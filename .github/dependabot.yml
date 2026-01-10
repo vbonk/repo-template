@@ -1,30 +1,77 @@
+# Dependabot Configuration
+# Automatically creates PRs for dependency updates
+# See: https://docs.github.com/en/code-security/dependabot
+
 version: 2
 updates:
-  # Enable version updates for npm
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    reviewers:
-      - "vbonk"
-    assignees:
-      - "vbonk"
-    commit-message:
-      prefix: "deps"
-      prefix-development: "deps-dev"
-      include: "scope"
-
-  # Enable version updates for GitHub Actions
+  # GitHub Actions - always enable this
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 5
-    reviewers:
-      - "vbonk"
-    assignees:
-      - "vbonk"
     commit-message:
       prefix: "ci"
       include: "scope"
+
+  # ============================================
+  # TEMPLATE: Uncomment the section for your stack
+  # ============================================
+
+  # --- npm (JavaScript/TypeScript) ---
+  # - package-ecosystem: "npm"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #   open-pull-requests-limit: 10
+  #   commit-message:
+  #     prefix: "deps"
+  #     prefix-development: "deps-dev"
+  #     include: "scope"
+  #   groups:
+  #     # Group minor/patch updates to reduce PR noise
+  #     production-dependencies:
+  #       dependency-type: "production"
+  #       update-types:
+  #         - "minor"
+  #         - "patch"
+  #     development-dependencies:
+  #       dependency-type: "development"
+  #       update-types:
+  #         - "minor"
+  #         - "patch"
+
+  # --- pip (Python) ---
+  # - package-ecosystem: "pip"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #   open-pull-requests-limit: 10
+  #   commit-message:
+  #     prefix: "deps"
+  #     include: "scope"
+
+  # --- gomod (Go) ---
+  # - package-ecosystem: "gomod"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #   open-pull-requests-limit: 10
+  #   commit-message:
+  #     prefix: "deps"
+  #     include: "scope"
+
+  # --- cargo (Rust) ---
+  # - package-ecosystem: "cargo"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #   open-pull-requests-limit: 10
+  #   commit-message:
+  #     prefix: "deps"
+  #     include: "scope"

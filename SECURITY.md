@@ -1,36 +1,61 @@
 # Security Policy
 
-## Supported Versions
-
-The repo-template itself does not have versions as it is a baseline repository template. However, for projects created from this template, we recommend the following approach:
-
-- **Current Major Version**: Fully supported with security updates.
-- **Previous Major Version**: Supported with critical security updates only.
-- **Versions Older than 2 Major Releases**: Not supported.
-
-Projects using this template should define their own supported versions in this section.
-
 ## Reporting a Vulnerability
 
-We take security vulnerabilities seriously and appreciate your efforts to responsibly disclose any issues you find.
+We take security seriously. If you discover a security vulnerability, please report it responsibly.
 
 ### How to Report
 
-- **Do not create public GitHub issues** for security vulnerabilities.
-- Email security reports to: [Your Security Contact Email] (replace with your actual security contact).
-- Include as much detail as possible, including:
-  - A description of the vulnerability.
-  - Steps to reproduce.
-  - Potential impact.
-  - Any suggested fixes.
+1. **Do NOT create a public GitHub issue** for security vulnerabilities
+2. Use [GitHub's private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) (preferred)
+3. Or email: <!-- TODO: Add your security contact email -->
 
-### What to Expect
+### What to Include
 
-- **Acknowledgment**: We'll acknowledge receipt of your report within 48 hours.
-- **Updates**: We'll provide regular updates (at least every 7 days) on our progress.
-- **Resolution**: If accepted, we'll work on a fix and coordinate disclosure. If declined, we'll explain why.
-- **Credit**: With your permission, we'll credit you in the fix or security advisory.
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Suggested fix (if any)
 
-This security policy applies to the repo-template and any projects derived from it. For specific project security policies, customize this file accordingly.
+### Response Timeline
 
-For more information, see GitHub's [Security Advisories](https://docs.github.com/en/code-security/security-advisories) documentation.
+| Action | Timeframe |
+|--------|-----------|
+| Acknowledgment | Within 48 hours |
+| Status update | Every 7 days |
+| Resolution | Depends on severity |
+
+### After Resolution
+
+- We'll coordinate disclosure timing with you
+- With permission, we'll credit you in the security advisory
+
+## Supported Versions
+
+<!-- TODO: Update with your version support policy -->
+
+| Version | Supported |
+|---------|-----------|
+| Latest | Yes |
+| Previous major | Security fixes only |
+| Older | No |
+
+## Security Best Practices
+
+This repository follows security best practices:
+
+- Dependencies monitored by Dependabot
+- GitHub Actions pinned to SHA
+- Secrets never committed (see `.gitignore`)
+- Push protection enabled (recommended)
+
+## Enabling Additional Security Features
+
+In your repository settings, consider enabling:
+
+1. **Secret scanning** - Detects committed secrets
+2. **Push protection** - Blocks pushes with secrets
+3. **Dependabot alerts** - Notifies of vulnerable dependencies
+4. **Code scanning** - Finds vulnerabilities via CodeQL
+
+See [GitHub Security Features](https://docs.github.com/en/code-security) for setup instructions.
