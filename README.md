@@ -17,7 +17,7 @@ Stop wasting time on boilerplate. Start every project with security best practic
 ---
 
 <details>
-<summary><strong>Table of Contents</strong></summary>
+<summary><strong>▶ Table of Contents</strong></summary>
 
 - [Who Is This For?](#who-is-this-for)
 - [Why This Template?](#why-this-template)
@@ -116,7 +116,7 @@ Choose the workflow that matches your situation:
 ### New Project Workflows
 
 <details open>
-<summary><strong>Workflow A: GitHub Template (Recommended for most users)</strong></summary>
+<summary><strong>▶ Workflow A: GitHub Template (Recommended for most users)</strong></summary>
 
 Best for: Quick start with GitHub's UI
 
@@ -147,7 +147,7 @@ flowchart LR
 </details>
 
 <details>
-<summary><strong>Workflow B: Local-First (For pre-planned projects)</strong></summary>
+<summary><strong>▶ Workflow B: Local-First (For pre-planned projects)</strong></summary>
 
 Best for: When you've already planned your project structure or have existing code
 
@@ -170,7 +170,7 @@ Best for: When you've already planned your project structure or have existing co
 </details>
 
 <details>
-<summary><strong>Workflow C: Spin-off from Existing Session</strong></summary>
+<summary><strong>▶ Workflow C: Spin-off from Existing Session</strong></summary>
 
 Best for: When working in Claude Code and you realize a component should be its own project
 
@@ -187,7 +187,7 @@ Best for: When working in Claude Code and you realize a component should be its 
 </details>
 
 <details>
-<summary><strong>Workflow D: Empty GitHub Repo + Manual Setup</strong></summary>
+<summary><strong>▶ Workflow D: Empty GitHub Repo + Manual Setup</strong></summary>
 
 Best for: Users who prefer full control or don't use Claude Code
 
@@ -215,7 +215,7 @@ Best for: Users who prefer full control or don't use Claude Code
 ### Existing Repository Workflows
 
 <details>
-<summary><strong>Workflow E: Retrofit an Existing Repository</strong></summary>
+<summary><strong>▶ Workflow E: Retrofit an Existing Repository</strong></summary>
 
 Best for: Bringing an older repo up to template standards
 
@@ -243,7 +243,7 @@ Best for: Bringing an older repo up to template standards
 </details>
 
 <details>
-<summary><strong>Workflow F: Fork + Personal Standards</strong></summary>
+<summary><strong>▶ Workflow F: Fork + Personal Standards</strong></summary>
 
 Best for: Contributing to others' projects with AI assistance
 
@@ -263,7 +263,7 @@ This gives you AI assistance without affecting the upstream project.
 </details>
 
 <details>
-<summary><strong>Workflow G: Create Organization Template</strong></summary>
+<summary><strong>▶ Workflow G: Create Organization Template</strong></summary>
 
 Best for: Teams wanting consistent standards across repos
 
@@ -279,7 +279,7 @@ Best for: Teams wanting consistent standards across repos
 </details>
 
 <details>
-<summary><strong>Workflow H: Multi-Stack Projects</strong></summary>
+<summary><strong>▶ Workflow H: Multi-Stack Projects</strong></summary>
 
 Best for: Projects with multiple languages (e.g., Python backend + TypeScript frontend)
 
@@ -304,7 +304,7 @@ Best for: Projects with multiple languages (e.g., Python backend + TypeScript fr
 </details>
 
 <details>
-<summary><strong>Workflow I: Monorepo</strong></summary>
+<summary><strong>▶ Workflow I: Monorepo</strong></summary>
 
 Best for: Multiple projects in a single repository
 
@@ -401,7 +401,7 @@ The CI workflow follows GitHub's security best practices:
 ## Customization Guide
 
 <details>
-<summary><strong>Adding a New Language</strong></summary>
+<summary><strong>▶ Adding a New Language</strong></summary>
 
 1. Uncomment the relevant section in `.github/workflows/ci.yml`
 2. Uncomment the ecosystem in `.github/dependabot.yml`
@@ -411,14 +411,14 @@ The CI workflow follows GitHub's security best practices:
 </details>
 
 <details>
-<summary><strong>Setting Up Pre-commit Hooks</strong></summary>
+<summary><strong>▶ Setting Up Pre-commit Hooks</strong></summary>
 
 See [CONTRIBUTING.md](CONTRIBUTING.md#pre-commit-hooks-optional) for instructions on setting up Husky and lint-staged.
 
 </details>
 
 <details>
-<summary><strong>Enabling GitHub Security Features</strong></summary>
+<summary><strong>▶ Enabling GitHub Security Features</strong></summary>
 
 In your repository Settings → Security:
 
@@ -430,7 +430,7 @@ In your repository Settings → Security:
 </details>
 
 <details>
-<summary><strong>Creating Custom Slash Commands</strong></summary>
+<summary><strong>▶ Creating Custom Slash Commands</strong></summary>
 
 Add Markdown files to `.claude/commands/`:
 
@@ -449,21 +449,21 @@ Then use with `/project:my-command` in Claude Code.
 ## FAQ
 
 <details>
-<summary><strong>I don't use Node.js. Will this work for me?</strong></summary>
+<summary><strong>▶ I don't use Node.js. Will this work for me?</strong></summary>
 
 Yes. The template is language-agnostic. The CI workflow has commented sections for Python, Go, and Rust. Uncomment the one you need, or add your own. The directory structure (`src/`, `tests/`, etc.) works for any language.
 
 </details>
 
 <details>
-<summary><strong>Do I need to use Claude Code?</strong></summary>
+<summary><strong>▶ Do I need to use Claude Code?</strong></summary>
 
 No. The template works with any workflow. The AI configuration files (CLAUDE.md, AGENTS.md, copilot-instructions.md) are just text files — they won't affect anything if you don't use AI tools. But if you do use them, your agents will be more effective.
 
 </details>
 
 <details>
-<summary><strong>The CI workflow failed. What do I do?</strong></summary>
+<summary><strong>▶ The CI workflow failed. What do I do?</strong></summary>
 
 Common causes:
 1. **No package.json/requirements.txt** — The workflow expects dependencies. Comment out the install step or add your dependency file.
@@ -475,7 +475,7 @@ Check the Actions tab for specific error messages.
 </details>
 
 <details>
-<summary><strong>How do I update after the template improves?</strong></summary>
+<summary><strong>▶ How do I update after the template improves?</strong></summary>
 
 Repositories created from templates don't auto-update. To get improvements:
 1. Check the [template repo](https://github.com/vbonk/repo-template) for changes
@@ -485,7 +485,7 @@ Repositories created from templates don't auto-update. To get improvements:
 </details>
 
 <details>
-<summary><strong>I used "Use this template" but also have local customizations. What now?</strong></summary>
+<summary><strong>▶ I used "Use this template" but also have local customizations. What now?</strong></summary>
 
 If you created a repo via GitHub's template button but also have locally customized files (e.g., from a previous session), you have divergent git histories. Options:
 
@@ -503,7 +503,7 @@ If you created a repo via GitHub's template button but also have locally customi
 </details>
 
 <details>
-<summary><strong>Can I add template standards to someone else's repo I forked?</strong></summary>
+<summary><strong>▶ Can I add template standards to someone else's repo I forked?</strong></summary>
 
 Yes! See Workflow F. Add your AI configuration files (CLAUDE.md, etc.) and exclude them from git tracking using `.git/info/exclude` so they don't pollute PRs to the upstream project.
 
