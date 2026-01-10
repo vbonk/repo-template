@@ -1,7 +1,6 @@
 # Project Context & Session Summary
 
 **Date:** January 10, 2026
-**Branch:** `claude/review-changes-mk7ie6fcdzowc3ev-NwalZ`
 
 ---
 
@@ -112,13 +111,13 @@ d5373fa Add Requirements Specification for agentic repository template
 ### What We Landed On
 The article should be:
 - **Knowledge sharing**, not promotional
-- **About repos in general**, not about "our template"
+- **About repos-template
 - **Peer-to-peer tone**, not salesy
-- **Fresh perspective**, treating it as new (not "we rebuilt")
-
+- **Fresh perspective**, thinking about the outcomes, results
+Instruction files, READMEs, comments that work for humans + AI
 ### Promising Angles (To Develop)
 1. **"What AI Agents Actually Look For"** - How AI tools parse repos, what context they pull
-2. **"Writing for Your AI Collaborator"** - Instruction files, READMEs, comments that work for humans + AI
+2. **"Here's how I sat down with claude code opus 4.5 and"** - Solved s problem - my github repos are almost random when it comes to how they are set up and configured, and i every time i greate a new repo for a project,
 3. **"Repository Structure in the Age of AI Coding"** - How conventions are shifting
 
 ### What to Avoid
