@@ -3,6 +3,17 @@
 > Cross-agent instructions for AI coding assistants.
 > This file is recognized by multiple AI tools including Claude Code, Cursor, and others.
 
+## Template Initialization
+
+**New repo from template?** Help the user customize by:
+1. Asking for project name, description, and tech stack
+2. Updating CLAUDE.md, AGENTS.md, README.md with their answers
+3. Uncommenting the relevant language section in `.github/workflows/ci.yml`
+4. Uncommenting the relevant ecosystem in `.github/dependabot.yml`
+5. Adding security contact to SECURITY.md
+
+See `.claude/commands/init-template.md` for detailed steps.
+
 ## Project Overview
 
 **Project Name:** <!-- TODO: Replace with project name -->
