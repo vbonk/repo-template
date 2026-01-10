@@ -23,7 +23,10 @@ Stop wasting time on boilerplate. Start every project with security best practic
 - [Why This Template?](#why-this-template)
 - [Features](#features)
 - [What's Included](#whats-included)
-- [Quick Start](#quick-start)
+- [Workflows](#workflows)
+  - [New Project Workflows](#new-project-workflows)
+  - [Existing Repository Workflows](#existing-repository-workflows)
+  - [Workflow Comparison](#workflow-comparison)
 - [What's Next?](#whats-next)
 - [AI Agent Configuration](#ai-agent-configuration)
 - [CI/CD](#cicd)
@@ -106,35 +109,95 @@ If you create GitHub repositories regularly and want them production-ready from 
 
 ---
 
-## Quick Start
+## Workflows
 
-### 1. Create Your Repository
+Choose the workflow that matches your situation:
 
-Click **[Use this template](https://github.com/vbonk/repo-template/generate)** → Name your repo → Create
+### New Project Workflows
 
-### 2. Clone and Open
+<details open>
+<summary><strong>Workflow A: GitHub Template (Recommended for most users)</strong></summary>
 
-```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
+Best for: Quick start with GitHub's UI
+
+1. Click **[Use this template](https://github.com/vbonk/repo-template/generate)** → Name your repo → Create
+2. Clone your new repository:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   cd YOUR_REPO
+   ```
+3. Open with Claude Code and run:
+   ```
+   /project:init-template
+   ```
+4. Answer the prompts — files update automatically
+
+```mermaid
+flowchart LR
+    A[🎯 Use Template] --> B[📥 Clone Repo]
+    B --> C[🤖 Run /init-template]
+    C --> D[💬 Answer Questions]
+    D --> E[✨ Files Updated]
+    E --> F[🚀 Start Coding]
+
+    style A fill:#238636,color:#fff
+    style F fill:#238636,color:#fff
 ```
 
-### 3. Customize (2 options)
+</details>
 
-**Option A: AI-Assisted (recommended)**
+<details>
+<summary><strong>Workflow B: Local-First (For pre-planned projects)</strong></summary>
 
-Open with Claude Code and run:
-```
-/project:init-template
-```
-The AI will ask for your project details and update all files automatically.
+Best for: When you've already planned your project structure or have existing code
 
-**Option B: Manual**
+1. Create a local directory for your project:
+   ```bash
+   mkdir my-project && cd my-project
+   git init
+   ```
+2. Start Claude Code in this directory
+3. Run `/project:init-template` — the agent will:
+   - Ask about your project objectives and tech stack
+   - Generate customized template files
+   - Create the GitHub repository
+   - Push the initial commit
 
-Find and update `TODO` comments:
-```bash
-grep -r "TODO" --include="*.md" --include="*.yml"
-```
+**Advantage:** Files are customized before the GitHub repo exists — no template placeholders to clean up.
+
+**Note:** Requires GitHub CLI (`gh`) to be installed and authenticated.
+
+</details>
+
+<details>
+<summary><strong>Workflow C: Spin-off from Existing Session</strong></summary>
+
+Best for: When working in Claude Code and you realize a component should be its own project
+
+1. While in an existing Claude Code session, describe the new project
+2. Ask Claude to create a new repository for it
+3. The agent will:
+   - Set up the new repo with template standards
+   - Move or generate relevant code
+   - Push to GitHub
+   - Return context to your original project
+
+**Example prompt:** "Let's spin off the authentication module into its own repository called `my-auth-service`"
+
+</details>
+
+<details>
+<summary><strong>Workflow D: Empty GitHub Repo + Manual Setup</strong></summary>
+
+Best for: Users who prefer full control or don't use Claude Code
+
+1. Create an empty repository on GitHub (no README, no .gitignore)
+2. Clone it locally
+3. Copy template files manually or download from this repo
+4. Find and update `TODO` comments:
+   ```bash
+   grep -r "TODO" --include="*.md" --include="*.yml"
+   ```
 
 | File | What to Change |
 |------|---------------|
@@ -145,21 +208,134 @@ grep -r "TODO" --include="*.md" --include="*.yml"
 | `.github/dependabot.yml` | Uncomment your package ecosystem |
 | `SECURITY.md` | Your security contact email |
 
-### 4. Start Building
+</details>
 
-Your AI coding assistant now understands your project structure and conventions from the first prompt.
+---
 
-```mermaid
-flowchart LR
-    A[🎯 Use Template] --> B[📥 Clone Repo]
-    B --> C[🤖 Run /init-template]
-    C --> D[💬 Answer Questions]
-    D --> E[✨ Files Auto-Updated]
-    E --> F[🚀 Start Coding]
+### Existing Repository Workflows
 
-    style A fill:#238636,color:#fff
-    style F fill:#238636,color:#fff
-```
+<details>
+<summary><strong>Workflow E: Retrofit an Existing Repository</strong></summary>
+
+Best for: Bringing an older repo up to template standards
+
+1. In your existing repo, run:
+   ```
+   /project:init-template
+   ```
+2. The agent will:
+   - Analyze your current structure
+   - Add missing template files (CLAUDE.md, CI, etc.)
+   - Preserve your existing code and configuration
+   - Suggest improvements without overwriting your work
+
+**What gets added:**
+- AI configuration files (if missing)
+- CI/CD workflow (if missing or outdated)
+- Issue/PR templates (if missing)
+- Security policy (if missing)
+
+**What's preserved:**
+- Your existing README (agent will suggest improvements)
+- Your code and tests
+- Your existing CI (agent will compare and recommend)
+
+</details>
+
+<details>
+<summary><strong>Workflow F: Fork + Personal Standards</strong></summary>
+
+Best for: Contributing to others' projects with AI assistance
+
+1. Fork the upstream repository
+2. Add template files to your fork:
+   - `CLAUDE.md` — Your personal AI instructions
+   - Optionally: `.github/copilot-instructions.md`
+3. **Important:** Add these to `.git/info/exclude` (not `.gitignore`) to avoid polluting upstream PRs:
+   ```
+   # .git/info/exclude
+   CLAUDE.md
+   .github/copilot-instructions.md
+   ```
+
+This gives you AI assistance without affecting the upstream project.
+
+</details>
+
+<details>
+<summary><strong>Workflow G: Create Organization Template</strong></summary>
+
+Best for: Teams wanting consistent standards across repos
+
+1. Fork or clone repo-template
+2. Customize for your organization:
+   - Add org-specific CI steps (internal registries, compliance checks)
+   - Update SECURITY.md with your security contact
+   - Add org branding to README template
+   - Create additional slash commands for team workflows
+3. Mark as a template repository in GitHub Settings
+4. Team members use your org template instead of this one
+
+</details>
+
+<details>
+<summary><strong>Workflow H: Multi-Stack Projects</strong></summary>
+
+Best for: Projects with multiple languages (e.g., Python backend + TypeScript frontend)
+
+1. Use Workflow A or B to create the repository
+2. In `.github/workflows/ci.yml`, uncomment multiple language sections
+3. In `.github/dependabot.yml`, enable multiple ecosystems
+4. In `CLAUDE.md`, document all stacks:
+   ```markdown
+   ## Commands
+
+   ### Backend (Python)
+   ```bash
+   cd backend && pytest
+   ```
+
+   ### Frontend (TypeScript)
+   ```bash
+   cd frontend && npm test
+   ```
+   ```
+
+</details>
+
+<details>
+<summary><strong>Workflow I: Monorepo</strong></summary>
+
+Best for: Multiple projects in a single repository
+
+1. Apply template at repository root
+2. Customize paths in CI and Dependabot:
+   ```yaml
+   # dependabot.yml
+   - package-ecosystem: "npm"
+     directory: "/packages/frontend"
+   - package-ecosystem: "pip"
+     directory: "/packages/backend"
+   ```
+3. In `CLAUDE.md`, document the monorepo structure and per-package commands
+
+</details>
+
+---
+
+### Workflow Comparison
+
+| Workflow | Starting Point | Best For | AI Required |
+|----------|---------------|----------|-------------|
+| A: GitHub Template | GitHub UI | Quick start | Recommended |
+| B: Local-First | Empty directory | Pre-planned projects | Yes |
+| C: Spin-off | Existing session | Breaking out components | Yes |
+| D: Manual | Empty GitHub repo | Full control | No |
+| E: Retrofit | Existing repo | Upgrading old projects | Recommended |
+| F: Fork | Others' repos | Contributing with AI | No |
+| G: Org Template | This template | Team standards | No |
+| H: Multi-Stack | Any | Polyglot projects | No |
+| I: Monorepo | Any | Multi-project repos | No |
 
 ---
 
@@ -305,6 +481,31 @@ Repositories created from templates don't auto-update. To get improvements:
 1. Check the [template repo](https://github.com/vbonk/repo-template) for changes
 2. Manually copy relevant updates to your project
 3. Or use the template again for new projects
+
+</details>
+
+<details>
+<summary><strong>I used "Use this template" but also have local customizations. What now?</strong></summary>
+
+If you created a repo via GitHub's template button but also have locally customized files (e.g., from a previous session), you have divergent git histories. Options:
+
+1. **Force push local work** (recommended if local is more complete):
+   ```bash
+   git push --force origin main
+   ```
+   This replaces the template files with your customized version.
+
+2. **Discard local and customize template**:
+   Clone the GitHub repo and run `/project:init-template` to customize interactively.
+
+**To avoid this:** Use Workflow B (Local-First) when you have pre-planned customizations, or use Workflow A (GitHub Template) and customize afterward — don't mix both.
+
+</details>
+
+<details>
+<summary><strong>Can I add template standards to someone else's repo I forked?</strong></summary>
+
+Yes! See Workflow F. Add your AI configuration files (CLAUDE.md, etc.) and exclude them from git tracking using `.git/info/exclude` so they don't pollute PRs to the upstream project.
 
 </details>
 
