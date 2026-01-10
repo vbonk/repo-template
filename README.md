@@ -149,6 +149,18 @@ grep -r "TODO" --include="*.md" --include="*.yml"
 
 Your AI coding assistant now understands your project structure and conventions from the first prompt.
 
+```mermaid
+flowchart LR
+    A[🎯 Use Template] --> B[📥 Clone Repo]
+    B --> C[🤖 Run /init-template]
+    C --> D[💬 Answer Questions]
+    D --> E[✨ Files Auto-Updated]
+    E --> F[🚀 Start Coding]
+
+    style A fill:#238636,color:#fff
+    style F fill:#238636,color:#fff
+```
+
 ---
 
 ## What's Next?
