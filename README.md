@@ -16,6 +16,40 @@ Stop wasting time on boilerplate. Start every project with security best practic
 
 ---
 
+<details>
+<summary><strong>Table of Contents</strong></summary>
+
+- [Who Is This For?](#who-is-this-for)
+- [Why This Template?](#why-this-template)
+- [Features](#features)
+- [What's Included](#whats-included)
+- [Quick Start](#quick-start)
+- [What's Next?](#whats-next)
+- [AI Agent Configuration](#ai-agent-configuration)
+- [CI/CD](#cicd)
+- [Customization Guide](#customization-guide)
+- [FAQ](#faq)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+
+</details>
+
+---
+
+## Who Is This For?
+
+This template is built for:
+
+- **Solo developers** tired of repetitive project setup
+- **Teams** wanting consistent structure across repositories
+- **AI-first developers** using Claude Code, GitHub Copilot, Codex, or similar tools
+- **Security-conscious developers** who want sensible defaults without the research
+
+If you create GitHub repositories regularly and want them production-ready from the start, this is for you.
+
+---
+
 ## Why This Template?
 
 | Traditional Setup | With This Template |
@@ -31,7 +65,7 @@ Stop wasting time on boilerplate. Start every project with security best practic
 
 - **🤖 AI-Agent Ready** — Pre-configured for Claude Code, GitHub Copilot, and Codex
 - **🔒 Secure by Default** — Secrets protection, SHA-pinned Actions, Dependabot
-- **⚡ Zero Config** — Works immediately, customize as needed
+- **⚡ Minimal Setup** — Works immediately, customize in minutes
 - **📝 Template-Friendly** — Clear TODOs, easy find-and-replace
 - **🔄 CI/CD Included** — GitHub Actions workflow ready to uncomment
 - **📋 Issue Templates** — Structured YAML forms for bugs and features
@@ -76,7 +110,7 @@ Stop wasting time on boilerplate. Start every project with security best practic
 
 ### 1. Create Your Repository
 
-Click **[Use this template](https://github.com/vbonk/repo-template/generate)** → Create a new repo
+Click **[Use this template](https://github.com/vbonk/repo-template/generate)** → Name your repo → Create
 
 ### 2. Clone and Open
 
@@ -117,17 +151,40 @@ Your AI coding assistant now understands your project structure and conventions 
 
 ---
 
+## What's Next?
+
+After setup, here are some things to try:
+
+| Action | How |
+|--------|-----|
+| **Add your first feature** | Ask Claude: "Create a basic Express server in src/" |
+| **Run CI locally** | `npm test` or your stack's test command |
+| **Create an issue** | Try the bug report form — see how structured it is |
+| **Enable security features** | Settings → Security → Enable secret scanning |
+
+### First Week Checklist
+
+- [ ] Add your source code to `src/`
+- [ ] Write your first test in `tests/`
+- [ ] Push a commit and watch CI run
+- [ ] Invite collaborators (they'll see CONTRIBUTING.md)
+- [ ] Enable GitHub security features (see [Security](#security))
+
+---
+
 ## AI Agent Configuration
 
 This template includes instruction files for multiple AI coding assistants:
 
-| File | AI Tool | Purpose |
-|------|---------|---------|
-| `CLAUDE.md` | Claude Code | Project context, commands, conventions |
-| `.github/copilot-instructions.md` | GitHub Copilot | Code generation guidelines |
-| `AGENTS.md` | Codex, Gemini, others | Cross-agent compatibility |
+| File | AI Tool | What It Contains |
+|------|---------|------------------|
+| `CLAUDE.md` | Claude Code | Project context, commands, code style, structure |
+| `.github/copilot-instructions.md` | GitHub Copilot | Code generation guidelines, security rules |
+| `AGENTS.md` | Codex, Gemini, Cursor, others | Cross-agent compatibility layer |
 
-**Why this matters:** AI agents perform better when they understand your project's conventions, tech stack, and workflows upfront.
+**Why this matters:** AI agents perform significantly better when they understand your project's conventions, tech stack, and workflows upfront. Instead of re-explaining your preferences each session, the agent reads these files automatically.
+
+**Custom commands:** The `.claude/commands/` folder contains slash commands like `/project:init-template`. You can add your own for repetitive tasks.
 
 ---
 
@@ -135,16 +192,21 @@ This template includes instruction files for multiple AI coding assistants:
 
 The included workflow (`.github/workflows/ci.yml`) supports multiple languages. Uncomment the section for your stack:
 
-- **Node.js/TypeScript** — npm install, lint, test, build
-- **Python** — pip install, pytest, ruff
-- **Go** — go build, go test
-- **Rust** — cargo build, cargo test
+| Stack | What It Runs |
+|-------|--------------|
+| **Node.js/TypeScript** | npm ci, lint, test, build |
+| **Python** | pip install, pytest, ruff |
+| **Go** | go build, go test, go vet |
+| **Rust** | cargo build, cargo test, cargo clippy |
 
-**Security features:**
-- Actions pinned to SHA (not tags)
-- Explicit least-privilege permissions
-- 30-minute timeout
-- Concurrency controls
+### Security Features
+
+The CI workflow follows GitHub's security best practices:
+
+- **Actions pinned to SHA** — Prevents supply chain attacks from compromised tags
+- **Explicit permissions** — Least-privilege access, not default write-all
+- **30-minute timeout** — Prevents runaway jobs from consuming resources
+- **Concurrency controls** — Cancels outdated runs when new commits push
 
 ---
 
@@ -172,10 +234,65 @@ See [CONTRIBUTING.md](CONTRIBUTING.md#pre-commit-hooks-optional) for instruction
 
 In your repository Settings → Security:
 
-1. Enable **Secret scanning**
-2. Enable **Push protection**
-3. Enable **Dependabot alerts**
-4. Enable **Code scanning** (for public repos)
+1. Enable **Secret scanning** — Detects API keys in commits
+2. Enable **Push protection** — Blocks pushes containing secrets
+3. Enable **Dependabot alerts** — Notifies of vulnerable dependencies
+4. Enable **Code scanning** — Finds vulnerabilities via CodeQL (public repos)
+
+</details>
+
+<details>
+<summary><strong>Creating Custom Slash Commands</strong></summary>
+
+Add Markdown files to `.claude/commands/`:
+
+```markdown
+# .claude/commands/my-command.md
+
+Instructions for Claude when this command is invoked...
+```
+
+Then use with `/project:my-command` in Claude Code.
+
+</details>
+
+---
+
+## FAQ
+
+<details>
+<summary><strong>I don't use Node.js. Will this work for me?</strong></summary>
+
+Yes. The template is language-agnostic. The CI workflow has commented sections for Python, Go, and Rust. Uncomment the one you need, or add your own. The directory structure (`src/`, `tests/`, etc.) works for any language.
+
+</details>
+
+<details>
+<summary><strong>Do I need to use Claude Code?</strong></summary>
+
+No. The template works with any workflow. The AI configuration files (CLAUDE.md, AGENTS.md, copilot-instructions.md) are just text files — they won't affect anything if you don't use AI tools. But if you do use them, your agents will be more effective.
+
+</details>
+
+<details>
+<summary><strong>The CI workflow failed. What do I do?</strong></summary>
+
+Common causes:
+1. **No package.json/requirements.txt** — The workflow expects dependencies. Comment out the install step or add your dependency file.
+2. **No test script** — Add a test script or comment out the test step.
+3. **Wrong language section** — Make sure you uncommented the right section.
+
+Check the Actions tab for specific error messages.
+
+</details>
+
+<details>
+<summary><strong>How do I update after the template improves?</strong></summary>
+
+Repositories created from templates don't auto-update. To get improvements:
+1. Check the [template repo](https://github.com/vbonk/repo-template) for changes
+2. Manually copy relevant updates to your project
+3. Or use the template again for new projects
 
 </details>
 
@@ -189,6 +306,7 @@ Contributions to improve this template are welcome! See [CONTRIBUTING.md](CONTRI
 - Language-specific add-on configs
 - Additional CI/CD patterns
 - Improved documentation
+- New custom slash commands
 
 ---
 
