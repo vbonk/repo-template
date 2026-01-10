@@ -1,8 +1,8 @@
 # Requirements Specification: Agentic Repository Template
 
-**Version:** 1.0 (Draft)
+**Version:** 1.1
 **Date:** January 10, 2026
-**Status:** Under Discussion
+**Status:** Approved - Ready for Build
 
 ---
 
@@ -181,28 +181,39 @@ repo-template/
 
 ---
 
-## 6. Out of Scope (v1.0)
+## 6. Scope & Phasing
 
-The following are explicitly **not** included in v1.0:
+### 6.1 v1.0 Core Template (This Build)
+- Generic base template (language-agnostic)
+- All security configurations
+- AI agent instruction files (CLAUDE.md, AGENTS.md, copilot-instructions.md)
+- CI workflow, Dependabot, issue/PR templates
+- Documentation (README, CONTRIBUTING, SECURITY)
 
-- [ ] Language-specific configurations (package.json, requirements.txt, etc.)
-- [ ] Deployment workflows (only CI, not CD)
-- [ ] Branch protection setup (requires manual configuration)
-- [ ] Code owners file
-- [ ] Changelog automation
-- [ ] Multiple template variants (minimal, standard, full)
+### 6.2 v1.1+ Modular Add-ons (Future)
+- [ ] JavaScript/TypeScript config (package.json, tsconfig, ESLint)
+- [ ] Python config (pyproject.toml, requirements.txt)
+- [ ] Go config (go.mod)
+- [ ] Rust config (Cargo.toml)
+
+### 6.3 Out of Scope
+- Deployment workflows (CI only, not CD)
+- Branch protection setup (requires manual GitHub configuration)
+- Code owners file
+- Changelog automation
 
 ---
 
-## 7. Open Questions
+## 7. Design Decisions
 
-| # | Question | Options | Decision |
-|---|----------|---------|----------|
-| Q1 | Should we include language-specific variants? | Single generic vs. multiple variants | TBD |
-| Q2 | AGENTS.md format - what's the emerging standard? | Research needed | TBD |
-| Q3 | Include pre-commit hooks setup (husky)? | Yes/No - adds complexity | TBD |
-| Q4 | Default branch name? | `main` vs configurable | `main` |
-| Q5 | Include GitHub Discussions enablement guidance? | Yes/No | TBD |
+| # | Question | Decision | Rationale |
+|---|----------|----------|-----------|
+| Q1 | Language-specific variants? | **Modular add-ons** | Base template + optional language configs (JS/TS, Python, Go, etc.) |
+| Q2 | Include AGENTS.md? | **Yes** | Future-proofing for cross-agent compatibility |
+| Q3 | Pre-commit hooks (husky)? | **Document only** | Keep template language-agnostic; explain setup in docs |
+| Q4 | Default branch name? | **`main`** | Industry standard |
+| Q5 | Copilot instructions? | **Yes** | Include `.github/copilot-instructions.md` for multi-agent support |
+| Q6 | Issue template format? | **YAML forms** | Structured fields, required inputs, better UX |
 
 ---
 
@@ -228,6 +239,7 @@ The following are explicitly **not** included in v1.0:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-01-10 | Claude & User | Initial draft |
+| 1.1 | 2026-01-10 | Claude & User | Finalized design decisions, approved for build |
 
 ---
 
