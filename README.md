@@ -1,63 +1,88 @@
 # Project Name
 
-Brief description of your project. Replace this with your actual project details.
+<!-- TODO: Replace with your project name and description -->
 
-## Features
+Brief description of your project.
 
-- Feature 1
-- Feature 2
-- Feature 3
-
-## Tech Stack
-
-- Language/Framework: [e.g., TypeScript, Python, etc.]
-- Database: [if applicable]
-- Deployment: [e.g., Vercel, Railway, etc.]
-
-## Getting Started
-
-### Prerequisites
-
-- [List required software/tools]
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/vbonk/your-repo-name.git
-   cd your-repo-name
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install  # or pip install -r requirements.txt
-   ```
-
-### Usage
+## Quick Start
 
 ```bash
-npm start  # or python main.py
+# Clone and setup
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+cd YOUR_REPO
+
+# Install dependencies (adapt to your stack)
+npm install          # Node.js
+pip install -r requirements.txt  # Python
+go mod download      # Go
 ```
 
 ## Development
 
-This repository follows solo developer standards. Use GitHub Copilot for code review and triage:
+```bash
+# Run development server
+npm run dev
 
-1. Write code and commit changes.
-2. Use Copilot Chat for self-review: "Review this code for issues."
-3. Run CI checks locally before pushing.
-4. Push and let Actions validate.
+# Run tests
+npm test
 
-### Scripts
+# Build for production
+npm run build
+```
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm test` - Run tests
+> Adapt commands to your tech stack.
+
+## Project Structure
+
+```
+├── src/           # Source code
+├── tests/         # Test files
+├── docs/          # Documentation
+├── scripts/       # Automation scripts
+└── .github/       # GitHub configuration
+```
+
+## Tech Stack
+
+<!-- TODO: List your technologies -->
+
+- Language:
+- Framework:
+- Database:
 
 ## Contributing
 
-Solo development: Self-review with Copilot. For collaboration, see CONTRIBUTING.md.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+[MIT](LICENSE)
+
+---
+
+<details>
+<summary><strong>Template Info</strong></summary>
+
+This repository was created from [repo-template](https://github.com/vbonk/repo-template), an agentic-optimized GitHub template.
+
+### After Creating From Template
+
+1. Update this README with your project details
+2. Configure `CLAUDE.md` and `AGENTS.md` with your tech stack
+3. Uncomment relevant sections in `.github/workflows/ci.yml`
+4. Uncomment relevant sections in `.github/dependabot.yml`
+5. Update `SECURITY.md` with your security contact
+6. Delete this template info section
+
+### AI Agent Support
+
+This repository includes configuration for:
+- **Claude Code**: `CLAUDE.md`
+- **GitHub Copilot**: `.github/copilot-instructions.md`
+- **Cross-agent**: `AGENTS.md`
+
+</details>
