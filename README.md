@@ -85,15 +85,22 @@ git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
 cd YOUR_REPO
 ```
 
-### 3. Customize (5 minutes)
+### 3. Customize (2 options)
 
-Run a quick find-and-replace for `TODO` comments:
+**Option A: AI-Assisted (recommended)**
 
+Open with Claude Code and run:
+```
+/project:init-template
+```
+The AI will ask for your project details and update all files automatically.
+
+**Option B: Manual**
+
+Find and update `TODO` comments:
 ```bash
 grep -r "TODO" --include="*.md" --include="*.yml"
 ```
-
-**Key files to update:**
 
 | File | What to Change |
 |------|---------------|
