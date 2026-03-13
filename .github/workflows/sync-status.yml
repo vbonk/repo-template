@@ -6,7 +6,7 @@ on:
 
 env:
   # === CONFIGURE THESE ===
-  # Run /setup-github-issues to auto-discover, or find manually:
+  # Run /project:init-template to auto-discover, or find manually:
   #   gh api graphql -f query='{ user(login: "USER") { projectV2(number: N) { id field(name: "Status") { ... on ProjectV2SingleSelectField { id options { id name } } } } } }'
   PROJECT_ID: "__PROJECT_ID__"
   STATUS_FIELD_ID: "__STATUS_FIELD_ID__"

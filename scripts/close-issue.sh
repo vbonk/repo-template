@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Close a GitHub issue with comment and status:done label
 # Usage: ./scripts/close-issue.sh <issue-number> [comment]
-# Example: ./scripts/close-issue.sh 23 "GA4 property created, measurement ID set in Vercel"
+# Example: ./scripts/close-issue.sh 23 "Fixed login redirect bug in commit abc123"
 
 set -euo pipefail
 
