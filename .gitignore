@@ -151,3 +151,14 @@ temp/
 .claude.local.md
 CLAUDE.local.md
 *.local
+
+# ========================================
+# Claude Code Session Files (auto-generated, not part of project)
+# ========================================
+.claude/SESSION_STATE.json
+.claude/HANDOFF.md
+
+# ========================================
+# Local Admin / Marketing (maintainer-only, never in template)
+# ========================================
+_admin/
