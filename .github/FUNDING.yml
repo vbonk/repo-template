@@ -1,0 +1,17 @@
+# Funding — Display "Sponsor" button on your repo
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+#
+# === Uncomment the platforms you use ===
+# github: [your-username]
+# patreon: your-username
+# open_collective: your-project
+# ko_fi: your-username
+# tidelift: npm/package-name
+# liberapay: your-username
+# issuehunt: your-username
+# lfx_crowdfunding: project-name
+# community_bridge: project-name
+# polar: your-username
+# buy_me_a_coffee: your-username
+# thanks_dev: your-username
+# custom: ["https://your-donation-link.com"]

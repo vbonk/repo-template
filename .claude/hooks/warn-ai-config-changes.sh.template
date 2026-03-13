@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# warn-ai-config-changes.sh — Claude Code hook template
+#
+# PURPOSE: Warn when AI configuration files are being modified.
+#
+# AI config files (CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules, .windsurfrules,
+# .github/copilot-instructions.md) control how AI agents behave in this repo.
+# Unauthorized changes to these files are a prompt injection vector — an attacker
+# could modify them to instruct the agent to exfiltrate secrets or bypass checks.
+#
+# This hook alerts the human operator whenever these files are part of a change.
+#
+# USAGE:
+#   1. Copy this file to .claude/hooks/warn-ai-config-changes.sh
+#   2. Remove the .template extension
+#   3. chmod +x .claude/hooks/warn-ai-config-changes.sh
+#   4. Register in .claude/settings.json under PostToolUse hooks
+#
+# HOOK TYPE: PostToolUse (runs after file modifications)
+# TRIGGER: After any file write or edit operation
+
+set -euo pipefail
+
+# --- Configuration ---
+# Files that control AI agent behavior. Add more as needed.
+AI_CONFIG_FILES=(
+  "CLAUDE.md"
+  "AGENTS.md"
+  "GEMINI.md"
+  ".cursorrules"
+  ".windsurfrules"
+  ".github/copilot-instructions.md"
+  ".claude/settings.json"
+  ".claude/commands/"
+  ".claude/hooks/"
+)
+
+# --- Input ---
+# This hook receives the changed file path as an argument or via stdin.
+# Adapt based on how your hook runner provides context.
+CHANGED_FILE="${1:-}"
+if [ -z "$CHANGED_FILE" ]; then
+  # Fallback: check git diff for staged changes
+  CHANGED_FILE=$(git diff --cached --name-only 2>/dev/null || echo "")
+fi
+
+if [ -z "$CHANGED_FILE" ]; then
+  exit 0
+fi
+
+# --- Check ---
+WARNED=0
+for config_file in "${AI_CONFIG_FILES[@]}"; do
+  if echo "$CHANGED_FILE" | grep -q "$config_file"; then
+    if [ "$WARNED" -eq 0 ]; then
+      echo ""
+      echo "========================================"
+      echo " AI CONFIG FILE CHANGE DETECTED"
+      echo "========================================"
+      echo ""
+    fi
+    MATCH=$(echo "$CHANGED_FILE" | grep "$config_file")
+    echo "  Changed: $MATCH"
+    WARNED=$((WARNED + 1))
+  fi
+done
+
+if [ "$WARNED" -gt 0 ]; then
+  echo ""
+  echo "These files control AI agent behavior and are prompt injection targets."
+  echo "Ensure these changes are intentional and reviewed by a human maintainer."
+  echo "CODEOWNERS should require owner review for these files."
+  echo ""
+  echo "See docs/AI-SECURITY.md for details on AI config security."
+  echo "========================================"
+  echo ""
+fi
+
+exit 0
