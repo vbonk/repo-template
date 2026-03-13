@@ -30,11 +30,13 @@ Stop wasting time on boilerplate. Start every project with security best practic
 - [What's Next?](#whats-next)
 - [AI Agent Configuration](#ai-agent-configuration)
 - [CI/CD](#cicd)
+- [Issue Management](#issue-management)
 - [Customization Guide](#customization-guide)
 - [FAQ](#faq)
 - [Contributing](#contributing)
 - [Security](#security)
 - [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 </details>
 

@@ -4,6 +4,10 @@ on:
   issues:
     types: [labeled, unlabeled, closed, reopened, opened]
 
+permissions:
+  contents: read
+  issues: read
+
 env:
   # === CONFIGURE THESE ===
   # Run /project:init-template to auto-discover, or find manually:
