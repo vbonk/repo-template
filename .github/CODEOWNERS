@@ -1,0 +1,31 @@
+# CODEOWNERS — Auto-assign reviewers on PRs
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Each line: pattern  owner(s)
+# Owners: @username, @org/team, or email
+#
+# === Uncomment and replace @your-username with your GitHub username ===
+#
+# Global default — all files
+# *                              @your-username
+#
+# CI/CD — workflow and action changes
+# .github/                       @your-username
+#
+# Documentation
+# *.md                           @your-username
+# docs/                          @your-username
+#
+# Security-sensitive files
+# .github/workflows/             @your-username
+# SECURITY.md                    @your-username
+#
+# AI agent configuration — PROMPT INJECTION DEFENSE
+# Changes to these files modify how AI agents behave in your repo.
+# Require owner review to prevent prompt injection via PRs.
+# CLAUDE.md                      @your-username
+# AGENTS.md                      @your-username
+# GEMINI.md                      @your-username
+# .cursorrules                   @your-username
+# .windsurfrules                 @your-username
+# .github/copilot-instructions.md @your-username
