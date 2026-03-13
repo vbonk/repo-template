@@ -1,0 +1,49 @@
+name: External Blocker
+description: Task blocked on a client, vendor, or external party
+labels: ["owner:external", "status:blocked"]
+body:
+  - type: input
+    id: external_party
+    attributes:
+      label: Who is this blocked on?
+      placeholder: "Client name, vendor, service provider, etc."
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What they need to do
+      description: What action does the external party need to take?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Background info to share with them (for a call, email, or meeting)
+
+  - type: textarea
+    id: next_steps
+    attributes:
+      label: What we do after they complete this
+      description: Ensures this task doesn't sit idle once unblocked
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / Blockers
+      description: Other issues this depends on or blocks. Reference with #
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know this is resolved?
+      value: |
+        - [ ]
+    validations:
+      required: true

@@ -1,0 +1,194 @@
+name: Sync Issue Status → Project Board + Notion
+
+on:
+  issues:
+    types: [labeled, unlabeled, closed, reopened, opened]
+
+env:
+  # === CONFIGURE THESE ===
+  # Run /setup-github-issues to auto-discover, or find manually:
+  #   gh api graphql -f query='{ user(login: "USER") { projectV2(number: N) { id field(name: "Status") { ... on ProjectV2SingleSelectField { id options { id name } } } } } }'
+  PROJECT_ID: "__PROJECT_ID__"
+  STATUS_FIELD_ID: "__STATUS_FIELD_ID__"
+  PLANNING_OPTION_ID: "__PLANNING_OPT__"
+  IN_PROGRESS_OPTION_ID: "__IN_PROGRESS_OPT__"
+  BLOCKED_OPTION_ID: "__BLOCKED_OPT__"
+  DONE_OPTION_ID: "__DONE_OPT__"
+  # Notion sync (leave empty to disable)
+  NOTION_DATABASE_ID: ""
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_STATE: ${{ github.event.issue.state }}
+      ISSUE_LABELS: ${{ toJSON(github.event.issue.labels.*.name) }}
+    steps:
+      - name: Determine status from labels
+        id: status
+        run: |
+          if [ "$ISSUE_STATE" = "closed" ]; then
+            echo "status=Done" >> "$GITHUB_OUTPUT"
+            echo "project_option=$DONE_OPTION_ID" >> "$GITHUB_OUTPUT"
+          elif echo "$ISSUE_LABELS" | grep -q "status:blocked"; then
+            echo "status=Blocked" >> "$GITHUB_OUTPUT"
+            echo "project_option=$BLOCKED_OPTION_ID" >> "$GITHUB_OUTPUT"
+          elif echo "$ISSUE_LABELS" | grep -q "status:in-progress"; then
+            echo "status=In Progress" >> "$GITHUB_OUTPUT"
+            echo "project_option=$IN_PROGRESS_OPTION_ID" >> "$GITHUB_OUTPUT"
+          elif echo "$ISSUE_LABELS" | grep -q "status:done"; then
+            echo "status=Done" >> "$GITHUB_OUTPUT"
+            echo "project_option=$DONE_OPTION_ID" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=Planning" >> "$GITHUB_OUTPUT"
+            echo "project_option=$PLANNING_OPTION_ID" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine owner and priority from labels
+        id: meta
+        run: |
+          OWNER="Unassigned"
+          if echo "$ISSUE_LABELS" | grep -q "owner:human"; then
+            OWNER="Human"
+          elif echo "$ISSUE_LABELS" | grep -q "owner:agent"; then
+            OWNER="Agent"
+          elif echo "$ISSUE_LABELS" | grep -q "owner:external"; then
+            OWNER="External"
+          fi
+          echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
+
+          PRIORITY="Medium"
+          if echo "$ISSUE_LABELS" | grep -q "priority:high"; then
+            PRIORITY="High"
+          elif echo "$ISSUE_LABELS" | grep -q "priority:low"; then
+            PRIORITY="Low"
+          fi
+          echo "priority=$PRIORITY" >> "$GITHUB_OUTPUT"
+
+          BLOCKED=$(echo "$ISSUE_LABELS" | grep -q "status:blocked" && echo "true" || echo "false")
+          echo "blocked=$BLOCKED" >> "$GITHUB_OUTPUT"
+
+      - name: Find project item (paginated)
+        id: find_item
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          CURSOR=""
+          FOUND="false"
+          while true; do
+            AFTER=""
+            if [ -n "$CURSOR" ]; then
+              AFTER=", after: \"$CURSOR\""
+            fi
+            RESULT=$(gh api graphql -f query='
+              query {
+                node(id: "'"$PROJECT_ID"'") {
+                  ... on ProjectV2 {
+                    items(first: 100'"$AFTER"') {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        id
+                        content { ... on Issue { number } }
+                      }
+                    }
+                  }
+                }
+              }')
+            ITEM_ID=$(echo "$RESULT" | jq -r ".data.node.items.nodes[] | select(.content.number == $ISSUE_NUMBER) | .id")
+            if [ -n "$ITEM_ID" ] && [ "$ITEM_ID" != "null" ]; then
+              echo "item_id=$ITEM_ID" >> "$GITHUB_OUTPUT"
+              echo "found=true" >> "$GITHUB_OUTPUT"
+              FOUND="true"
+              break
+            fi
+            HAS_NEXT=$(echo "$RESULT" | jq -r '.data.node.items.pageInfo.hasNextPage')
+            if [ "$HAS_NEXT" != "true" ]; then
+              break
+            fi
+            CURSOR=$(echo "$RESULT" | jq -r '.data.node.items.pageInfo.endCursor')
+          done
+          if [ "$FOUND" != "true" ]; then
+            echo "Issue #$ISSUE_NUMBER not in project board"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update Project board status
+        if: steps.find_item.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ITEM_ID: ${{ steps.find_item.outputs.item_id }}
+          OPTION_ID: ${{ steps.status.outputs.project_option }}
+        run: |
+          gh project item-edit \
+            --project-id "$PROJECT_ID" \
+            --id "$ITEM_ID" \
+            --field-id "$STATUS_FIELD_ID" \
+            --single-select-option-id "$OPTION_ID"
+          echo "Updated project item to: ${{ steps.status.outputs.status }}"
+
+      - name: Update Notion database
+        if: env.NOTION_DATABASE_ID != ''
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          SYNC_STATUS: ${{ steps.status.outputs.status }}
+          SYNC_OWNER: ${{ steps.meta.outputs.owner }}
+          SYNC_PRIORITY: ${{ steps.meta.outputs.priority }}
+          SYNC_BLOCKED: ${{ steps.meta.outputs.blocked }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, urllib.request, urllib.error
+
+          NOTION_API_KEY = os.environ["NOTION_API_KEY"]
+          DB_ID = os.environ["NOTION_DATABASE_ID"]
+          ISSUE_NUMBER = int(os.environ["ISSUE_NUMBER"])
+          TITLE = os.environ["ISSUE_TITLE"]
+          STATUS = os.environ["SYNC_STATUS"]
+          OWNER = os.environ["SYNC_OWNER"]
+          PRIORITY = os.environ["SYNC_PRIORITY"]
+          BLOCKED = os.environ["SYNC_BLOCKED"] == "true"
+
+          HEADERS = {
+              "Authorization": f"Bearer {NOTION_API_KEY}",
+              "Notion-Version": "2022-06-28",
+              "Content-Type": "application/json",
+          }
+
+          def notion_request(method, endpoint, body=None):
+              url = f"https://api.notion.com/v1/{endpoint}"
+              data = json.dumps(body).encode() if body else None
+              req = urllib.request.Request(url, data=data, headers=HEADERS, method=method)
+              try:
+                  with urllib.request.urlopen(req) as resp:
+                      return json.loads(resp.read().decode())
+              except urllib.error.HTTPError as e:
+                  print(f"Notion API error {e.code}: {e.read().decode()}")
+                  raise
+
+          # Find existing page by GitHub Issue number
+          result = notion_request("POST", f"databases/{DB_ID}/query", {
+              "filter": {"property": "GitHub Issue", "number": {"equals": ISSUE_NUMBER}}
+          })
+
+          properties = {
+              "Task": {"title": [{"text": {"content": TITLE}}]},
+              "Status": {"select": {"name": STATUS}},
+              "Owner": {"select": {"name": OWNER}},
+              "Priority": {"select": {"name": PRIORITY}},
+              "GitHub Issue": {"number": ISSUE_NUMBER},
+              "Blocked": {"checkbox": BLOCKED},
+          }
+
+          pages = result.get("results", [])
+          if pages:
+              page_id = pages[0]["id"]
+              notion_request("PATCH", f"pages/{page_id}", {"properties": properties})
+              print(f"Updated Notion page {page_id} for issue #{ISSUE_NUMBER} -> {STATUS}")
+          else:
+              notion_request("POST", "pages", {
+                  "parent": {"database_id": DB_ID},
+                  "properties": properties,
+              })
+              print(f"Created Notion page for issue #{ISSUE_NUMBER} -> {STATUS}")
+          PYEOF

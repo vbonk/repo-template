@@ -49,6 +49,18 @@ scripts/  # Automation
 - Use environment variables for config
 - See SECURITY.md for reporting vulnerabilities
 
+## Task Management
+
+GitHub Issues is the task tracker. Use `status:*` labels as the source of truth.
+
+```bash
+scripts/my-tasks.sh           # Your tasks + blocked issues
+scripts/my-tasks.sh agent     # Agent-completable tasks
+scripts/my-tasks.sh high      # High priority
+scripts/close-issue.sh 23 "Fixed in commit abc123"  # Close with comment
+scripts/labels.sh             # Create/update labels (idempotent)
+```
+
 ## Custom Commands
 
 - `/project:init-template` — Initialize this template for your project

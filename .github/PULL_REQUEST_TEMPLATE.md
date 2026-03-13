@@ -1,42 +1,32 @@
 ## Summary
 
-<!-- Brief description of the changes -->
+<!-- What changed and why -->
 
-## Changes
+## Issues
 
-<!-- List the key changes made -->
-
--
+<!-- Reference issues: Closes #XX, Fixes #YY -->
 
 ## Type of Change
 
-<!-- Check all that apply -->
-
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] Documentation update
-- [ ] Refactoring (no functional changes)
-- [ ] Chore (maintenance, dependencies, etc.)
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation
+- [ ] Refactoring
+- [ ] Chore / dependencies
 
 ## Testing
 
-<!-- Describe how you tested these changes -->
-
 - [ ] Tests pass locally
-- [ ] New tests added (if applicable)
-- [ ] Manual testing completed
+- [ ] Manual / end-to-end verification completed
+
+## Verification
+
+<!-- How was this tested? Not just "it deployed" — describe the actual test. -->
 
 ## Checklist
 
-- [ ] My code follows the project's code style
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code where necessary
-- [ ] I have updated documentation (if applicable)
-- [ ] My changes generate no new warnings
-- [ ] Any dependent changes have been merged
-
-## Related Issues
-
-<!-- Link to related issues: Fixes #123, Closes #456 -->
-
+- [ ] I have reviewed my own changes
+- [ ] Documentation updated (if applicable)
+- [ ] No secrets or credentials committed
+- [ ] CI passes

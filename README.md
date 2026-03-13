@@ -71,7 +71,7 @@ If you create GitHub repositories regularly and want them production-ready from 
 - **⚡ Minimal Setup** — Works immediately, customize in minutes
 - **📝 Template-Friendly** — Clear TODOs, easy find-and-replace
 - **🔄 CI/CD Included** — GitHub Actions workflow ready to uncomment
-- **📋 Issue Templates** — Structured YAML forms for bugs and features
+- **📋 Issue Management** — 5 issue templates, label taxonomy, project board sync, helper scripts
 
 ---
 
@@ -84,7 +84,8 @@ If you create GitHub repositories regularly and want them production-ready from 
 │                                                             │
 │  📁 .github/                                                │
 │     ├── workflows/ci.yml      → CI pipeline (multi-stack)  │
-│     ├── ISSUE_TEMPLATE/       → Bug & feature forms        │
+│     ├── workflows/sync-status → Label → Project board sync │
+│     ├── ISSUE_TEMPLATE/       → 5 issue forms + config     │
 │     ├── PULL_REQUEST_TEMPLATE → PR checklist               │
 │     ├── dependabot.yml        → Dependency updates         │
 │     └── copilot-instructions  → GitHub Copilot config      │
@@ -92,10 +93,14 @@ If you create GitHub repositories regularly and want them production-ready from 
 │  📁 .claude/                                                │
 │     └── commands/             → Custom slash commands       │
 │                                                             │
+│  📁 scripts/                                                │
+│     ├── labels.sh             → Create/update labels       │
+│     ├── my-tasks.sh           → Filtered issue views       │
+│     └── close-issue.sh        → Close with status:done     │
+│                                                             │
 │  📁 src/                      → Your source code            │
 │  📁 tests/                    → Your tests                  │
 │  📁 docs/                     → Documentation               │
-│  📁 scripts/                  → Automation scripts          │
 │                                                             │
 │  📄 CLAUDE.md                 → Claude Code instructions    │
 │  📄 AGENTS.md                 → Cross-agent compatibility   │
@@ -395,6 +400,46 @@ The CI workflow follows GitHub's security best practices:
 - **Explicit permissions** — Least-privilege access, not default write-all
 - **30-minute timeout** — Prevents runaway jobs from consuming resources
 - **Concurrency controls** — Cancels outdated runs when new commits push
+
+---
+
+## Issue Management
+
+This template includes a structured issue tracking system with labels, templates, and automation.
+
+### Issue Templates
+
+| Template | Auto-Labels | Use For |
+|----------|-------------|---------|
+| Agent Task | `owner:agent`, `task` | Work an AI agent can complete autonomously |
+| Human Task | `owner:human`, `task` | ENV vars, accounts, credentials, DNS, decisions |
+| External Blocker | `owner:external`, `status:blocked` | Waiting on a client, vendor, or third party |
+| Bug Report | `bug` | Something is broken |
+| Feature Request | `enhancement` | Suggest a new feature |
+
+### Label Taxonomy
+
+| Category | Labels | Purpose |
+|----------|--------|---------|
+| Status | `status:planning`, `in-progress`, `done`, `blocked` | Drives automation |
+| Owner | `owner:human`, `agent`, `external` | Who does the work |
+| Priority | `priority:high`, `medium`, `low` | Urgency |
+| Type | `bug`, `enhancement`, `task`, `roadmap`, `idea`, etc. | Classification |
+
+Run `scripts/labels.sh` to create all labels. Idempotent — safe to run multiple times.
+
+### Helper Scripts
+
+```bash
+scripts/my-tasks.sh              # Your tasks + blocked issues
+scripts/my-tasks.sh agent        # Agent-completable tasks
+scripts/my-tasks.sh high         # High priority only
+scripts/close-issue.sh 23 "Done" # Close with status:done + comment
+```
+
+### Project Board Sync (Optional)
+
+The `sync-status.yml` workflow auto-syncs `status:*` labels to a GitHub Projects v2 board (and optionally Notion). Run `/project:init-template` to configure, or fill in the placeholder IDs manually.
 
 ---
 

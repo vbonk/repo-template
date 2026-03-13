@@ -1,0 +1,59 @@
+name: Bug Report
+description: Something is broken
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "priority:high"
+        - "priority:medium"
+        - "priority:low"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What's broken
+      description: Describe the bug clearly
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happens?
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: URL where it happens
+      placeholder: "https://example.com/page"
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error logs / screenshots
+      description: Paste error messages, stack traces, or attach screenshots

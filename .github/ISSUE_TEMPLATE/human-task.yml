@@ -1,0 +1,50 @@
+name: Human Task
+description: Task that requires human action (env vars, accounts, credentials, DNS, decisions)
+labels: ["owner:human", "task"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "priority:high"
+        - "priority:medium"
+        - "priority:low"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What needs to be done
+      description: Clear description of the task
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: Step-by-step instructions
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / Blockers
+      description: What must be done first? Reference issue numbers with #
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know this is done?
+      value: |
+        - [ ]
+    validations:
+      required: true

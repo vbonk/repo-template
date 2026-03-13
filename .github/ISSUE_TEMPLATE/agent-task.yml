@@ -1,0 +1,65 @@
+name: Agent Task
+description: Task that an AI agent can complete autonomously
+labels: ["owner:agent", "task"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "priority:high"
+        - "priority:medium"
+        - "priority:low"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What needs to be done
+      description: Clear description of the task
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Implementation Steps
+      description: Step-by-step plan for the agent
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Files to read first
+      description: Files the agent MUST read before starting (prevents inventing approaches)
+      placeholder: |
+        - src/lib/config.ts
+        - docs/ARCHITECTURE.md
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / Blockers
+      description: What must be done first? Reference issue numbers with #
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know this is done?
+      value: |
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: How to smoke-test end-to-end (not just "it deployed" — describe the actual test)

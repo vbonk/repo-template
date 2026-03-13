@@ -61,6 +61,18 @@ See `.claude/commands/init-template.md` for detailed steps.
 - Use environment variables for sensitive configuration
 - See SECURITY.md for vulnerability reporting
 
+## Task Management
+
+GitHub Issues is the task tracker. Use `status:*` labels as the source of truth.
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/my-tasks.sh [filter]` | Filtered issue views (mine, agent, high, blocked, all) |
+| `scripts/close-issue.sh <num> [comment]` | Close issue with status:done label |
+| `scripts/labels.sh` | Create/update core labels (idempotent) |
+
+Label taxonomy: `status:*` (planning/in-progress/done/blocked), `owner:*` (human/agent/external), `priority:*` (high/medium/low), plus type labels (bug, enhancement, task, etc.)
+
 ## Additional Context
 
 For tool-specific instructions:
