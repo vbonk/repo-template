@@ -1,0 +1,12 @@
+{
+  // Recommended extensions for this project
+  "recommendations": [
+    "editorconfig.editorconfig",
+    "github.copilot"
+    // === Uncomment for your stack ===
+    // "dbaeumer.vscode-eslint",        // Node.js/TypeScript
+    // "ms-python.python",              // Python
+    // "golang.go",                     // Go
+    // "rust-lang.rust-analyzer"        // Rust
+  ]
+}

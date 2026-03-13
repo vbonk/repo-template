@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Husky + lint-staged setup for Node.js projects
+# Run: bash .husky-setup.sh
+set -euo pipefail
+npm install -D husky lint-staged
+npx husky init
+echo "npx lint-staged" > .husky/pre-commit
+cat > .lintstagedrc.json << 'LINT'
+{
+  "*.{js,ts,jsx,tsx}": ["eslint --fix"],
+  "*.{json,md,yml,yaml}": ["prettier --write"]
+}
+LINT
+echo "Husky + lint-staged configured."
