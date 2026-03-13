@@ -1,0 +1,54 @@
+# Labeler configuration for actions/labeler
+# Maps file path patterns to PR labels.
+# See: https://github.com/actions/labeler
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.md'
+          - 'docs/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'package-lock.json'
+          - 'requirements.txt'
+          - 'requirements*.txt'
+          - 'pyproject.toml'
+          - 'go.mod'
+          - 'go.sum'
+          - 'Cargo.toml'
+          - 'Cargo.lock'
+          - 'Gemfile'
+          - 'Gemfile.lock'
+
+# TEMPLATE: Uncomment and adjust for your project structure
+#
+# frontend:
+#   - changed-files:
+#       - any-glob-to-any-file:
+#           - 'src/components/**'
+#           - 'src/pages/**'
+#           - 'src/styles/**'
+#           - '*.css'
+#           - '*.scss'
+#
+# backend:
+#   - changed-files:
+#       - any-glob-to-any-file:
+#           - 'src/api/**'
+#           - 'src/services/**'
+#           - 'src/models/**'
+#
+# tests:
+#   - changed-files:
+#       - any-glob-to-any-file:
+#           - 'tests/**'
+#           - '**/*.test.*'
+#           - '**/*.spec.*'

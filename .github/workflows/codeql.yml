@@ -1,0 +1,56 @@
+# CodeQL Analysis
+# Runs GitHub's CodeQL security scanner.
+# TEMPLATE: Uncomment languages in the matrix to enable scanning.
+
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 8 * * 1' # Weekly Monday 08:00 UTC
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # TEMPLATE: Uncomment languages used in your project.
+        # Supported: javascript, typescript, python, go, ruby, java, kotlin, csharp, cpp, swift
+        language: []
+        # language:
+        #   - javascript-typescript
+        #   - python
+        #   - go
+        #   - java-kotlin
+        #   - ruby
+        #   - csharp
+        #   - cpp
+        #   - swift
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@820e3160e279568db735cee8ed8f8e77a6da7818 # v3.32.6
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@820e3160e279568db735cee8ed8f8e77a6da7818 # v3.32.6
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@820e3160e279568db735cee8ed8f8e77a6da7818 # v3.32.6
+        with:
+          category: '/language:${{ matrix.language }}'

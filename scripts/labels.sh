@@ -39,4 +39,14 @@ gh label create "documentation"      --color "0075CA" --description "Documentati
 gh label create "dependencies"       --color "0366D6" --description "Dependency updates"               --force $REPO
 gh label create "ci"                 --color "EDEDED" --description "CI/CD changes"                    --force $REPO
 
+# Size labels (for PR size labeler)
+gh label create "size/xs"  --color "0E8A16" --description "Extra small PR (≤10 lines)"  --force $REPO
+gh label create "size/s"   --color "0075CA" --description "Small PR (≤50 lines)"         --force $REPO
+gh label create "size/m"   --color "FBCA04" --description "Medium PR (≤200 lines)"       --force $REPO
+gh label create "size/l"   --color "D93F0B" --description "Large PR (≤500 lines)"        --force $REPO
+gh label create "size/xl"  --color "B60205" --description "Extra large PR (>500 lines)"  --force $REPO
+
+# Deferred label
+gh label create "deferred"  --color "CCCCCC" --description "Planned for future — not in current milestone" --force $REPO
+
 echo "Done. $(gh label list $REPO --json name --jq 'length') labels total."

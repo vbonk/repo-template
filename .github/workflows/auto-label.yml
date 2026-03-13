@@ -1,0 +1,25 @@
+# Auto-Label PRs
+# Automatically labels PRs based on changed file paths.
+# Configure labels in .github/labeler.yml
+
+name: Auto Label
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Label PR based on changed files
+        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6.0.1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sync-labels: true

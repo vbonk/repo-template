@@ -1,0 +1,34 @@
+# # Welcome First-Time Contributors
+# # Posts a friendly message on first issue or PR from a new contributor.
+# # TEMPLATE: Uncomment to enable. Customize messages below.
+#
+# name: Welcome
+#
+# on:
+#   # issues:
+#   #   types: [opened]
+#   # pull_request_target:
+#   #   types: [opened]
+#   workflow_dispatch: # Placeholder — uncomment triggers above
+#
+# permissions:
+#   issues: write
+#   pull-requests: write
+#
+# jobs:
+#   welcome:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 5
+#
+#     steps:
+#       - name: Welcome first-time contributors
+#         uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
+#         with:
+#           repo-token: ${{ secrets.GITHUB_TOKEN }}
+#           issue-message: |
+#             Thanks for opening your first issue! We appreciate your feedback.
+#             A maintainer will review it shortly.
+#           pr-message: |
+#             Thanks for your first pull request! A maintainer will review it soon.
+#             Please make sure CI checks pass and the PR description explains
+#             the change clearly.

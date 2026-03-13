@@ -1,0 +1,104 @@
+# Template Validation (Meta-CI)
+# Validates the template's own files: YAML, JSON, shell scripts, SHA pins, secrets.
+# Remove this workflow after initializing from the template.
+
+name: Validate Template
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Validate YAML files
+        run: |
+          echo "--- Validating YAML files ---"
+          ERRORS=0
+          for f in $(find . -name '*.yml' -o -name '*.yaml' | grep -v node_modules | sort); do
+            if python3 -c "import yaml; yaml.safe_load(open('$f'))" 2>/dev/null; then
+              echo "OK: $f"
+            else
+              echo "FAIL: $f"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::$ERRORS YAML file(s) failed validation"
+            exit 1
+          fi
+
+      - name: Validate JSON files
+        run: |
+          echo "--- Validating JSON files ---"
+          ERRORS=0
+          for f in $(find . -name '*.json' | grep -v node_modules | sort); do
+            if python3 -c "import json; json.load(open('$f'))" 2>/dev/null; then
+              echo "OK: $f"
+            else
+              echo "FAIL: $f"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::$ERRORS JSON file(s) failed validation"
+            exit 1
+          fi
+
+      - name: ShellCheck scripts
+        run: |
+          echo "--- Running ShellCheck ---"
+          if ! command -v shellcheck &>/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -qq -y shellcheck
+          fi
+          ERRORS=0
+          for f in $(find . -name '*.sh' | grep -v node_modules | sort); do
+            if shellcheck "$f"; then
+              echo "OK: $f"
+            else
+              echo "FAIL: $f"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::$ERRORS script(s) failed ShellCheck"
+            exit 1
+          fi
+
+      - name: Verify all actions are SHA-pinned
+        run: |
+          echo "--- Checking SHA-pinned actions ---"
+          # Find 'uses:' lines with @v* (not SHA-pinned)
+          UNPINNED=$(grep -rn 'uses:.*@v[0-9]' .github/workflows/ \
+            | grep -v '#' \
+            | grep -v 'dependabot/fetch-metadata' \
+            || true)
+          if [ -n "$UNPINNED" ]; then
+            echo "::error::Found actions pinned to tags instead of SHAs:"
+            echo "$UNPINNED"
+            exit 1
+          fi
+          echo "All actions are SHA-pinned."
+
+      - name: Check for secrets patterns
+        run: |
+          echo "--- Scanning for secrets patterns ---"
+          PATTERNS='(AKIA[0-9A-Z]{16}|ghp_[a-zA-Z0-9]{36}|sk-[a-zA-Z0-9]{48}|-----BEGIN (RSA |EC )?PRIVATE KEY)'
+          MATCHES=$(grep -rEn "$PATTERNS" --include='*.yml' --include='*.yaml' --include='*.json' --include='*.sh' --include='*.md' . || true)
+          if [ -n "$MATCHES" ]; then
+            echo "::error::Possible secrets detected:"
+            echo "$MATCHES"
+            exit 1
+          fi
+          echo "No secrets patterns found."
