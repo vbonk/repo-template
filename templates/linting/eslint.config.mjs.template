@@ -1,0 +1,15 @@
+// ESLint flat config (v9+)
+import js from '@eslint/js';
+
+export default [
+  js.configs.recommended,
+  {
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+  {
+    ignores: ['dist/', 'build/', 'node_modules/', 'coverage/'],
+  },
+];
