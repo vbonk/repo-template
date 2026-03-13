@@ -1,0 +1,73 @@
+# # PR/Issue Body Scanner (Prompt Injection Detection)
+# # Scans PR and issue bodies for prompt injection patterns.
+# # Adds a warning comment if detected — does NOT block the PR.
+# # TEMPLATE: Uncomment to enable. Opt-in only.
+#
+# name: Scan PR Body
+#
+# on:
+#   issues:
+#     types: [opened, edited]
+#   pull_request_target:
+#     types: [opened, edited]
+#
+# permissions:
+#   issues: write
+#   pull-requests: write
+#
+# jobs:
+#   scan:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 5
+#
+#     steps:
+#       - name: Scan for injection patterns
+#         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+#         with:
+#           script: |
+#             const patterns = [
+#               /ignore\s+(all\s+)?previous\s+instructions/i,
+#               /you\s+are\s+now/i,
+#               /system\s*prompt\s*:/i,
+#               /\bbase64\b.{0,20}[A-Za-z0-9+/=]{40,}/i,
+#               /do\s+not\s+follow\s+(any\s+)?previous/i,
+#               /override\s+(all\s+)?(previous\s+)?instructions/i,
+#               /disregard\s+(all\s+)?(previous\s+)?instructions/i,
+#             ];
+#
+#             let body = '';
+#             if (context.eventName === 'issues') {
+#               body = context.payload.issue.body || '';
+#             } else {
+#               body = context.payload.pull_request.body || '';
+#             }
+#
+#             const matches = patterns.filter(p => p.test(body));
+#             if (matches.length === 0) {
+#               console.log('No injection patterns detected.');
+#               return;
+#             }
+#
+#             const warning = [
+#               '> [!WARNING]',
+#               '> **Potential prompt injection detected**',
+#               '>',
+#               `> This ${context.eventName === 'issues' ? 'issue' : 'PR'} body contains ${matches.length} pattern(s) that may be prompt injection attempts.`,
+#               '> A maintainer should review the content before any AI agent processes it.',
+#               '>',
+#               '> _This is an automated scan. False positives are possible._',
+#             ].join('\n');
+#
+#             if (context.eventName === 'issues') {
+#               await github.rest.issues.createComment({
+#                 ...context.repo,
+#                 issue_number: context.payload.issue.number,
+#                 body: warning,
+#               });
+#             } else {
+#               await github.rest.issues.createComment({
+#                 ...context.repo,
+#                 issue_number: context.payload.pull_request.number,
+#                 body: warning,
+#               });
+#             }

@@ -1,0 +1,51 @@
+# Stale Issues & PRs
+# Marks issues/PRs as stale after 60 days of inactivity, closes after 14 more days.
+# TEMPLATE: Uncomment the schedule trigger when ready for automated runs.
+
+name: Stale
+
+on:
+  workflow_dispatch: # Manual trigger only by default
+  # schedule:
+  #   - cron: '30 6 * * 1' # Weekly Monday 06:30 UTC
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Mark stale issues and PRs
+        uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
+        with:
+          days-before-stale: 60
+          days-before-close: 14
+
+          stale-issue-label: stale
+          stale-pr-label: stale
+
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not
+            had activity in the last 60 days. It will be closed in 14 days if no
+            further activity occurs. Remove the `stale` label or comment to keep
+            it open.
+          stale-pr-message: >
+            This PR has been automatically marked as stale because it has not had
+            activity in the last 60 days. It will be closed in 14 days if no
+            further activity occurs. Remove the `stale` label or comment to keep
+            it open.
+
+          close-issue-message: 'Closed as stale. Reopen if still relevant.'
+          close-pr-message: 'Closed as stale. Reopen if still relevant.'
+
+          # Exempt labels — issues/PRs with these labels are never marked stale
+          exempt-issue-labels: 'status:in-progress,status:blocked,priority:high,roadmap'
+          exempt-pr-labels: 'status:in-progress,status:blocked,priority:high'
+
+          # Only process issues/PRs in ascending (oldest first) order
+          ascending: true
+          operations-per-run: 100
