@@ -1,12 +1,13 @@
 # repo-template
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![AI-Optimized](https://img.shields.io/badge/AI--Optimized-Claude%20%7C%20Copilot%20%7C%20Codex-blue)](https://github.com/vbonk/repo-template)
+[![AI Agents: 6](https://img.shields.io/badge/AI%20Agents-6%20Supported-blue)](https://github.com/vbonk/repo-template)
+[![CI](https://github.com/vbonk/repo-template/actions/workflows/ci.yml/badge.svg)](https://github.com/vbonk/repo-template/actions/workflows/ci.yml)
 [![GitHub last commit](https://img.shields.io/github/last-commit/vbonk/repo-template)](https://github.com/vbonk/repo-template/commits)
 
-**A GitHub repository template optimized for AI-assisted development.**
+**The AI-first GitHub repository template.** Six AI agents. Security by default. Production-ready in 2 minutes.
 
-Stop wasting time on boilerplate. Start every project with security best practices, CI/CD, and AI agent configurations already in place.
+Stop wasting time on boilerplate. Start every project with CI/CD, security scanning, six AI agent configs, issue management, and compliance auditing already in place.
 
 <p align="center">
   <a href="https://github.com/vbonk/repo-template/generate">
@@ -68,12 +69,14 @@ If you create GitHub repositories regularly and want them production-ready from 
 
 ## Features
 
-- **🤖 AI-Agent Ready** — Pre-configured for Claude Code, GitHub Copilot, and Codex
-- **🔒 Secure by Default** — Secrets protection, SHA-pinned Actions, Dependabot
-- **⚡ Minimal Setup** — Works immediately, customize in minutes
-- **📝 Template-Friendly** — Clear TODOs, easy find-and-replace
-- **🔄 CI/CD Included** — GitHub Actions workflow ready to uncomment
-- **📋 Issue Management** — 5 issue templates, label taxonomy, project board sync, helper scripts
+- **🤖 Six AI Agents** — Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf — all configured
+- **🔒 Secure by Default** — SHA-pinned Actions, CodeQL scanning, dependency review, prompt injection defense
+- **⚡ Quick or Full Setup** — 2-minute quick mode or comprehensive 8-step configuration
+- **📋 Issue Management** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync
+- **🔄 13 Workflows** — CI, releases, stale management, auto-labeling, PR sizing, security scanning
+- **🛡️ AI Security** — CODEOWNERS on AI configs, PR injection scanner, defense documentation
+- **📦 Dev Experience** — Devcontainer, linting templates, pre-commit hooks, VS Code settings
+- **📊 Compliance Audit** — Score any repo against template standards with `scripts/audit-compliance.sh`
 
 ---
 
@@ -138,6 +141,9 @@ Best for: Quick start with GitHub's UI
    /project:init-template
    ```
 4. Answer the prompts — files update automatically
+
+> [!IMPORTANT]
+> After creating from template, run `scripts/labels.sh` to create issue labels. Labels, branch protection, secrets, and Projects do **not** transfer from template repos. See `docs/BRANCH-PROTECTION.md` for protection setup.
 
 ```mermaid
 flowchart LR
@@ -555,6 +561,34 @@ If you created a repo via GitHub's template button but also have locally customi
 Yes! See Workflow F. Add your AI configuration files (CLAUDE.md, etc.) and exclude them from git tracking using `.git/info/exclude` so they don't pollute PRs to the upstream project.
 
 </details>
+
+---
+
+<details>
+<summary><strong>▶ AI Security</strong></summary>
+
+This template includes prompt injection defenses — a first for GitHub templates:
+
+- **CODEOWNERS** protects AI config files (CLAUDE.md, AGENTS.md, .cursorrules, etc.) — changes require owner review
+- **PR body scanner** (opt-in workflow) detects common injection patterns in issue/PR text
+- **Hook templates** validate inputs before AI agents process them
+- **Documentation** in [docs/AI-SECURITY.md](docs/AI-SECURITY.md) covers attack vectors and best practices
+
+See [docs/AI-SECURITY.md](docs/AI-SECURITY.md) for the full threat model.
+
+</details>
+
+---
+
+## Show Your Support
+
+If you created your repo with this template, add this badge to your README:
+
+```markdown
+[![Built with repo-template](https://img.shields.io/badge/Built%20with-repo--template-blue?style=flat-square)](https://github.com/vbonk/repo-template)
+```
+
+[![Built with repo-template](https://img.shields.io/badge/Built%20with-repo--template-blue?style=flat-square)](https://github.com/vbonk/repo-template)
 
 ---
 
