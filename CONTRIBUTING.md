@@ -105,6 +105,17 @@ pre-commit install
 - Keep PRs focused and reasonably sized
 - Ensure CI passes before requesting review
 
+## Security
+
+> [!IMPORTANT]
+> Never commit secrets, API keys, or credentials. Use `.env` files (which are gitignored).
+
+If you discover a security vulnerability, **do not open a public issue**. See [SECURITY.md](SECURITY.md) for responsible disclosure instructions.
+
 ## Questions?
 
-Open an issue if you have questions or need help.
+Open an issue if you have questions or need help. See [SUPPORT.md](SUPPORT.md) for all support options.
+
+---
+
+> **See also:** [CLAUDE.md](CLAUDE.md) | [AGENTS.md](AGENTS.md) | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | [SECURITY.md](SECURITY.md) | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)

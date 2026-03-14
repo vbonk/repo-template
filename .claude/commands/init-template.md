@@ -2,9 +2,16 @@
 
 Customize this repository template for your project.
 
-## Instructions
+## Mode Selection
 
-Guide the user through template customization interactively.
+Ask: **"Quick setup (essentials only) or full setup (all features)?"**
+
+- **Quick** (Steps 1-4): Get coding fast — core files + language setup
+- **Full** (Steps 1-8): Everything — issues, security, dev tooling, releases
+
+---
+
+## Quick Mode (Steps 1-4)
 
 ### 1. Gather Project Information
 
@@ -15,74 +22,88 @@ Ask for:
 - **Primary language**: Node.js/TypeScript, Python, Go, Rust, or other
 - **Security contact email**
 
-### 2. Update Files
+### 2. Update Core Files
 
 | File | Changes |
 |------|---------|
-| `README.md` | Title, description, update badges with correct repo |
-| `CLAUDE.md` | Project name, tech stack, commands |
+| `README.md` | Title, description, badges with correct repo |
+| `CLAUDE.md` | Project name, tech stack, commands, architecture |
 | `AGENTS.md` | Mirror CLAUDE.md changes |
+| `GEMINI.md` | Mirror CLAUDE.md changes |
+| `.cursorrules` | Mirror AGENTS.md changes |
+| `.windsurfrules` | Mirror AGENTS.md changes |
+| `.github/copilot-instructions.md` | Mirror changes |
 | `.github/workflows/ci.yml` | Uncomment relevant language section |
 | `.github/dependabot.yml` | Uncomment relevant ecosystem |
+| `.github/CODEOWNERS` | Fill in owner username |
+| `CODE_OF_CONDUCT.md` | Fill in enforcement email |
 | `SECURITY.md` | Add security contact email |
+
+Set repository description: `gh repo edit --description "one-line description"`
 
 ### 3. Language-Specific Setup
 
 Offer to create starter configs:
 
-**Node.js/TypeScript:**
-```json
-// package.json with dev, build, test, lint scripts
-// tsconfig.json if TypeScript
-```
+**Node.js/TypeScript:** package.json, tsconfig.json
+**Python:** pyproject.toml
+**Go:** go.mod
+**Rust:** Cargo.toml
 
-**Python:**
-```toml
-# pyproject.toml with pytest, ruff
-```
+Also uncomment matching section in:
+- `.devcontainer/devcontainer.json` (language feature + VS Code extension)
+- `.vscode/extensions.json` (language extension)
 
-**Go:**
-```go
-// go.mod with module path
-```
-
-**Rust:**
-```toml
-# Cargo.toml with project name
-```
-
-### 4. GitHub Issues Setup (Optional)
-
-Ask: "Set up GitHub Issues management? (labels, project board sync, helper scripts)"
-
-If yes:
-
-1. **Create labels:** Run `bash scripts/labels.sh`
-   - Creates 19 labels: `status:*` (4), `owner:*` (3), `priority:*` (3), type (9)
-   - Idempotent — safe to run multiple times
-
-2. **Project board sync** (optional): Ask "Set up Project board auto-sync?"
-   - Create or detect a GitHub Projects v2 board
-   - Discover GraphQL IDs: project ID, status field ID, option IDs (Planning, In Progress, Blocked, Done)
-   - Replace placeholders in `.github/workflows/sync-status.yml`:
-     - `__PROJECT_ID__`, `__STATUS_FIELD_ID__`
-     - `__PLANNING_OPT__`, `__IN_PROGRESS_OPT__`, `__BLOCKED_OPT__`, `__DONE_OPT__`
-   - Guide user to set `PROJECT_TOKEN` secret (needs `project` scope: `gh auth refresh -s project`)
-
-3. **Notion sync** (optional): Ask "Sync issues to Notion?"
-   - Get `NOTION_DATABASE_ID` and set `NOTION_API_KEY` secret
-   - Fill in `NOTION_DATABASE_ID` in sync-status.yml
-
-### 5. Cleanup
+### 4. Cleanup & Summary
 
 - Remove addressed `<!-- TODO -->` comments
-- Offer initial commit: `chore: Initialize project from template`
+- Offer initial commit: `chore: initialize project from template`
+- Suggest: add code to `src/`, write tests, enable GitHub security features
 
-### 6. Summary
+**If Quick mode: STOP HERE.** Suggest: "Run `/project:init-template` again with Full mode later to add issues, security scanning, dev tooling, and releases."
 
-Report what was changed and suggest:
-- Add code to `src/`
-- Write tests in `tests/`
-- Create your first issue using the issue templates
-- Run `scripts/my-tasks.sh` to see filtered issue views
-- Enable GitHub security features in Settings
+---
+
+## Full Mode (continues from Step 4)
+
+### 5. GitHub Issues Setup
+
+Ask: "Set up GitHub Issues management?"
+
+If yes:
+1. Run `bash scripts/labels.sh` (creates 25+ labels, idempotent)
+2. **Project board sync** (optional):
+   - Create/detect GitHub Projects v2 board
+   - Discover GraphQL IDs and fill in `sync-status.yml` placeholders
+   - Guide: `gh auth refresh -s project` for PROJECT_TOKEN secret
+3. **Notion sync** (optional): Get NOTION_DATABASE_ID + NOTION_API_KEY secret
+
+### 6. Security & Compliance
+
+- **CodeQL:** Uncomment matching language in `.github/workflows/codeql.yml`
+- **Branch protection:** Offer to run `gh api` commands from `docs/BRANCH-PROTECTION.md`
+- **Protected tags:** `gh api repos/OWNER/REPO/tags/protection --method POST -f pattern='v*'`
+- **FUNDING.yml:** "Set up sponsor button?" → uncomment platform + username
+- **GitHub Topics:** "Add topics for discoverability?" → suggest relevant topics, run `gh repo edit --add-topic TOPIC`
+
+### 7. Developer Tooling
+
+- **Linting:** "Install linting config?" → copy from `templates/linting/` to root
+- **Pre-commit hooks:** "Set up hooks?" → Node: husky; Python/Go: pre-commit
+- **Coverage:** "Set up coverage?" → uncomment CI steps, copy `templates/coverage/codecov.yml.template`
+- **Makefile:** "Install Makefile?" → copy from `templates/tooling/Makefile.template`
+- **Version pinning:** "Pin language versions?" → copy `.tool-versions` with selected language
+
+### 8. Release & Final Setup
+
+- **Release workflow:** "Release method? (Tag-based / semantic-release / skip)" → uncomment variant in `.github/workflows/release.yml`
+- **License:** "License? (MIT / Apache-2.0 / GPL-3.0 / keep MIT)" → update LICENSE file
+- **Social preview:** Suggest adding a custom image in Settings > Social preview
+
+Final commit: `chore: complete full project initialization`
+
+Report everything that was configured. Suggest:
+- Create your first issue using the templates
+- Run `scripts/my-tasks.sh` to see filtered views
+- Push a commit to trigger CI
+- Tag `v0.1.0` to test the release workflow
