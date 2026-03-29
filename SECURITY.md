@@ -59,3 +59,27 @@ In your repository settings, consider enabling:
 4. **Code scanning** - Finds vulnerabilities via CodeQL
 
 See [GitHub Security Features](https://docs.github.com/en/code-security) for setup instructions.
+
+Or run the automated setup: `bash scripts/secure-repo.sh`
+
+## What To Do If a Secret Is Leaked
+
+If a secret (API key, password, token, credential) is accidentally committed:
+
+1. **Rotate the credential immediately** — this is the ONLY reliable mitigation. Do this BEFORE anything else.
+2. **Check for unauthorized access** — review audit logs for the affected service to see if the credential was used.
+3. **Remove from git history** — use [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) or `git filter-repo` to purge the secret from all commits.
+4. **Force-push the cleaned history** — `git push --force-with-lease` to update the remote.
+5. **Request GitHub cache purge** — [contact GitHub Support](https://support.github.com) to clear cached views of the commit.
+6. **Monitor for unauthorized usage** — watch for suspicious activity on the affected service for at least 30 days.
+
+> [!WARNING]
+> **Fork network caveat:** If your repo has been forked, the commit containing the secret may be accessible from other repos in the fork network even after deletion. GitHub shares object storage across forks. This is why **rotation is the only reliable fix** — deletion alone is not sufficient.
+
+### Prevention
+
+- Install the pre-commit hook: `bash templates/hooks/setup-hooks.sh`
+- Configure forbidden tokens in `.git/hooks/forbidden-tokens.txt`
+- Use environment variables (`.env` files are gitignored)
+- Never hardcode credentials in source files
+- See [docs/FORK-SECURITY.md](docs/FORK-SECURITY.md) for fork-specific guidance

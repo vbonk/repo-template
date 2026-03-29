@@ -70,7 +70,7 @@ If you create GitHub repositories regularly and want them production-ready from 
 ## Features
 
 - **🤖 Six AI Agents** — Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf — all configured
-- **🔒 Secure by Default** — SHA-pinned Actions, CodeQL scanning, dependency review, prompt injection defense
+- **🔒 Secure by Default** — SHA-pinned Actions, CodeQL scanning, dependency review, prompt injection defense, secret scanning (pre-commit + CI), automated repo hardening
 - **⚡ Quick or Full Setup** — 2-minute quick mode or comprehensive 8-step configuration
 - **📋 Issue Management** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync
 - **🔄 13 Workflows** — CI, releases, stale management, auto-labeling, PR sizing, security scanning
@@ -473,12 +473,30 @@ See [CONTRIBUTING.md](CONTRIBUTING.md#pre-commit-hooks-optional) for instruction
 <details>
 <summary><strong>▶ Enabling GitHub Security Features</strong></summary>
 
-In your repository Settings → Security:
+**Automated (recommended):** Run the hardening script:
+
+```bash
+bash scripts/secure-repo.sh
+```
+
+This enables Dependabot alerts, automated security fixes, branch protection (block force-push/deletion), tag protection, and delete-branch-on-merge in one command.
+
+**Manual:** In your repository Settings → Security:
 
 1. Enable **Secret scanning** — Detects API keys in commits
 2. Enable **Push protection** — Blocks pushes containing secrets
 3. Enable **Dependabot alerts** — Notifies of vulnerable dependencies
 4. Enable **Code scanning** — Finds vulnerabilities via CodeQL (public repos)
+
+**Pre-commit hooks:** Install the secret scanning hook:
+
+```bash
+bash templates/hooks/setup-hooks.sh
+```
+
+Blocks commits containing API keys, private keys, credentials, and custom forbidden tokens. Chains safely with existing hooks (husky, lint-staged, etc.).
+
+**Fork security:** See [docs/FORK-SECURITY.md](docs/FORK-SECURITY.md) for fork-specific security guidance (upstream push blocking, fork network data leakage, sync workflow).
 
 </details>
 

@@ -64,9 +64,23 @@ Example: `feat: add user authentication`
 - Write self-documenting code
 - Add comments for complex logic only
 
-## Pre-commit Hooks (Optional)
+## Pre-commit Hooks
 
-For JavaScript/TypeScript projects, you can set up pre-commit hooks:
+### Secret Scanning (Recommended for All Projects)
+
+Install the secret scanning pre-commit hook to catch accidental credential commits:
+
+```bash
+bash templates/hooks/setup-hooks.sh
+```
+
+This installs a hook that blocks commits containing API keys, private keys, credentials, and tokens you configure in `.git/hooks/forbidden-tokens.txt`. If a detection is a false positive, the hook tells you how to proceed.
+
+If you already have a pre-commit hook (husky, lint-staged, etc.), the installer chains them — your existing hook is preserved.
+
+### Linting Hooks (Optional)
+
+For JavaScript/TypeScript projects, you can add linting pre-commit hooks:
 
 ```bash
 # Install husky and lint-staged

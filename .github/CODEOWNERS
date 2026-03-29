@@ -29,3 +29,11 @@
 # .cursorrules                   @your-username
 # .windsurfrules                 @your-username
 # .github/copilot-instructions.md @your-username
+#
+# Security hardening files — SECRET SCANNING DEFENSE
+# Changes to these files weaken security protections.
+# Require owner review to prevent security downgrades via PRs.
+# scripts/secure-repo.sh           @your-username
+# templates/hooks/                 @your-username
+# .github/workflows/secret-scan-pr.yml @your-username
+# .gitattributes                   @your-username

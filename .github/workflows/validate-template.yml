@@ -87,6 +87,41 @@ jobs:
           fi
           echo "All actions are SHA-pinned."
 
+      - name: ShellCheck hook templates
+        run: |
+          echo "--- ShellCheck on .sh.template files ---"
+          ERRORS=0
+          for f in $(find . -name '*.sh.template' | grep -v node_modules | sort); do
+            if shellcheck "$f"; then
+              echo "OK: $f"
+            else
+              echo "FAIL: $f"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::$ERRORS template(s) failed ShellCheck"
+            exit 1
+          fi
+          echo "All hook templates pass ShellCheck."
+
+      - name: Verify security files exist
+        run: |
+          echo "--- Checking security files ---"
+          MISSING=0
+          for f in .gitattributes scripts/secure-repo.sh templates/hooks/pre-commit-secrets.sh.template templates/hooks/setup-hooks.sh docs/FORK-SECURITY.md; do
+            if [ -f "$f" ]; then
+              echo "OK: $f"
+            else
+              echo "MISSING: $f"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::error::$MISSING security file(s) missing"
+            exit 1
+          fi
+
       - name: Check for secrets patterns
         run: |
           echo "--- Scanning for secrets patterns ---"

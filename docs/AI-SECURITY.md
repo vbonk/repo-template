@@ -56,6 +56,12 @@ Layer 4: Hook-based Scanning
 Layer 5: Agent Instructions
   Each AI config file includes injection awareness.
   Agents are told to refuse suspicious requests.
+      |
+      v
+Layer 6: Secret Detection
+  Pre-commit hooks scan for secrets, API keys, and credentials.
+  CI workflow scans PR diffs as a server-side backstop.
+  See templates/hooks/ and .github/workflows/secret-scan-pr.yml.
 ```
 
 ## Protected Files

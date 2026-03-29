@@ -1,0 +1,19 @@
+# Forbidden tokens — one per line
+# Checked by the pre-commit hook. If ANY appear in staged files, the commit is blocked.
+#
+# Your local username is detected automatically — no need to add it here.
+# Add tokens specific to YOUR environment below.
+#
+# Examples of what to add:
+#   - Your hostname (e.g., my-macbook.local)
+#   - Your home directory path (e.g., /Users/yourname)
+#   - Unique substrings of your API keys
+#   - Internal hostnames or IP addresses
+#
+# Common API key prefixes (already caught by regex in the hook, but
+# adding specific substrings gives an extra layer of protection):
+
+# --- Add your environment-specific tokens below ---
+# /Users/yourname
+# your-hostname
+# your-api-key-prefix

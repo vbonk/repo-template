@@ -1,0 +1,45 @@
+# Auto-detect text files and normalize line endings
+* text=auto
+
+# Force LF for shell scripts and config
+*.sh text eol=lf
+*.bash text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.editorconfig text eol=lf
+Makefile text eol=lf
+
+# Secret file types — mark as binary so git warns on changes
+# These should never be committed, but if someone tries, git will treat them as binary
+*.pem binary
+*.key binary
+*.p12 binary
+*.pfx binary
+*.jks binary
+*.keystore binary
+
+# Lock files — mark as generated (linguist)
+package-lock.json linguist-generated
+pnpm-lock.yaml linguist-generated
+yarn.lock linguist-generated
+Cargo.lock linguist-generated
+go.sum linguist-generated
+poetry.lock linguist-generated
+
+# Binary formats
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary

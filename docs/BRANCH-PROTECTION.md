@@ -105,3 +105,53 @@ CODEOWNERS requires human review for changes to AI configuration files
 `.github/copilot-instructions.md`). This prevents prompt injection via PRs.
 
 See [AI-SECURITY.md](AI-SECURITY.md) for more on prompt injection defense.
+
+## Automated Setup
+
+For quick setup of basic protections (block force-push, block deletion, Dependabot, tag protection):
+
+```bash
+bash scripts/secure-repo.sh
+```
+
+This configures the most important settings in one command. Use the manual `gh api` commands above for full control (PR reviews, status checks, signed commits).
+
+## Commit Signing
+
+Signed commits prove authorship and prevent impersonation. This is optional but recommended, especially for public repos and open source contributions.
+
+### SSH Signing (Recommended)
+
+Most modern setups (GitHub, 1Password, etc.) support SSH-based signing:
+
+```bash
+# Configure git to use SSH signing
+git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/id_ed25519.pub
+git config --global commit.gpgsign true
+
+# Add the key to GitHub: Settings > SSH and GPG keys > New SSH key (type: Signing Key)
+```
+
+### GPG Signing
+
+```bash
+# List keys
+gpg --list-secret-keys --keyid-format=long
+
+# Configure git
+git config --global user.signingkey YOUR_KEY_ID
+git config --global commit.gpgsign true
+```
+
+### Verify
+
+After setup, your commits will show as **"Verified"** on GitHub.
+
+## Fork-Specific Protection
+
+If this repo is a fork, see [FORK-SECURITY.md](FORK-SECURITY.md) for:
+- Upstream push blocking
+- Fork network data leakage risks
+- Sync workflow
+- Branch hygiene for contributors

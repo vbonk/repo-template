@@ -80,16 +80,24 @@ If yes:
 
 ### 6. Security & Compliance
 
+- **Automated hardening:** Run `bash scripts/secure-repo.sh` — enables Dependabot alerts, branch protection, tag protection, delete-branch-on-merge in one step
 - **CodeQL:** Uncomment matching language in `.github/workflows/codeql.yml`
-- **Branch protection:** Offer to run `gh api` commands from `docs/BRANCH-PROTECTION.md`
+- **Branch protection:** If `secure-repo.sh` wasn't enough (e.g., require PR reviews), offer to run full `gh api` commands from `docs/BRANCH-PROTECTION.md`
 - **Protected tags:** `gh api repos/OWNER/REPO/tags/protection --method POST -f pattern='v*'`
+- **Pre-commit hooks:** Run `bash templates/hooks/setup-hooks.sh` — installs secret scanning hook + forbidden tokens file
+- **Commit signing:** "Set up commit signing?" → see `docs/BRANCH-PROTECTION.md` for SSH/GPG instructions
 - **FUNDING.yml:** "Set up sponsor button?" → uncomment platform + username
 - **GitHub Topics:** "Add topics for discoverability?" → suggest relevant topics, run `gh repo edit --add-topic TOPIC`
+
+**Fork-specific:** If the repo was created as a fork:
+- Block upstream push: `git config remote.upstream.pushurl "NEVER_PUSH_TO_UPSTREAM_USE_PR"`
+- Review `docs/FORK-SECURITY.md` for fork-specific security guidance
+- Disable Actions on the fork if not needed: `gh api -X PUT repos/OWNER/REPO/actions/permissions --input - <<< '{"enabled": false}'`
 
 ### 7. Developer Tooling
 
 - **Linting:** "Install linting config?" → copy from `templates/linting/` to root
-- **Pre-commit hooks:** "Set up hooks?" → Node: husky; Python/Go: pre-commit
+- **Pre-commit hooks (linting):** "Add linting hooks?" → Node: husky; Python/Go: pre-commit (chains with secret scanning hook)
 - **Coverage:** "Set up coverage?" → uncomment CI steps, copy `templates/coverage/codecov.yml.template`
 - **Makefile:** "Install Makefile?" → copy from `templates/tooling/Makefile.template`
 - **Version pinning:** "Pin language versions?" → copy `.tool-versions` with selected language
