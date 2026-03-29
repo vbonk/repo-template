@@ -232,21 +232,31 @@ Best for: Users who prefer full control or don't use Claude Code
 
 Best for: Bringing an older repo up to template standards
 
-1. In your existing repo, run:
+1. First, add the init command to your existing repo:
+   ```bash
+   # From your existing repo root:
+   mkdir -p .claude/commands
+   curl -sL https://raw.githubusercontent.com/vbonk/repo-template/main/.claude/commands/init-template.md \
+     -o .claude/commands/init-template.md
+   ```
+2. Then run the command in Claude Code:
    ```
    /project:init-template
    ```
-2. The agent will:
+3. The agent will:
    - Analyze your current structure
    - Add missing template files (CLAUDE.md, CI, etc.)
    - Preserve your existing code and configuration
    - Suggest improvements without overwriting your work
+
+> **Why the extra step?** `/project:init-template` is a Claude Code custom command that must exist in your repo's `.claude/commands/` directory before Claude Code can discover it. Repos created from this template already have it.
 
 **What gets added:**
 - AI configuration files (if missing)
 - CI/CD workflow (if missing or outdated)
 - Issue/PR templates (if missing)
 - Security policy (if missing)
+- Security hardening script + pre-commit hooks
 
 **What's preserved:**
 - Your existing README (agent will suggest improvements)
@@ -272,6 +282,8 @@ Best for: Contributing to others' projects with AI assistance
    ```
 
 This gives you AI assistance without affecting the upstream project.
+
+**Security for forks:** See [docs/FORK-SECURITY.md](docs/FORK-SECURITY.md) for upstream push blocking, fork network data leakage risks, and secure contribution workflows.
 
 </details>
 
