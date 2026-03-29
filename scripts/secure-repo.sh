@@ -143,7 +143,7 @@ else
 fi
 
 if [[ -f "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" ]]; then
-  TOKEN_COUNT=$(grep -cv '^\s*#\|^\s*$' "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" 2>/dev/null || echo 0)
+  TOKEN_COUNT=$(grep -cv '^[[:space:]]*#\|^[[:space:]]*$' "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" 2>/dev/null || echo 0)
   echo -e "  ${GREEN}[PASS]${NC} Forbidden tokens file ($TOKEN_COUNT tokens)"
   PASS=$((PASS + 1))
 else
@@ -183,8 +183,8 @@ fi
 
 echo ""
 echo "============================================"
-echo "  SECURITY SCORECARD: $GRADE"
-echo "  ${GREEN}$PASS pass${NC} | ${YELLOW}$WARN warn${NC} | ${RED}$FAIL fail${NC}"
+echo -e "  SECURITY SCORECARD: $GRADE"
+echo -e "  ${GREEN}$PASS pass${NC} | ${YELLOW}$WARN warn${NC} | ${RED}$FAIL fail${NC}"
 echo "============================================"
 
 if [[ $WARN -gt 0 || $FAIL -gt 0 ]]; then
