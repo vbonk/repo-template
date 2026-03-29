@@ -42,19 +42,15 @@ jobs:
       - name: Validate JSON files
         run: |
           echo "--- Validating JSON files ---"
-          ERRORS=0
-          for f in $(find . -name '*.json' | grep -v node_modules | sort); do
-            if python3 -c "import json; json.load(open('$f'))" 2>/dev/null; then
-              echo "OK: $f"
-            else
-              echo "FAIL: $f"
-              ERRORS=$((ERRORS + 1))
-            fi
-          done
-          if [ "$ERRORS" -gt 0 ]; then
-            echo "::error::$ERRORS JSON file(s) failed validation"
+          # Uses scripts/validate-jsonc.py which strips // and /* */ comments before
+          # parsing, so devcontainer.json and .vscode/*.json template files with
+          # instructional comments are treated as valid JSONC.
+          FILES=$(find . -name '*.json' | grep -v node_modules | sort | tr '\n' ' ')
+          # shellcheck disable=SC2086
+          python3 scripts/validate-jsonc.py $FILES || {
+            echo "::error::One or more JSON file(s) failed validation"
             exit 1
-          fi
+          }
 
       - name: ShellCheck scripts
         run: |
