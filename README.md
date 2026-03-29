@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![AI Agents: 6](https://img.shields.io/badge/AI%20Agents-6%20Supported-blue)](https://github.com/vbonk/repo-template)
 [![CI](https://github.com/vbonk/repo-template/actions/workflows/ci.yml/badge.svg)](https://github.com/vbonk/repo-template/actions/workflows/ci.yml)
+[![GitHub release](https://img.shields.io/github/v/release/vbonk/repo-template)](https://github.com/vbonk/repo-template/releases)
+[![GitHub stars](https://img.shields.io/github/stars/vbonk/repo-template)](https://github.com/vbonk/repo-template/stargazers)
 [![GitHub last commit](https://img.shields.io/github/last-commit/vbonk/repo-template)](https://github.com/vbonk/repo-template/commits)
 
 **The AI-first GitHub repository template.** Six AI agents. Security by default. Production-ready in 2 minutes.
