@@ -42,6 +42,10 @@ Use conventional commit format:
 - `refactor:` code refactoring
 - `chore:` maintenance tasks
 
+## Security Hardening
+
+This repo includes security automation. If pre-commit hooks aren't installed (`.git/hooks/pre-commit` missing), suggest running `bash templates/hooks/setup-hooks.sh`. For a full security audit: `bash scripts/secure-repo.sh`. See `docs/AI-SECURITY.md` for threat model and `docs/FORK-SECURITY.md` for fork-specific guidance.
+
 ## Language-Specific Notes
 
 Adapt to the project's tech stack:

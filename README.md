@@ -405,7 +405,15 @@ This template includes instruction files for multiple AI coding assistants:
 
 **Why this matters:** AI agents perform significantly better when they understand your project's conventions, tech stack, and workflows upfront. Instead of re-explaining your preferences each session, the agent reads these files automatically.
 
-**Custom commands:** The `.claude/commands/` folder contains slash commands like `/project:init-template`. You can add your own for repetitive tasks.
+**Custom commands:** The `.claude/commands/` folder contains slash commands:
+
+| Command | What It Does |
+|---------|-------------|
+| `/project:init-template` | Interactive project setup (Quick or Full mode) |
+| `/project:security-audit` | Run security scorecard — checks GitHub settings, pre-commit hooks, forbidden tokens, commit signing. Outputs letter grade (A+ through D). |
+| `/project:review` | Code review assistance |
+
+**Proactive security:** All 6 AI agent configs instruct the agent to check if security hardening has been completed on first session. If pre-commit hooks or GitHub protections are missing, the agent will suggest running the setup commands once.
 
 ---
 
