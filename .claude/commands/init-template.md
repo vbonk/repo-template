@@ -54,19 +54,29 @@ Also uncomment matching section in:
 - `.devcontainer/devcontainer.json` (language feature + VS Code extension)
 - `.vscode/extensions.json` (language extension)
 
-### 4. Cleanup & Summary
+### 4. Quick Security Hardening
+
+Ask: "Harden GitHub security settings? (recommended, takes 5 seconds)"
+
+If yes:
+- Run `bash scripts/secure-repo.sh` — enables Dependabot alerts, branch protection, tag protection
+- Run `bash templates/hooks/setup-hooks.sh` — installs pre-commit secret scanning hook
+
+These are fast, safe, and reversible. No reason to skip them.
+
+### 5. Cleanup & Summary
 
 - Remove addressed `<!-- TODO -->` comments
 - Offer initial commit: `chore: initialize project from template`
-- Suggest: add code to `src/`, write tests, enable GitHub security features
+- Report the security scorecard from `secure-repo.sh`
 
-**If Quick mode: STOP HERE.** Suggest: "Run `/project:init-template` again with Full mode later to add issues, security scanning, dev tooling, and releases."
+**If Quick mode: STOP HERE.** Suggest: "Run `/project:init-template` again with Full mode later to add issues, advanced security, dev tooling, and releases."
 
 ---
 
-## Full Mode (continues from Step 4)
+## Full Mode (continues from Step 5)
 
-### 5. GitHub Issues Setup
+### 6. GitHub Issues Setup
 
 Ask: "Set up GitHub Issues management?"
 
@@ -78,13 +88,12 @@ If yes:
    - Guide: `gh auth refresh -s project` for PROJECT_TOKEN secret
 3. **Notion sync** (optional): Get NOTION_DATABASE_ID + NOTION_API_KEY secret
 
-### 6. Security & Compliance
+### 7. Advanced Security & Compliance
 
-- **Automated hardening:** Run `bash scripts/secure-repo.sh` — enables Dependabot alerts, branch protection, tag protection, delete-branch-on-merge in one step
+If `secure-repo.sh` was already run in Quick Mode (Step 4), this step covers the advanced options:
+
 - **CodeQL:** Uncomment matching language in `.github/workflows/codeql.yml`
-- **Branch protection:** If `secure-repo.sh` wasn't enough (e.g., require PR reviews), offer to run full `gh api` commands from `docs/BRANCH-PROTECTION.md`
-- **Protected tags:** `gh api repos/OWNER/REPO/tags/protection --method POST -f pattern='v*'`
-- **Pre-commit hooks:** Run `bash templates/hooks/setup-hooks.sh` — installs secret scanning hook + forbidden tokens file
+- **Branch protection (advanced):** If Step 4's basic protection isn't enough (e.g., require PR reviews, signed commits), run full `gh api` commands from `docs/BRANCH-PROTECTION.md`
 - **Commit signing:** "Set up commit signing?" → see `docs/BRANCH-PROTECTION.md` for SSH/GPG instructions
 - **FUNDING.yml:** "Set up sponsor button?" → uncomment platform + username
 - **GitHub Topics:** "Add topics for discoverability?" → suggest relevant topics, run `gh repo edit --add-topic TOPIC`
@@ -94,7 +103,7 @@ If yes:
 - Review `docs/FORK-SECURITY.md` for fork-specific security guidance
 - Disable Actions on the fork if not needed: `gh api -X PUT repos/OWNER/REPO/actions/permissions --input - <<< '{"enabled": false}'`
 
-### 7. Developer Tooling
+### 8. Developer Tooling
 
 - **Linting:** "Install linting config?" → copy from `templates/linting/` to root
 - **Pre-commit hooks (linting):** "Add linting hooks?" → Node: husky; Python/Go: pre-commit (chains with secret scanning hook)
@@ -102,7 +111,7 @@ If yes:
 - **Makefile:** "Install Makefile?" → copy from `templates/tooling/Makefile.template`
 - **Version pinning:** "Pin language versions?" → copy `.tool-versions` with selected language
 
-### 8. Release & Final Setup
+### 9. Release & Final Setup
 
 - **Release workflow:** "Release method? (Tag-based / semantic-release / skip)" → uncomment variant in `.github/workflows/release.yml`
 - **License:** "License? (MIT / Apache-2.0 / GPL-3.0 / keep MIT)" → update LICENSE file

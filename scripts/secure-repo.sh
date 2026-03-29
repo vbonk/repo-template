@@ -129,16 +129,71 @@ run_check "Set default Actions permissions to read" \
 APEOF" \
   "May require org-level override"
 
-# --- Summary ---
+# --- Local Protections Check (read-only) ---
+echo ""
+echo "Local Protections:"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
+
+if [[ -x "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
+  echo -e "  ${GREEN}[PASS]${NC} Pre-commit hook installed"
+  PASS=$((PASS + 1))
+else
+  echo -e "  ${YELLOW}[WARN]${NC} No pre-commit hook — run: bash templates/hooks/setup-hooks.sh"
+  WARN=$((WARN + 1))
+fi
+
+if [[ -f "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" ]]; then
+  TOKEN_COUNT=$(grep -cv '^\s*#\|^\s*$' "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" 2>/dev/null || echo 0)
+  echo -e "  ${GREEN}[PASS]${NC} Forbidden tokens file ($TOKEN_COUNT tokens)"
+  PASS=$((PASS + 1))
+else
+  echo -e "  ${YELLOW}[WARN]${NC} No forbidden-tokens.txt — run: bash templates/hooks/setup-hooks.sh"
+  WARN=$((WARN + 1))
+fi
+
+if [[ -f "$REPO_ROOT/.gitattributes" ]]; then
+  echo -e "  ${GREEN}[PASS]${NC} .gitattributes present"
+  PASS=$((PASS + 1))
+else
+  echo -e "  ${YELLOW}[WARN]${NC} No .gitattributes"
+  WARN=$((WARN + 1))
+fi
+
+SIGNING=$(git config --get commit.gpgsign 2>/dev/null || echo "false")
+if [[ "$SIGNING" == "true" ]]; then
+  echo -e "  ${GREEN}[PASS]${NC} Commit signing enabled"
+  PASS=$((PASS + 1))
+else
+  echo -e "  ${YELLOW}[WARN]${NC} Commit signing not configured (see docs/BRANCH-PROTECTION.md)"
+  WARN=$((WARN + 1))
+fi
+
+# --- Scorecard ---
+if [[ $FAIL -eq 0 && $WARN -eq 0 ]]; then
+  GRADE="A+"
+elif [[ $FAIL -eq 0 && $WARN -le 2 ]]; then
+  GRADE="A"
+elif [[ $FAIL -eq 0 ]]; then
+  GRADE="B"
+elif [[ $FAIL -le 1 ]]; then
+  GRADE="C"
+else
+  GRADE="D"
+fi
+
 echo ""
 echo "============================================"
-echo "  Results: ${GREEN}$PASS done${NC} | ${YELLOW}$WARN warnings${NC} | ${RED}$FAIL failed${NC}"
+echo "  SECURITY SCORECARD: $GRADE"
+echo "  ${GREEN}$PASS pass${NC} | ${YELLOW}$WARN warn${NC} | ${RED}$FAIL fail${NC}"
 echo "============================================"
-echo ""
-echo "Next steps:"
-echo "  1. Install pre-commit hooks: bash templates/hooks/setup-hooks.sh"
-echo "  2. Set up commit signing (see docs/BRANCH-PROTECTION.md)"
-echo "  3. Configure CodeQL language in .github/workflows/codeql.yml"
+
+if [[ $WARN -gt 0 || $FAIL -gt 0 ]]; then
+  echo ""
+  echo "Next steps:"
+  [[ ! -x "$REPO_ROOT/.git/hooks/pre-commit" ]] && echo "  - Install hooks: bash templates/hooks/setup-hooks.sh"
+  [[ "$SIGNING" != "true" ]] && echo "  - Set up commit signing: see docs/BRANCH-PROTECTION.md"
+  echo "  - Configure CodeQL language in .github/workflows/codeql.yml"
+fi
 echo ""
 
 if [[ $FAIL -gt 0 ]]; then

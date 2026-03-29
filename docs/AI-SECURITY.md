@@ -114,7 +114,17 @@ If you are an AI agent reading this document:
 
 ## Hook Templates
 
-This repository includes two Claude Code hook templates in `.claude/hooks/`:
+This repository includes hook templates at two levels:
+
+### Secret Scanning Hooks (`templates/hooks/`)
+
+- **`pre-commit-secrets.sh.template`** -- Pre-commit hook that blocks commits containing API keys, private keys, credentials, and custom forbidden tokens.
+- **`forbidden-tokens.txt.template`** -- Customizable blocklist for environment-specific strings (hostnames, paths, key prefixes).
+- **`setup-hooks.sh`** -- Safe installer that chains with existing hooks and backs up to `~/.config/repo-template/hooks/`.
+
+Install with: `bash templates/hooks/setup-hooks.sh`
+
+### AI Security Hooks (`.claude/hooks/`)
 
 - **`validate-pr-body.sh.template`** -- Scans PR content for common injection patterns before the agent processes it.
 - **`warn-ai-config-changes.sh.template`** -- Warns when AI config files are modified, prompting human review.
@@ -123,6 +133,38 @@ To use them:
 1. Copy the template and remove `.template` extension
 2. Make executable: `chmod +x .claude/hooks/<name>.sh`
 3. Register in `.claude/settings.json`
+
+### Clone Detection Hook (Advanced)
+
+For Claude Code users who want automatic security reminders when cloning repos, add a PostToolUse hook to your global `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/detect-repo-clone.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The hook script checks if the Bash command was a `git clone` or `gh repo clone` and reminds the agent to run security hardening:
+
+```bash
+#!/usr/bin/env bash
+COMMAND="${TOOL_INPUT_command:-}"
+if echo "$COMMAND" | grep -qiE '(git clone|gh repo clone|gh repo fork|gh repo create)'; then
+  echo "REPO SECURITY REMINDER: Run scripts/secure-repo.sh and templates/hooks/setup-hooks.sh"
+fi
+```
 
 ## Further Reading
 

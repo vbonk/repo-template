@@ -76,7 +76,9 @@ bash templates/hooks/setup-hooks.sh
 
 This installs a hook that blocks commits containing API keys, private keys, credentials, and tokens you configure in `.git/hooks/forbidden-tokens.txt`. If a detection is a false positive, the hook tells you how to proceed.
 
-If you already have a pre-commit hook (husky, lint-staged, etc.), the installer chains them — your existing hook is preserved.
+If you already have a pre-commit hook (husky, lint-staged, etc.), the installer chains them — your existing hook is preserved. Hooks are also backed up to `~/.config/repo-template/hooks/` so they survive recloning.
+
+> **Note for contributors modifying hooks:** Use POSIX-compatible regex patterns (`[[:space:]]` not `\s`, `[[:alpha:]]` not `\w`) for cross-platform compatibility. BSD grep on macOS doesn't support Perl-style character classes.
 
 ### Linting Hooks (Optional)
 

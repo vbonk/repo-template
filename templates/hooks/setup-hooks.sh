@@ -88,6 +88,20 @@ else
   INSTALLED=$((INSTALLED + 1))
 fi
 
+# --- Backup hooks to persistent location ---
+REPO_NAME=$(basename "$REPO_ROOT")
+BACKUP_DIR="$HOME/.config/repo-template/hooks/$REPO_NAME"
+
+if [[ $INSTALLED -gt 0 || $CHAINED -gt 0 ]]; then
+  mkdir -p "$BACKUP_DIR"
+  for f in "$HOOKS_DIR"/pre-commit "$HOOKS_DIR"/pre-commit-secrets "$HOOKS_DIR"/forbidden-tokens.txt; do
+    [[ -f "$f" ]] && cp "$f" "$BACKUP_DIR/"
+  done
+  echo -e "${GREEN}[DONE]${NC} Hooks backed up to $BACKUP_DIR"
+  echo "  (Survives reclone — restore with: cp $BACKUP_DIR/* .git/hooks/)"
+  INSTALLED=$((INSTALLED + 1))
+fi
+
 # --- Summary ---
 echo ""
 echo "=== Results: $INSTALLED installed | $CHAINED chained | $SKIPPED skipped ==="
@@ -98,4 +112,7 @@ if [[ $INSTALLED -gt 0 || $CHAINED -gt 0 ]]; then
   echo "  1. Edit .git/hooks/forbidden-tokens.txt with your environment-specific tokens"
   echo "  2. Test: echo 'sk-ant-test123' > /tmp/test.txt && git add /tmp/test.txt"
   echo "     (the pre-commit hook should block the commit)"
+  echo ""
+  echo "After recloning this repo, restore hooks with:"
+  echo "  cp $BACKUP_DIR/* .git/hooks/ && chmod +x .git/hooks/pre-commit"
 fi
