@@ -170,7 +170,13 @@ Best for: When you've already planned your project structure or have existing co
    git init
    ```
 2. Start Claude Code in this directory
-3. Run `/project:init-template` — the agent will:
+3. Add the init command:
+   ```bash
+   mkdir -p .claude/commands
+   curl -sL https://raw.githubusercontent.com/vbonk/repo-template/main/.claude/commands/init-template.md \
+     -o .claude/commands/init-template.md
+   ```
+4. Run `/project:init-template` — the agent will:
    - Ask about your project objectives and tech stack
    - Generate customized template files
    - Create the GitHub repository
@@ -579,7 +585,7 @@ If you created a repo via GitHub's template button but also have locally customi
    This replaces the template files with your customized version.
 
 2. **Discard local and customize template**:
-   Clone the GitHub repo and run `/project:init-template` to customize interactively.
+   Clone the GitHub repo and run `/project:init-template` to customize interactively (this command is already included in repos created from the template).
 
 **To avoid this:** Use Workflow B (Local-First) when you have pre-planned customizations, or use Workflow A (GitHub Template) and customize afterward — don't mix both.
 
