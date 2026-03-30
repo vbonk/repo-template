@@ -1,14 +1,54 @@
 # Security Policy
 
-## Reporting a Vulnerability
+> **Security at a glance:** We follow a 6-layer defense model — from GitHub-native features through pre-commit hooks to runtime protection. Vulnerabilities should be reported privately via GitHub's advisory system. If a secret is leaked, rotate first, clean history second.
+
+## 🛡️ Security Model
+
+```mermaid
+block-beta
+    columns 1
+    block:layers
+        L1["Layer 1: GitHub-Native Security\nSecret scanning · Push protection · Dependabot alerts · CodeQL"]
+        L2["Layer 2: Pre-commit Hooks\nSecret scanning hook · Forbidden tokens · POSIX-compatible patterns"]
+        L3["Layer 3: CI Pipeline\nAutomated tests · Linting · SHA-pinned Actions · Branch protection"]
+        L4["Layer 4: Code Review\nCODEOWNERS on sensitive files · Human review of AI config changes"]
+        L5["Layer 5: Access Control\nBranch protection · Signed commits · Least-privilege permissions"]
+        L6["Layer 6: Runtime & Monitoring\nAudit logs · Dependency monitoring · Incident response plan"]
+    end
+
+    style L1 fill:#2d6a4f,color:#fff
+    style L2 fill:#40916c,color:#fff
+    style L3 fill:#52b788,color:#fff
+    style L4 fill:#74c69d,color:#000
+    style L5 fill:#95d5b2,color:#000
+    style L6 fill:#b7e4c7,color:#000
+```
+
+## 📋 Reporting a Vulnerability
 
 We take security seriously. If you discover a security vulnerability, please report it responsibly.
 
+```mermaid
+flowchart TD
+    A["🔍 Discover\nVulnerability"] --> B{"Is it a\nsecurity issue?"}
+    B -- No --> C["Open a\npublic issue"]
+    B -- Yes --> D["⚠️ Do NOT create\na public issue"]
+    D --> E["Use GitHub Private\nVulnerability Reporting"]
+    E --> F["Include: description,\nrepro steps, impact"]
+    F --> G["📬 Acknowledgment\nwithin 48 hours"]
+    G --> H["🔄 Status updates\nevery 7 days"]
+    H --> I["🔧 Fix developed\nand tested"]
+    I --> J["📢 Coordinated\ndisclosure"]
+    J --> K["🏆 Credit in\nsecurity advisory"]
+```
+
 ### How to Report
 
-1. **Do NOT create a public GitHub issue** for security vulnerabilities
-2. Use [GitHub's private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) (preferred)
-3. Or email: <!-- TODO: Add your security contact email -->
+> [!IMPORTANT]
+> **Do NOT create a public GitHub issue** for security vulnerabilities. Use private reporting to protect users while a fix is developed.
+
+1. Use [GitHub's private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) (preferred)
+2. Or email: <!-- TODO: Add your security contact email -->
 
 ### What to Include
 
@@ -40,14 +80,17 @@ We take security seriously. If you discover a security vulnerability, please rep
 | Previous major | Security fixes only |
 | Older | No |
 
-## Security Best Practices
+## 🔐 Security Best Practices
 
 This repository follows security best practices:
 
-- Dependencies monitored by Dependabot
-- GitHub Actions pinned to SHA
-- Secrets never committed (see `.gitignore`)
-- Push protection enabled (recommended)
+| Practice | Status | Description |
+|----------|--------|-------------|
+| Dependabot | Enabled | Monitors dependencies for known vulnerabilities |
+| SHA-pinned Actions | Enforced | GitHub Actions pinned to commit SHA, not tags |
+| Secret scanning hook | Available | Pre-commit hook blocks credential commits |
+| Push protection | Recommended | Blocks pushes containing detected secrets |
+| CODEOWNERS | Configured | Sensitive files require maintainer review |
 
 ## Enabling Additional Security Features
 
@@ -58,11 +101,18 @@ In your repository settings, consider enabling:
 3. **Dependabot alerts** - Notifies of vulnerable dependencies
 4. **Code scanning** - Finds vulnerabilities via CodeQL
 
-See [GitHub Security Features](https://docs.github.com/en/code-security) for setup instructions.
+> [!TIP]
+> Run the automated security setup to configure all recommended features at once:
+> ```bash
+> bash scripts/secure-repo.sh
+> ```
 
-Or run the automated setup: `bash scripts/secure-repo.sh`
+See [GitHub Security Features](https://docs.github.com/en/code-security) for manual setup instructions.
 
-## What To Do If a Secret Is Leaked
+## 🚨 What To Do If a Secret Is Leaked
+
+> [!CAUTION]
+> **Time is critical.** A leaked credential can be exploited within minutes. Follow these steps in order — rotation comes first because history rewriting alone is not sufficient to protect you.
 
 If a secret (API key, password, token, credential) is accidentally committed:
 
@@ -78,8 +128,15 @@ If a secret (API key, password, token, credential) is accidentally committed:
 
 ### Prevention
 
+> [!TIP]
+> Prevention is far cheaper than remediation. A single pre-commit hook catches most accidental credential commits before they ever reach the remote.
+
 - Install the pre-commit hook: `bash templates/hooks/setup-hooks.sh`
 - Configure forbidden tokens in `.git/hooks/forbidden-tokens.txt`
 - Use environment variables (`.env` files are gitignored)
 - Never hardcode credentials in source files
 - See [docs/FORK-SECURITY.md](docs/FORK-SECURITY.md) for fork-specific guidance
+
+---
+
+> **See also:** [CONTRIBUTING.md](CONTRIBUTING.md) | [GOVERNANCE.md](GOVERNANCE.md) | [docs/AI-SECURITY.md](docs/AI-SECURITY.md) | [docs/FORK-SECURITY.md](docs/FORK-SECURITY.md)

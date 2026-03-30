@@ -1,19 +1,21 @@
 # Fork Security Guide
 
-How to securely work with forks of this repository.
+> **Fork Security at a Glance** -- Forks share a git object store with the upstream repository. Deleted commits may still be fetchable by SHA from any repo in the fork network. If you accidentally push a secret, **rotate it immediately** -- deleting the commit is never sufficient. Always block upstream push, work on feature branches, and install pre-commit hooks.
+
+---
 
 ## The Fork Model
 
-```
-upstream/repo (public, not yours)
-       |
-       | fork (GitHub creates a linked copy)
-       v
-you/repo (public, yours) ← origin
-       |
-       | clone
-       v
-local working copy
+```mermaid
+graph TD
+    U["**upstream/repo**<br/><em>public, not yours</em>"] -->|"fork<br/>(GitHub creates a linked copy)"| F["**you/repo**<br/><em>public, yours (origin)</em>"]
+    F -->|"clone"| L["**local working copy**"]
+    L -->|"push (to origin only)"| F
+    F -->|"PR"| U
+
+    style U fill:#1a5276,stroke:#2980b9,color:#fff
+    style F fill:#1e8449,stroke:#27ae60,color:#fff
+    style L fill:#7d6608,stroke:#f1c40f,color:#fff
 ```
 
 ## Critical Rules
@@ -34,7 +36,7 @@ Prevent accidental pushes to the parent repository:
 git config remote.upstream.pushurl "NEVER_PUSH_TO_UPSTREAM_USE_PR"
 ```
 
-Now `git push upstream` will always fail — you must use PRs.
+Now `git push upstream` will always fail -- you must use PRs.
 
 ### 3. Review Before Pushing
 
@@ -57,15 +59,19 @@ git push origin main
 
 ## Fork Network Data Leakage
 
-**This is the most important thing most people don't know about forks.**
+> [!CAUTION]
+> **This is the most important thing most people don't know about forks.**
+>
+> GitHub forks share a git object store. This means:
+>
+> - A commit pushed to your fork and then **deleted** (via force-push or branch deletion) may still be **fetchable from the upstream repo** by its SHA hash.
+> - This applies to every repo in the fork network.
+> - GitHub's garbage collection runs on an unpredictable schedule -- your "deleted" commit may persist for weeks or months.
 
-GitHub forks share a git object store. This means:
-
-- A commit pushed to your fork and then **deleted** (via force-push or branch deletion) may still be **fetchable from the upstream repo** by its SHA hash.
-- This applies to every repo in the fork network.
-- GitHub's garbage collection runs on an unpredictable schedule — your "deleted" commit may persist for weeks or months.
-
-**Rule: If you accidentally push a secret, ALWAYS rotate the credential immediately. Deleting the commit is NOT sufficient.**
+> [!WARNING]
+> **Rule: If you accidentally push a secret, ALWAYS rotate the credential immediately. Deleting the commit is NOT sufficient.**
+>
+> The secret should be considered compromised from the moment it was pushed, regardless of how quickly you remove the commit. Rotate first, clean up history second.
 
 ## What's Safe to Push
 
@@ -122,6 +128,9 @@ Signed commits prove authorship. Set up SSH signing (recommended):
    git config --global commit.gpgsign true
    ```
 
+> [!TIP]
+> See [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md#commit-signing) for more details on SSH vs GPG signing and verification.
+
 ## Security Checklist for Fork Contributors
 
 - [ ] Upstream push URL is blocked
@@ -133,6 +142,7 @@ Signed commits prove authorship. Set up SSH signing (recommended):
 
 ## See Also
 
-- [SECURITY.md](../SECURITY.md) — Vulnerability reporting and incident response
-- [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md) — Branch protection setup
-- [AI-SECURITY.md](AI-SECURITY.md) — Prompt injection defense
+- [SECURITY.md](../SECURITY.md) -- Vulnerability reporting and incident response
+- [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md) -- Branch protection setup
+- [AI-SECURITY.md](AI-SECURITY.md) -- Prompt injection defense
+- [GITHUB-ENVIRONMENTS.md](GITHUB-ENVIRONMENTS.md) -- Deployment environments and secret scoping

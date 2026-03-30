@@ -1,6 +1,21 @@
 # Contributing
 
+> **At a glance:** Fork the repo, create a branch, make changes with tests, open a PR. We use conventional commits and require CI to pass before merging. Secret scanning hooks are strongly recommended.
+
 Thank you for your interest in contributing!
+
+## Quick Reference
+
+| Step | Command / Link |
+|------|---------------|
+| Fork | Click **Fork** on the repo page |
+| Clone | `git clone https://github.com/YOUR_USERNAME/REPO_NAME.git` |
+| Branch | `git checkout -b feature/your-feature` |
+| Commit | `git commit -m "feat: describe your change"` |
+| Push | `git push origin feature/your-feature` |
+| Pull Request | Open a PR from your fork to `main` |
+| Conventions | [Conventional Commits](https://www.conventionalcommits.org/) |
+| Code of Conduct | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
 
 ## Getting Started
 
@@ -10,6 +25,24 @@ Thank you for your interest in contributing!
 4. Make your changes
 5. Push to your fork
 6. Open a Pull Request
+
+## 🔀 PR Workflow
+
+```mermaid
+flowchart LR
+    A["🍴 Fork"] --> B["🌿 Branch"]
+    B --> C["💻 Code"]
+    C --> D["✅ Test"]
+    D --> E["📝 Commit"]
+    E --> F["🚀 Push"]
+    F --> G["📬 Open PR"]
+    G --> H{"CI Passes?"}
+    H -- Yes --> I["👀 Review"]
+    H -- No --> C
+    I --> J{"Changes\nRequested?"}
+    J -- Yes --> C
+    J -- No --> K["🎉 Merge"]
+```
 
 ## Development Workflow
 
@@ -64,9 +97,12 @@ Example: `feat: add user authentication`
 - Write self-documenting code
 - Add comments for complex logic only
 
-## Pre-commit Hooks
+## 🔒 Pre-commit Hooks
 
 ### Secret Scanning (Recommended for All Projects)
+
+> [!TIP]
+> Set up secret scanning in under a minute. This single step prevents the most common and costly security mistake — accidentally committing credentials.
 
 Install the secret scanning pre-commit hook to catch accidental credential commits:
 
@@ -76,9 +112,11 @@ bash templates/hooks/setup-hooks.sh
 
 This installs a hook that blocks commits containing API keys, private keys, credentials, and tokens you configure in `.git/hooks/forbidden-tokens.txt`. If a detection is a false positive, the hook tells you how to proceed.
 
-If you already have a pre-commit hook (husky, lint-staged, etc.), the installer chains them — your existing hook is preserved. Hooks are also backed up to `~/.config/repo-template/hooks/` so they survive recloning.
+> [!TIP]
+> If you already have a pre-commit hook (husky, lint-staged, etc.), the installer chains them — your existing hook is preserved. Hooks are also backed up to `~/.config/repo-template/hooks/` so they survive recloning.
 
-> **Note for contributors modifying hooks:** Use POSIX-compatible regex patterns (`[[:space:]]` not `\s`, `[[:alpha:]]` not `\w`) for cross-platform compatibility. BSD grep on macOS doesn't support Perl-style character classes.
+> [!NOTE]
+> **For contributors modifying hooks:** Use POSIX-compatible regex patterns (`[[:space:]]` not `\s`, `[[:alpha:]]` not `\w`) for cross-platform compatibility. BSD grep on macOS doesn't support Perl-style character classes.
 
 ### Linting Hooks (Optional)
 
@@ -121,12 +159,13 @@ pre-commit install
 - Keep PRs focused and reasonably sized
 - Ensure CI passes before requesting review
 
-## Security
+## 🔐 Security
 
 > [!IMPORTANT]
-> Never commit secrets, API keys, or credentials. Use `.env` files (which are gitignored).
+> Never commit secrets, API keys, or credentials. Use `.env` files (which are gitignored). If you discover a security vulnerability, **do not open a public issue**. Follow responsible disclosure via [SECURITY.md](SECURITY.md).
 
-If you discover a security vulnerability, **do not open a public issue**. See [SECURITY.md](SECURITY.md) for responsible disclosure instructions.
+> [!WARNING]
+> If you accidentally commit a secret, **rotate it immediately** — removing it from git history alone is not sufficient. See the [incident runbook](SECURITY.md#what-to-do-if-a-secret-is-leaked) for the full procedure.
 
 ## Questions?
 

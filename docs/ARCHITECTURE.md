@@ -2,6 +2,9 @@
 
 > High-level architecture of this project. Keep this document updated as the system evolves.
 
+> [!NOTE]
+> This is a **template document**. Replace the TODO placeholders with your project's actual architecture. The Mermaid diagrams, component tables, and constraint sections are structured starting points -- customize them to match your system.
+
 <!-- TODO: Brief system description -->
 
 ## System Diagram
@@ -44,6 +47,9 @@ sequenceDiagram
 | <!-- TODO: e.g., Database --> | <!-- e.g., PostgreSQL --> | <!-- e.g., Relational, ACID --> |
 | <!-- TODO: e.g., Hosting --> | <!-- e.g., Railway --> | <!-- e.g., Simple deploys, good DX --> |
 
+> [!TIP]
+> Record each major technology decision as an ADR in [docs/decisions/](decisions/). The table above is a summary -- the ADRs capture full context and alternatives considered.
+
 ## Constraints
 
 <!-- TODO: What constraints affect the architecture? -->
@@ -55,11 +61,13 @@ sequenceDiagram
 
 ## Architecture Decision Records
 
-See [docs/decisions/](decisions/) for detailed ADRs.
+Major decisions are tracked as ADRs using the template at [decisions/000-template.md](decisions/000-template.md).
+
+See [docs/decisions/](decisions/) for the full list.
 
 | ADR | Date | Decision | Status |
 |-----|------|----------|--------|
-| [000](decisions/000-template.md) | — | Template | — |
+| [000](decisions/000-template.md) | -- | Template | -- |
 
 ---
 

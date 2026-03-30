@@ -1,6 +1,17 @@
 # Branch Protection
 
-Recommended branch protection settings for this repository.
+> **Protection at a Glance** -- Require PR reviews, CI checks, signed commits, and linear history on `main`. AI agents must use PRs and cannot self-approve. CODEOWNERS gates AI config file changes behind human review.
+>
+> | Protection | Status | Notes |
+> |------------|--------|-------|
+> | PR required before merge | Required | At least 1 approval |
+> | CODEOWNERS review | Required | For AI config files |
+> | Status checks (CI, CodeQL) | Required | Must pass before merge |
+> | Signed commits | Recommended | Proves authorship |
+> | Linear history | Recommended | Enforces rebase/squash |
+> | Force push / deletion | Blocked | On `main` and `v*` tags |
+
+---
 
 ## Settings Checklist
 
@@ -108,15 +119,17 @@ See [AI-SECURITY.md](AI-SECURITY.md) for more on prompt injection defense.
 
 ## Automated Setup
 
-For quick setup of basic protections (block force-push, block deletion, Dependabot, tag protection):
+> [!IMPORTANT]
+> The `secure-repo.sh` script is the fastest way to apply baseline protections. It configures force-push blocking, deletion blocking, Dependabot, and tag protection in one command. For full control over PR reviews, status checks, and signed commits, use the manual `gh api` commands above.
 
 ```bash
 bash scripts/secure-repo.sh
 ```
 
-This configures the most important settings in one command. Use the manual `gh api` commands above for full control (PR reviews, status checks, signed commits).
-
 ## Commit Signing
+
+> [!TIP]
+> Signed commits show a **"Verified"** badge on GitHub, proving the commit was authored by the claimed identity. This is especially valuable for open source projects where contributor trust matters.
 
 Signed commits prove authorship and prevent impersonation. This is optional but recommended, especially for public repos and open source contributions.
 

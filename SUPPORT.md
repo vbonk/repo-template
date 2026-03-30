@@ -2,11 +2,26 @@
 
 Thank you for using this project! Here is how to get help.
 
+## Quick Reference
+
+| Need | Where to Go |
+|------|-------------|
+| Common questions | [README FAQ](README.md) |
+| Check existing issues | [Open issues](../../issues) |
+| General discussion | [Discussions](../../discussions) |
+| Report a bug | [New bug report](../../issues/new?template=bug_report.yml) |
+| Request a feature | [New feature request](../../issues/new?template=feature_request.yml) |
+| Contribute code | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Security vulnerability | [SECURITY.md](SECURITY.md) (private disclosure) |
+
 ## Getting Help
 
-- **README FAQ** — Check the [README](README.md) for common questions and usage examples.
-- **Existing Issues** — Search [open issues](../../issues) to see if your question has been answered.
-- **Discussions** — If enabled, use [Discussions](../../discussions) for general questions and ideas.
+- **README FAQ** -- Check the [README](README.md) for common questions and usage examples.
+- **Existing Issues** -- Search [open issues](../../issues) to see if your question has been answered.
+- **Discussions** -- If enabled, use [Discussions](../../discussions) for general questions and ideas.
+
+> [!TIP]
+> Search issues with `is:issue label:bug` or `is:issue label:enhancement` to quickly find relevant threads.
 
 ## Reporting Bugs
 
@@ -29,5 +44,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, workflow, and guid
 
 ## Security Issues
 
-**Do NOT open a public issue for security vulnerabilities.**
+> [!CAUTION]
+> **Do NOT open a public issue for security vulnerabilities.**
+
 See [SECURITY.md](SECURITY.md) for responsible disclosure instructions.
