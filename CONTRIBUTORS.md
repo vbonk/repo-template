@@ -12,6 +12,7 @@ Thank you to everyone who has contributed to this project!
 - **Copilot**
 - **copilot-swe-agent[bot]**
 - **dependabot[bot]**
+- **github-actions[bot]**
 - **Tony Bonk**
 
 <!-- CONTRIBUTORS-END -->
