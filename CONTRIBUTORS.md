@@ -6,5 +6,12 @@
 Thank you to everyone who has contributed to this project!
 
 <!-- CONTRIBUTORS-START -->
-<!-- Auto-generated contributor list will appear here -->
+
+- **Anthony Velte**
+- **Claude**
+- **Copilot**
+- **copilot-swe-agent[bot]**
+- **dependabot[bot]**
+- **Tony Bonk**
+
 <!-- CONTRIBUTORS-END -->
