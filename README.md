@@ -1,5 +1,6 @@
 # repo-template
 
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12331/badge)](https://www.bestpractices.dev/projects/12331)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/vbonk/repo-template/actions/workflows/ci.yml/badge.svg)](https://github.com/vbonk/repo-template/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/vbonk/repo-template)](https://github.com/vbonk/repo-template/releases)
