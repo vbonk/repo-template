@@ -1,81 +1,98 @@
-# ========================================
-# Secrets & Credentials (SECURITY CRITICAL)
-# ========================================
+# =============================================
+# SECRETS & CREDENTIALS
+# Why: Files in this section often contain passwords, API keys, and tokens.
+# If these reach GitHub, bots will find and exploit them within minutes.
+# The #1 preventable security mistake: 89% of accidental leaks are
+# prevented by having .env in this list. (GitGuardian 2024)
+# =============================================
 .env
 .env.*
-!.env.example
-*.pem
-*.key
-*.p12
-*.pfx
-credentials.json
-secrets.json
-**/secrets/
-.netrc
-.npmrc
-.pypirc
+!.env.example          # .env.example is safe — it has placeholder values only
+*.pem                  # SSL/TLS certificates and private keys
+*.key                  # Private key files
+*.p12                  # PKCS#12 certificate bundles (contain private keys)
+*.pfx                  # Windows certificate bundles (contain private keys)
+credentials.json       # Cloud provider credentials (GCP, Firebase, etc.)
+secrets.json           # Application secrets
+**/secrets/            # Any directory named "secrets"
+.netrc                 # Machine login credentials (used by curl, git, etc.)
+.npmrc                 # npm auth tokens for private registries
+.pypirc                # PyPI upload credentials
 
-# ========================================
-# OS Generated Files
-# ========================================
-.DS_Store
+# =============================================
+# OS GENERATED FILES
+# Why: Your operating system creates these invisible files automatically.
+# They contain metadata about your folders (icon positions, thumbnails).
+# They have no place in a codebase — they clutter PRs and differ per machine.
+# =============================================
+.DS_Store              # macOS folder metadata
 .DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
+._*                    # macOS resource forks
+.Spotlight-V100        # macOS search index
+.Trashes               # macOS trash
+ehthumbs.db            # Windows thumbnail cache
+Thumbs.db              # Windows thumbnail cache
+Desktop.ini            # Windows folder display settings
 
-# ========================================
-# IDE & Editor Files
-# ========================================
-.vscode/
-!.vscode/settings.json
-!.vscode/extensions.json
-.idea/
-*.swp
-*.swo
-*~
-*.sublime-workspace
-*.sublime-project
+# =============================================
+# IDE & EDITOR FILES
+# Why: Every editor creates hidden config files for your personal preferences.
+# These are unique to your machine — committing them forces YOUR settings on
+# every collaborator (or AI agent) who clones the repo.
+# Exception: settings.json and extensions.json are shared project settings.
+# =============================================
+.vscode/                # VS Code / Cursor workspace config
+!.vscode/settings.json  # Keep: shared project settings (formatting, etc.)
+!.vscode/extensions.json # Keep: recommended extensions for the project
+.idea/                  # JetBrains (WebStorm, PyCharm, IntelliJ, etc.)
+*.swp                   # Vim swap files (created while editing)
+*.swo                   # Vim swap files
+*~                      # Emacs backup files
+*.sublime-workspace     # Sublime Text workspace
+*.sublime-project       # Sublime Text project
 
-# ========================================
-# Node.js / JavaScript / TypeScript
-# ========================================
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.npm
-.yarn/cache
+# =============================================
+# NODE.JS / JAVASCRIPT / TYPESCRIPT
+# Why: node_modules/ can contain 50,000+ files and hundreds of MB.
+# It is NEVER committed — anyone can regenerate it with `npm install`.
+# Build outputs (dist/, build/) are also regenerated, not source code.
+# =============================================
+node_modules/           # Installed packages — regenerate with npm/yarn/pnpm install
+npm-debug.log*          # npm crash logs
+yarn-debug.log*         # yarn debug logs
+yarn-error.log*         # yarn error logs
+.pnpm-debug.log*        # pnpm debug logs
+.npm                    # npm cache directory
+.yarn/cache             # Yarn package cache
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
-.pnp.*
-*.tsbuildinfo
-.eslintcache
-.parcel-cache
-.next/
-.nuxt/
-dist/
-build/
-out/
-coverage/
-.nyc_output/
+.pnp.*                  # Yarn Plug'n'Play (alternative to node_modules)
+*.tsbuildinfo           # TypeScript incremental compilation cache
+.eslintcache            # ESLint cache (speeds up repeated runs)
+.parcel-cache           # Parcel bundler cache
+.next/                  # Next.js build output
+.nuxt/                  # Nuxt.js build output
+dist/                   # Compiled/bundled output
+build/                  # Compiled/bundled output
+out/                    # Static export output
+coverage/               # Test coverage reports (generated, not source)
+.nyc_output/            # NYC coverage tool output
 
-# ========================================
-# Python
-# ========================================
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
+# =============================================
+# PYTHON
+# Why: __pycache__/ and .pyc files are auto-generated bytecode — Python
+# creates them to speed up imports. Virtual environments (.venv/) contain
+# installed packages, like node_modules. Never commit either.
+# =============================================
+__pycache__/            # Python bytecode cache (auto-generated)
+*.py[cod]               # Compiled Python files (.pyc, .pyo, .pyd)
+*$py.class              # Jython compiled files
+*.so                    # Compiled C extensions
+.Python                 # Python build artifacts
+build/                  # Build output
+develop-eggs/           # Setuptools development eggs
+dist/                   # Distribution packages
 downloads/
 eggs/
 .eggs/
@@ -85,80 +102,97 @@ parts/
 sdist/
 var/
 wheels/
-*.egg-info/
+*.egg-info/             # Package metadata
 .installed.cfg
 *.egg
 MANIFEST
-.venv/
+.venv/                  # Virtual environment — regenerate with python -m venv
 venv/
 ENV/
 env/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-htmlcov/
+.pytest_cache/          # Pytest cache (speeds up repeated test runs)
+.mypy_cache/            # Mypy type checker cache
+.ruff_cache/            # Ruff linter cache
+htmlcov/                # HTML coverage reports
 
-# ========================================
-# Go
-# ========================================
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-vendor/
+# =============================================
+# GO
+# Why: Go compiles to a single binary — no need to commit compiled output.
+# vendor/ is an optional copy of dependencies (regenerate with go mod vendor).
+# =============================================
+*.exe                   # Windows executables
+*.exe~                  # Windows executable backups
+*.dll                   # Windows shared libraries
+*.so                    # Linux shared libraries
+*.dylib                 # macOS shared libraries
+*.test                  # Go test binaries
+*.out                   # Go coverage output
+vendor/                 # Vendored dependencies (regenerate with go mod vendor)
 
-# ========================================
-# Rust
-# ========================================
-target/
-Cargo.lock
-*.rlib
+# =============================================
+# RUST
+# Why: target/ contains compiled artifacts and can grow to several GB.
+# Cargo.lock is ignored for libraries (not applications) — see Rust docs.
+# =============================================
+target/                 # Compiled output (debug + release builds)
+Cargo.lock              # Dependency lock — commit this for binaries, ignore for libraries
+*.rlib                  # Rust library files
 
-# ========================================
-# Logs & Databases
-# ========================================
-*.log
-logs/
-*.sqlite
-*.sqlite3
-*.db
+# =============================================
+# LOGS & DATABASES
+# Why: Log files grow unbounded and contain runtime data, not source code.
+# Local database files (.sqlite, .db) contain user data that should never
+# be shared — and they cause merge conflicts since they are binary.
+# =============================================
+*.log                   # Application log files
+logs/                   # Log directories
+*.sqlite                # SQLite databases
+*.sqlite3               # SQLite databases
+*.db                    # Database files
 
-# ========================================
-# Temporary Files
-# ========================================
+# =============================================
+# TEMPORARY FILES
+# Why: Temp files are created by editors, build tools, and your OS.
+# They are throwaway by definition — committing them adds noise to your repo.
+# =============================================
 *.tmp
 *.temp
-*.bak
-*.cache
-.cache/
+*.bak                   # Backup files created by editors
+*.cache                 # Various tool caches
+.cache/                 # Generic cache directory
 tmp/
 temp/
 
-# ========================================
-# Build Artifacts
-# ========================================
-*.o
-*.obj
-*.a
-*.lib
+# =============================================
+# BUILD ARTIFACTS
+# Why: These are compiled object files produced by C/C++/Rust compilers.
+# They are machine-specific and regenerated on every build.
+# =============================================
+*.o                     # Unix object files
+*.obj                   # Windows object files
+*.a                     # Unix static libraries
+*.lib                   # Windows static libraries
 
-# ========================================
-# Local Development
-# ========================================
-.claude.local.md
-CLAUDE.local.md
-*.local
+# =============================================
+# LOCAL DEVELOPMENT
+# Why: *.local files contain machine-specific overrides (ports, paths,
+# personal preferences). They should never override the shared project config.
+# =============================================
+.claude.local.md        # Personal Claude Code overrides (not shared)
+CLAUDE.local.md         # Personal Claude Code overrides (not shared)
+*.local                 # Generic local overrides (e.g., .env.local)
 
-# ========================================
-# Claude Code Session Files (auto-generated, not part of project)
-# ========================================
+# =============================================
+# CLAUDE CODE SESSION FILES
+# Why: These are auto-generated by Claude Code to track session state.
+# They contain ephemeral context, not project configuration.
+# =============================================
 .claude/SESSION_STATE.json
 .claude/HANDOFF.md
 
-# ========================================
-# Local Admin / Marketing (maintainer-only, never in template)
-# ========================================
+# =============================================
+# LOCAL ADMIN / MARKETING
+# Why: Maintainer-only files (research, drafts, marketing). These are
+# never part of the template that end users receive.
+# =============================================
 _admin/

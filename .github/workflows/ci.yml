@@ -1,90 +1,121 @@
-# CI Workflow
-# Runs on push to main and pull requests
-# Adapt steps to your project's tech stack
+# CI Workflow — Automated Checks on Every Push and PR
+#
+# What this does: Runs your tests, linter, and build automatically whenever
+# you push code or open a pull request. If something breaks, GitHub shows a
+# red X on the commit/PR so you know before merging.
+#
+# Why CI matters: Without this, broken code silently reaches your main branch.
+# CI catches bugs, type errors, and style issues before they become problems.
+# Even solo developers benefit — it is your automated code reviewer.
+#
+# How to customize: Uncomment the section below that matches your stack
+# (Node.js, Python, Go, Rust, or Bun) and delete the placeholder step.
 
 name: CI
 
 on:
   push:
     branches: [main]
+    # Why paths-ignore: Don't waste CI minutes on docs-only changes
     paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.editorconfig']
   pull_request:
     branches: [main]
     paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.editorconfig']
 
-# Cancel in-progress runs for the same branch
+# Why concurrency + cancel-in-progress: If you push 3 times in a row, only
+# the latest push runs CI. Prevents wasting your GitHub Actions minutes on
+# outdated commits that you have already moved past.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Minimum required permissions (principle of least privilege)
+# Why permissions: contents: read — Principle of least privilege.
+# This workflow only needs to READ your code, not write to the repo.
+# If a compromised action tried to push code or modify settings, this
+# permission block prevents it. Always restrict to the minimum needed.
 permissions:
   contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Why timeout-minutes: Prevents runaway jobs from burning through your
+    # GitHub Actions quota. Without this, a hanging test could run for 6 hours
+    # (the default). 15 minutes is generous for most builds.
     timeout-minutes: 15
 
     steps:
-      # Pinned to SHA for security (update via Dependabot)
+      # Why SHA-pinning: Pinned to a full commit SHA instead of a version tag
+      # (e.g., @v4) to prevent supply chain attacks. If an attacker compromises
+      # the action's repo and moves the v4 tag, SHA-pinned repos are unaffected.
+      # Dependabot will automatically create PRs to update these SHAs.
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       # ============================================
       # TEMPLATE: Uncomment the section for your stack
+      # Delete the "Placeholder" step at the bottom once you have uncommented one.
       # ============================================
 
       # --- Node.js ---
+      # What: Installs dependencies, checks code style, runs tests, builds.
+      # Why each step: Lint catches style/quality issues. Test catches bugs.
+      # Build confirms your code compiles. All three must pass before merge.
       # - name: Setup Node.js
       #   uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
       #   with:
-      #     node-version: 'lts/*'
-      #     cache: 'npm'
+      #     node-version: 'lts/*'    # Uses latest long-term-support version
+      #     cache: 'npm'             # Caches node_modules between runs (faster CI)
       #
       # - name: Install dependencies
-      #   run: npm ci
+      #   run: npm ci                # "ci" = clean install from lockfile (reproducible)
       #
       # - name: Lint
-      #   run: npm run lint
+      #   run: npm run lint          # Catches code style and quality issues
       #
       # - name: Test
-      #   run: npm test
+      #   run: npm test              # Runs your test suite
       #
       # - name: Build
-      #   run: npm run build
+      #   run: npm run build         # Confirms production build succeeds
 
       # --- Python ---
+      # What: Installs dependencies, lints with Ruff, runs tests with pytest.
       # - name: Setup Python
       #   uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
       #   with:
       #     python-version: '3.12'
-      #     cache: 'pip'
+      #     cache: 'pip'             # Caches pip packages between runs
       #
       # - name: Install dependencies
       #   run: pip install -r requirements.txt
       #
       # - name: Lint
       #   run: |
-      #     pip install ruff
+      #     pip install ruff         # Ruff: fast Python linter (replaces flake8, isort, etc.)
       #     ruff check .
       #
       # - name: Test
       #   run: pytest
 
       # --- Go ---
+      # What: Builds all packages and runs all tests.
+      # Why ./...: The Go convention for "all packages in this module."
       # - name: Setup Go
       #   uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
       #   with:
       #     go-version: 'stable'
       #
       # - name: Build
-      #   run: go build ./...
+      #   run: go build ./...        # Compiles all packages
       #
       # - name: Test
-      #   run: go test ./...
+      #   run: go test ./...         # Runs all tests
 
       # --- Rust ---
+      # What: Checks formatting, runs Clippy (Rust linter), tests, and builds.
+      # Why clippy with -D warnings: Treats all warnings as errors so they
+      # cannot accumulate silently over time.
       # - name: Setup Rust
       #   uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # master
       #   with:
@@ -95,7 +126,7 @@ jobs:
       #   uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       #
       # - name: Check formatting
-      #   run: cargo fmt --all -- --check
+      #   run: cargo fmt --all -- --check     # Fails if code is not formatted
       #
       # - name: Clippy
       #   run: cargo clippy --all-targets --all-features -- -D warnings
@@ -107,13 +138,15 @@ jobs:
       #   run: cargo build --release
 
       # --- Bun ---
+      # What: Same as Node.js but using Bun (faster JS/TS runtime).
+      # Why frozen-lockfile: Ensures CI uses exact same versions as your machine.
       # - name: Setup Bun
       #   uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.2
       #   with:
       #     bun-version: latest
       #
       # - name: Install dependencies
-      #   run: bun install --frozen-lockfile
+      #   run: bun install --frozen-lockfile   # Exact versions from lockfile
       #
       # - name: Lint
       #   run: bun run lint
@@ -124,15 +157,17 @@ jobs:
       # - name: Build
       #   run: bun run build
 
-      # --- Generic (placeholder) ---
+      # --- Generic (placeholder — delete this once you uncomment a section above) ---
       - name: Placeholder
         run: |
           echo "CI workflow running"
           echo "Configure this workflow for your tech stack"
-          echo "See comments above for Node.js, Python, Go, and Rust examples"
+          echo "See comments above for Node.js, Python, Go, Rust, and Bun examples"
 
   # ============================================
   # TEMPLATE: Multi-OS matrix example
+  # What: Tests your code on Linux, macOS, and Windows in parallel.
+  # Why: Catches OS-specific bugs (file paths, line endings, shell differences).
   # Uncomment and replace the 'build' job above to test across OSes.
   # ============================================
   # build-matrix:

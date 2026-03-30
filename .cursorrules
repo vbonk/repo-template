@@ -1,4 +1,13 @@
 # Cursor AI Rules
+#
+# What this does: Tells Cursor (the AI coding editor) about your project's
+# conventions, architecture, and security boundaries. Cursor reads this
+# file automatically when you open the project.
+#
+# Why it matters: Without this, Cursor guesses your coding style and may
+# generate code that conflicts with your patterns. This file is your way
+# of saying "here is how we do things in this project."
+#
 # https://docs.cursor.com/context/rules-for-ai
 
 # Project Context

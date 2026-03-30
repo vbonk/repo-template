@@ -1,0 +1,43 @@
+// Commitlint configuration — enforce conventional commits
+// Install: npm install -D @commitlint/cli @commitlint/config-conventional
+// Setup: cp templates/linting/commitlint.config.js.template commitlint.config.js
+// Hook: echo 'npx commitlint --edit "$1"' > .husky/commit-msg
+//
+// Why conventional commits matter:
+// - Automated changelog generation from commit history
+// - Clear, scannable git log ("feat: add auth" vs "updated stuff")
+// - Semantic versioning can be automated based on commit types
+// - AI coding tools produce better commits when the format is enforced
+//
+// Commit format: type(scope): description
+// Examples:
+//   feat: add user authentication
+//   fix(api): handle null response from /users endpoint
+//   docs: update API documentation
+//   chore(deps): update express to 5.1.0
+
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    // Type must be one of these
+    'type-enum': [2, 'always', [
+      'feat',     // New feature
+      'fix',      // Bug fix
+      'docs',     // Documentation only
+      'style',    // Formatting, no code change
+      'refactor', // Code change, no feature/fix
+      'test',     // Adding/updating tests
+      'chore',    // Maintenance tasks
+      'ci',       // CI/CD changes
+      'perf',     // Performance improvement
+      'build',    // Build system changes
+      'revert',   // Revert a previous commit
+    ]],
+    // Subject must be sentence-case (not ALL CAPS)
+    'subject-case': [2, 'always', 'sentence-case'],
+    // Header (type + scope + subject) max 72 characters
+    'header-max-length': [2, 'always', 72],
+    // Body lines max 100 characters
+    'body-max-line-length': [1, 'always', 100],
+  },
+};

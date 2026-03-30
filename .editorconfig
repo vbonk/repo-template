@@ -1,24 +1,45 @@
-# EditorConfig helps maintain consistent coding styles
-# https://editorconfig.org
+# EditorConfig — Consistent Formatting Across Editors
+#
+# What this does: Ensures every editor (VS Code, Cursor, Vim, IntelliJ, etc.)
+# uses the same indentation, line endings, and whitespace rules for this project.
+#
+# Why it matters: Without this, files get inconsistent formatting depending on
+# which editor touched them last. This causes noisy git diffs (entire files
+# re-indented) and merge conflicts over whitespace — not actual code changes.
+#
+# How it works: Most editors detect this file automatically. VS Code and Cursor
+# need the "EditorConfig for VS Code" extension (included in .vscode/extensions.json).
+#
+# Docs: https://editorconfig.org
 
+# Why root = true: Tells editors "stop looking for .editorconfig files in parent
+# directories." This file is the final authority for this project.
 root = true
 
+# Default settings for all files
 [*]
-charset = utf-8
-end_of_line = lf
-indent_style = space
-indent_size = 2
-insert_final_newline = true
-trim_trailing_whitespace = true
+charset = utf-8                   # Modern standard — supports all languages/emoji
+end_of_line = lf                  # Unix-style line endings (LF), even on Windows
+indent_style = space              # Spaces, not tabs (most common convention)
+indent_size = 2                   # 2-space indent (standard for JS/TS/YAML/JSON)
+insert_final_newline = true       # POSIX standard — prevents "no newline at EOF" warnings
+trim_trailing_whitespace = true   # Removes invisible trailing spaces
 
+# Why Markdown is different: Trailing spaces in Markdown create line breaks (<br>).
+# Trimming them would break intentional formatting.
 [*.md]
 trim_trailing_whitespace = false
 
+# Why 4-space indent for Python and Rust: PEP 8 (Python) and rustfmt (Rust)
+# both require 4-space indentation. This matches their community standards.
 [*.{py,rs}]
 indent_size = 4
 
+# Why tabs for Makefiles: Make requires tabs for recipe lines. Using spaces
+# causes a "missing separator" error. This is not a preference — it is a syntax rule.
 [Makefile]
 indent_style = tab
 
+# Why tabs for Go: The Go community (and gofmt) uses tabs by convention.
 [*.go]
 indent_style = tab

@@ -9,6 +9,8 @@ Every new repository starts the same way. You write a `.gitignore`. Set up CI. A
 
 This template does all of it before you write your first line of code.
 
+> **New here?** Start with the [Getting Started Guide](docs/GETTING-STARTED.md) — it covers security, AI agents, and workflow setup in about 10 minutes.
+
 ### Works with your AI tools — one, some, or all
 
 The template includes context files for 7 AI coding agents. Use whichever you work with — they're independent files, not a package deal. Each one tells the agent about your project structure, conventions, commands, and security boundaries so it's productive from the first session instead of starting cold.

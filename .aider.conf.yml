@@ -1,23 +1,35 @@
-# Aider AI coding assistant configuration
+# Aider AI Coding Assistant Configuration
+#
+# What Aider does: AI coding assistant that works in your terminal.
+# You describe what you want changed, and Aider edits your files directly.
+# It reads this file automatically to know your preferences.
+#
 # Docs: https://aider.chat/docs/config/aider_conf.html
 
-# Model selection
+# Model selection — which AI model Aider uses for code generation
+# Uncomment and set to your preferred model
 # model: claude-sonnet-4-20250514
 
-# Repository context
+# Repository context — files Aider should always read for project understanding
+# Why: Giving Aider your architecture docs helps it make better decisions
 # read:
 #   - CLAUDE.md
 #   - docs/ARCHITECTURE.md
 
 # Git settings
-auto-commits: true
-dirty-commits: false
-attribute-author: true
-attribute-committer: false
+auto-commits: true          # Why: Aider commits each change automatically so you can
+                            # easily undo with git revert if something goes wrong
+dirty-commits: false        # Why false: Prevents Aider from committing when you have
+                            # uncommitted changes — protects your work-in-progress
+attribute-author: true      # Why: Marks AI-generated commits as authored by Aider,
+                            # so you can tell which code was human-written vs AI-generated
+attribute-committer: false  # Keep committer as you (the human) for accountability
 
-# Code style
+# Code style — uncomment and set to your project's lint/test commands
+# Why: Aider will run these after making changes to verify nothing broke
 # lint-cmd: npm run lint
 # test-cmd: npm test
 
-# Security — never auto-add sensitive files
+# Security — never auto-add sensitive files to Aider's context
+# Why: Prevents accidentally sending .env contents to the AI model
 # aiderignore patterns are in .aiderignore (if created)

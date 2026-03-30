@@ -8,11 +8,14 @@
 
 | Document | Description | Key Topics |
 |----------|-------------|------------|
+| [GETTING-STARTED.md](GETTING-STARTED.md) | Setup guide from zero to production-grade | Security, AI agents, workflow protection, automation |
+| [DOCUMENTATION-GUIDE.md](DOCUMENTATION-GUIDE.md) | Pattern library for professional documentation | README structure, Mermaid diagrams, callouts, progressive disclosure |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design and technical decisions | Components, data flow, technology choices, ADRs |
 | [AI-SECURITY.md](AI-SECURITY.md) | Prompt injection threat model and defenses | 6-layer defense, attack vectors, protected files, hook templates |
 | [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md) | Branch protection setup with `gh` CLI scripts | PR reviews, status checks, signed commits, tag protection |
 | [FORK-SECURITY.md](FORK-SECURITY.md) | Secure fork workflows and data leakage risks | Fork network, upstream push blocking, secret rotation |
 | [GITHUB-ENVIRONMENTS.md](GITHUB-ENVIRONMENTS.md) | Deployment environments and approval gates | Secret scoping, staging/production pipeline, wait timers |
+| [PROD_CHECKLIST.md](PROD_CHECKLIST.md) | Production readiness checklist | Security, performance, monitoring, infrastructure, legal compliance |
 | [decisions/](decisions/) | Architecture Decision Records (ADRs) | Individual design decisions with context and rationale |
 
 ## Root-Level Docs

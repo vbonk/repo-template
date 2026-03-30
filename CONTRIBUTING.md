@@ -90,6 +90,13 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 
 Example: `feat: add user authentication`
 
+> [!TIP]
+> Want to enforce conventional commits automatically? Copy the commitlint config:
+> ```bash
+> cp templates/linting/commitlint.config.js.template commitlint.config.js
+> npm install -D @commitlint/cli @commitlint/config-conventional
+> ```
+
 ## Code Style
 
 - Follow existing patterns in the codebase

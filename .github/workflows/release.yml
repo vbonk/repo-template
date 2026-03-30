@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write # Required for Sigstore keyless signing via GitHub OIDC
 
 jobs:
   release:
@@ -39,3 +40,58 @@ jobs:
           body_path: /tmp/changelog.txt
           draft: false
           prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+
+      # ──────────────────────────────────────────────────────────
+      # Sigstore Release Signing
+      #
+      # Uses "keyless" signing via GitHub's OIDC provider and Sigstore's
+      # Fulcio CA. No private keys are needed — the workflow's identity
+      # token proves this build ran in this repo on this trigger.
+      # Signatures are logged to Sigstore's Rekor transparency ledger.
+      #
+      # Verifiers can confirm authenticity with:
+      #   cosign verify-blob --bundle <file>.sigstore.json <file>
+      # ──────────────────────────────────────────────────────────
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+      - name: Download release source archives
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          # GitHub auto-generates source archives for every release.
+          # Download them so we can sign them.
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern '*.tar.gz' --pattern '*.zip' --dir /tmp/release-assets || true
+
+          # If no assets were downloaded (gh release download can race with
+          # release creation), fall back to direct URL download.
+          if [ -z "$(ls /tmp/release-assets/ 2>/dev/null)" ]; then
+            mkdir -p /tmp/release-assets
+            curl -sL "https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${TAG}.tar.gz" \
+              -o "/tmp/release-assets/${GITHUB_REPOSITORY##*/}-${TAG#v}.tar.gz"
+            curl -sL "https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${TAG}.zip" \
+              -o "/tmp/release-assets/${GITHUB_REPOSITORY##*/}-${TAG#v}.zip"
+          fi
+
+          echo "Assets to sign:"
+          ls -la /tmp/release-assets/
+
+      - name: Sign release artifacts with cosign
+        run: |
+          cd /tmp/release-assets
+          for asset in *.tar.gz *.zip; do
+            [ -f "$asset" ] || continue
+            echo "Signing: $asset"
+            cosign sign-blob "$asset" \
+              --yes \
+              --bundle "${asset}.sigstore.json"
+            echo "Created: ${asset}.sigstore.json"
+          done
+
+      - name: Upload signatures to release
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        with:
+          files: /tmp/release-assets/*.sigstore.json

@@ -1,8 +1,22 @@
-# CODEOWNERS — Auto-assign reviewers on PRs
+# CODEOWNERS — Automatic Review Assignment
+#
+# What this does: When someone opens a PR that changes files matching
+# a pattern below, GitHub automatically requests a review from the
+# listed owner. This ensures the right person reviews the right changes.
+#
+# Why it matters for solo devs: Even working alone, CODEOWNERS protects
+# your AI agent config files. If you use Claude Code or Cursor with
+# collaborators or in public repos, a PR that modifies CLAUDE.md or
+# .cursorrules must be reviewed by YOU — preventing prompt injection
+# attacks where someone sneaks malicious instructions into your AI config.
+#
+# Setup: Uncomment the lines below and replace @your-username with
+# your GitHub handle (e.g., @octocat). Requires branch protection with
+# "Require review from Code Owners" enabled (see docs/BRANCH-PROTECTION.md).
+#
 # Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
-# Each line: pattern  owner(s)
-# Owners: @username, @org/team, or email
+# Format: each line is — file-pattern   @owner(s)
 #
 # === Uncomment and replace @your-username with your GitHub username ===
 #
@@ -21,8 +35,11 @@
 # SECURITY.md                    @your-username
 #
 # AI agent configuration — PROMPT INJECTION DEFENSE
-# Changes to these files modify how AI agents behave in your repo.
-# Require owner review to prevent prompt injection via PRs.
+# Why: "Prompt injection" is when someone hides malicious instructions in a
+# PR, issue, or code comment to trick an AI agent into harmful actions —
+# like revealing API keys or disabling security settings. Requiring owner
+# review on these files means no one can modify your AI's instructions
+# without your explicit approval.
 # CLAUDE.md                      @your-username
 # AGENTS.md                      @your-username
 # GEMINI.md                      @your-username
@@ -30,9 +47,10 @@
 # .windsurfrules                 @your-username
 # .github/copilot-instructions.md @your-username
 #
-# Security hardening files — SECRET SCANNING DEFENSE
-# Changes to these files weaken security protections.
-# Require owner review to prevent security downgrades via PRs.
+# Security hardening files — SECURITY DOWNGRADE DEFENSE
+# Why: These files control your repo's security protections (hooks, scanning,
+# secret detection). A PR that weakens these files should always require your
+# review — whether the change comes from a collaborator or an AI agent.
 # scripts/secure-repo.sh           @your-username
 # templates/hooks/                 @your-username
 # .github/workflows/secret-scan-pr.yml @your-username

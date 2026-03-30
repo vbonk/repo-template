@@ -84,7 +84,10 @@ FEATURES = [
     ("changelog", "CHANGELOG.md", "docs", 2, "CHANGELOG.md"),
     ("readme-quality", "README with badges + ToC", "docs", 5, "README.md"),
     ("architecture-md", "ARCHITECTURE.md", "docs", 2, "docs/ARCHITECTURE.md"),
+    ("getting-started", "Getting Started guide", "docs", 4, "docs/GETTING-STARTED.md"),
+    ("doc-guide", "Documentation patterns guide", "docs", 2, "docs/DOCUMENTATION-GUIDE.md"),
     ("docs-index", "docs/README.md index", "docs", 2, "docs/README.md"),
+    ("prod-checklist", "Production checklist", "docs", 3, "docs/PROD_CHECKLIST.md"),
     ("meta-ci", "Template self-validation", "ci-cd", 2, ".github/workflows/validate-template.yml"),
 ]
 

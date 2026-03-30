@@ -218,8 +218,9 @@ with open('$f') as fh:
   local sc_errors=0
   if command -v shellcheck &>/dev/null; then
     while IFS= read -r f; do
-      # Skip self (info-level warnings are acceptable for the test script)
+      # Skip test scripts (info-level cd warnings are acceptable)
       [[ "$f" == *"test-template.sh" ]] && continue
+      [[ "$f" == *"test-e2e.sh" ]] && continue
       if ! shellcheck "$f" >/dev/null 2>&1; then
         sc_errors=$((sc_errors + 1))
         if $VERBOSE; then echo "    ShellCheck fail: $f"; fi
@@ -313,8 +314,10 @@ with open('$f') as fh:
            templates/hooks/pre-commit-secrets.sh.template \
            templates/hooks/forbidden-tokens.txt.template \
            templates/hooks/setup-hooks.sh \
+           templates/linting/commitlint.config.js.template \
            docs/AI-SECURITY.md docs/ARCHITECTURE.md docs/BRANCH-PROTECTION.md \
-           docs/FORK-SECURITY.md docs/GITHUB-ENVIRONMENTS.md; do
+           docs/FORK-SECURITY.md docs/GITHUB-ENVIRONMENTS.md docs/PROD_CHECKLIST.md \
+           docs/GETTING-STARTED.md docs/DOCUMENTATION-GUIDE.md; do
     assert_file_exists "$f"
   done
 }

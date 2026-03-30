@@ -105,7 +105,8 @@ If `secure-repo.sh` was already run in Quick Mode (Step 4), this step covers the
 
 ### 8. Developer Tooling
 
-- **Linting:** "Install linting config?" → copy from `templates/linting/` to root
+- **Linting:** "Install linting config?" → copy from `templates/linting/` to root (ESLint, Ruff, golangci-lint, rustfmt)
+- **Commit linting:** "Enforce conventional commits?" → copy `templates/linting/commitlint.config.js.template` to root, install `@commitlint/cli @commitlint/config-conventional`
 - **Pre-commit hooks (linting):** "Add linting hooks?" → Node: husky; Python/Go: pre-commit (chains with secret scanning hook)
 - **Coverage:** "Set up coverage?" → uncomment CI steps, copy `templates/coverage/codecov.yml.template`
 - **Makefile:** "Install Makefile?" → copy from `templates/tooling/Makefile.template`

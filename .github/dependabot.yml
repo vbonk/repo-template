@@ -1,22 +1,40 @@
-# Dependabot Configuration
-# Automatically creates PRs for dependency updates
-# See: https://docs.github.com/en/code-security/dependabot
+# Dependabot — Automatic Dependency Updates
+#
+# What this does: Dependabot scans your dependencies for known security
+# vulnerabilities and outdated versions, then automatically creates PRs
+# to update them. You just review and merge.
+#
+# Why it matters: 29 million secrets were leaked on GitHub in 2025, and
+# vulnerable dependencies are the other major attack vector. Libraries you
+# depend on get security patches regularly — Dependabot ensures you actually
+# apply them instead of running vulnerable code forever.
+#
+# How it works: Every Monday, Dependabot checks for updates. If it finds
+# any, it opens a PR with the version bump. You review the changelog,
+# confirm CI passes, and merge. That is it.
+#
+# Docs: https://docs.github.com/en/code-security/dependabot
 
 version: 2
 updates:
-  # GitHub Actions - always enable this
+  # GitHub Actions — always enable this, even if you use no other ecosystem.
+  # Why: Actions are code that runs with access to your repo. A compromised
+  # action version is a supply chain attack. Dependabot updates the SHA pins.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "weekly"     # Why weekly: Balances staying current without
+      day: "monday"          # creating too many PRs to review
+    # Why limit: Prevents Dependabot from overwhelming you with 20 PRs at once.
+    # 5 is manageable — once you merge them, it opens the next batch.
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "ci"
+      prefix: "ci"          # Creates commits like "ci(deps): bump actions/checkout"
       include: "scope"
 
   # ============================================
-  # TEMPLATE: Uncomment the section for your stack
+  # TEMPLATE: Uncomment the section for your stack.
+  # This tells Dependabot to also monitor your app's dependencies.
   # ============================================
 
   # --- npm (JavaScript/TypeScript) ---
@@ -28,15 +46,16 @@ updates:
   #   open-pull-requests-limit: 10
   #   commit-message:
   #     prefix: "deps"
-  #     prefix-development: "deps-dev"
+  #     prefix-development: "deps-dev"  # Distinguishes devDependency updates
   #     include: "scope"
   #   groups:
-  #     # Group minor/patch updates to reduce PR noise
+  #     # Why groups: Without this, updating 10 packages = 10 separate PRs.
+  #     # Grouping minor/patch updates into one PR reduces noise significantly.
   #     production-dependencies:
   #       dependency-type: "production"
   #       update-types:
-  #         - "minor"
-  #         - "patch"
+  #         - "minor"        # New features, backward-compatible
+  #         - "patch"        # Bug fixes, backward-compatible
   #     development-dependencies:
   #       dependency-type: "development"
   #       update-types:

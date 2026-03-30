@@ -1,4 +1,13 @@
 # Windsurf / Codeium Rules
+#
+# What this does: Tells Windsurf (AI coding editor by Codeium) about your
+# project's conventions, architecture, and security boundaries. Windsurf
+# reads this file automatically when you open the project.
+#
+# Why it matters: Without this, Windsurf guesses your coding style and may
+# generate code that conflicts with your patterns. This file is your way
+# of saying "here is how we do things in this project."
+#
 # https://docs.codeium.com/windsurf/memories#windsurfrules
 
 # Project Context
