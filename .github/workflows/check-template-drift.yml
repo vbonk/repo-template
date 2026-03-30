@@ -1,0 +1,117 @@
+# Template Drift Detection — Reusable Workflow
+# Compares key files in a downstream repo against the template source.
+# Reports drift so maintainers know when to update.
+#
+# Usage in downstream repos:
+#   name: Template Drift Check
+#   on:
+#     schedule:
+#       - cron: '0 9 * * 1'  # Weekly Monday 9am
+#     workflow_dispatch:
+#   jobs:
+#     check:
+#       uses: vbonk/repo-template/.github/workflows/check-template-drift.yml@main
+
+name: Check Template Drift
+
+on:
+  workflow_call:
+    inputs:
+      template_repo:
+        description: 'Template repository to compare against'
+        default: 'vbonk/repo-template'
+        type: string
+      severity:
+        description: 'Minimum severity to report (info, warn, error)'
+        default: 'warn'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout downstream repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check for template drift
+        env:
+          TEMPLATE_REPO: ${{ inputs.template_repo }}
+          GH_TOKEN: ${{ github.token }}
+          SEVERITY: ${{ inputs.severity }}
+        run: |
+          echo "=== Template Drift Check ==="
+          echo "Template: $TEMPLATE_REPO"
+          echo "Downstream: $GITHUB_REPOSITORY"
+          echo ""
+
+          DRIFT=0
+          WARNINGS=0
+
+          check_file() {
+            local file="$1"
+            local level="$2"
+
+            if [ ! -f "$file" ]; then
+              if [ "$level" = "error" ] || [ "$level" = "warn" ]; then
+                echo "::${level}::MISSING: $file (exists in template but not in this repo)"
+                DRIFT=$((DRIFT + 1))
+              fi
+              return
+            fi
+
+            TEMPLATE_SHA=$(gh api "repos/$TEMPLATE_REPO/contents/$file" --jq '.sha' 2>/dev/null || echo "")
+            if [ -z "$TEMPLATE_SHA" ]; then
+              return
+            fi
+
+            LOCAL_SHA=$(git hash-object "$file" 2>/dev/null || echo "")
+
+            if [ "$TEMPLATE_SHA" != "$LOCAL_SHA" ]; then
+              echo "  DRIFT: $file (modified from template)"
+              WARNINGS=$((WARNINGS + 1))
+            else
+              echo "  OK: $file (matches template)"
+            fi
+          }
+
+          echo "--- Security Files (error if missing) ---"
+          check_file ".gitattributes" "error"
+          check_file "SECURITY.md" "error"
+          check_file ".github/workflows/secret-scan-pr.yml" "warn"
+
+          echo ""
+          echo "--- CI/CD Files (warn if different) ---"
+          check_file ".github/workflows/ci.yml" "info"
+          check_file ".github/dependabot.yml" "info"
+          check_file ".github/workflows/codeql.yml" "warn"
+          check_file ".github/workflows/dependency-review.yml" "warn"
+
+          echo ""
+          echo "--- AI Config Files (info — expected to diverge) ---"
+          check_file "CLAUDE.md" "info"
+          check_file "AGENTS.md" "info"
+          check_file ".cursorrules" "info"
+
+          echo ""
+          echo "--- Scripts (warn if missing) ---"
+          check_file "scripts/secure-repo.sh" "warn"
+          check_file "templates/hooks/pre-commit-secrets.sh.template" "warn"
+          check_file "templates/hooks/setup-hooks.sh" "warn"
+
+          echo ""
+          echo "=== Results: $DRIFT missing | $WARNINGS drifted ==="
+
+          if [ "$DRIFT" -gt 0 ]; then
+            echo ""
+            echo "Run /project:init-template or manually copy missing files from the template."
+            echo "Template: https://github.com/$TEMPLATE_REPO"
+          fi
+
+          if [ "$DRIFT" -gt 0 ] && [ "$SEVERITY" = "error" ]; then
+            exit 1
+          fi
