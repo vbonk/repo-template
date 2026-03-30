@@ -89,6 +89,12 @@ FEATURES = [
     ("docs-index", "docs/README.md index", "docs", 2, "docs/README.md"),
     ("prod-checklist", "Production checklist", "docs", 3, "docs/PROD_CHECKLIST.md"),
     ("meta-ci", "Template self-validation", "ci-cd", 2, ".github/workflows/validate-template.yml"),
+    ("detect-conflicts", "Merge conflict detection", "ci-cd", 2, ".github/workflows/detect-conflicts.yml"),
+    ("update-contributors", "Contributor tracking", "community", 2, ".github/workflows/update-contributors.yml"),
+    ("contributors-md", "CONTRIBUTORS.md", "community", 2, "CONTRIBUTORS.md"),
+    ("sbom-release", "SBOM in releases", "security", 3, "__skip__"),
+    ("skills-dir", "Claude skills directory", "ai-config", 2, ".claude/skills/README.md"),
+    ("agents-dir", "Claude agents directory", "ai-config", 2, ".claude/agents/README.md"),
 ]
 
 repos_env = os.environ.get("AUDIT_REPOS", "").split()

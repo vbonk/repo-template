@@ -46,6 +46,8 @@
 # .cursorrules                   @your-username
 # .windsurfrules                 @your-username
 # .github/copilot-instructions.md @your-username
+# .claude/skills/                 @your-username
+# .claude/agents/                 @your-username
 #
 # Security hardening files — SECURITY DOWNGRADE DEFENSE
 # Why: These files control your repo's security protections (hooks, scanning,

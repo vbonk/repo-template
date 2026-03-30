@@ -1,0 +1,46 @@
+# Detect Merge Conflicts
+# Auto-labels open PRs with `needs-rebase` when they have merge conflicts.
+# Runs on push to main (existing PRs may become conflicted) and on PR updates.
+
+name: Detect Merge Conflicts
+
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-conflicts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Check PRs for merge conflicts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          prs=$(gh pr list --json number,mergeable,labels --state open)
+
+          echo "$prs" | jq -c '.[]' | while read -r pr; do
+            number=$(echo "$pr" | jq -r '.number')
+            mergeable=$(echo "$pr" | jq -r '.mergeable')
+            has_label=$(echo "$pr" | jq -r '[.labels[].name] | any(. == "needs-rebase")')
+
+            if [ "$mergeable" = "CONFLICTING" ] && [ "$has_label" = "false" ]; then
+              echo "PR #$number is conflicting — adding needs-rebase label"
+              gh pr edit "$number" --add-label needs-rebase
+            elif [ "$mergeable" = "MERGEABLE" ] && [ "$has_label" = "true" ]; then
+              echo "PR #$number is mergeable — removing needs-rebase label"
+              gh pr edit "$number" --remove-label needs-rebase
+            else
+              echo "PR #$number — mergeable=$mergeable, has_label=$has_label — no action needed"
+            fi
+          done

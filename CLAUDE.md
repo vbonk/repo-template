@@ -157,6 +157,11 @@ Run `/project:security-audit` for a full scorecard anytime.
 - `/project:security-audit` — Run security scorecard (GitHub settings + local protections)
 - `/project:review` — Code review assistance
 
+## Skills & Agents
+
+- `.claude/skills/` — Auto-discovered capabilities (see [Skills README](.claude/skills/README.md))
+- `.claude/agents/` — Specialized sub-agents for complex tasks (see [Agents README](.claude/agents/README.md))
+
 ---
 
 > **See also:** [AGENTS.md](AGENTS.md) | [copilot-instructions.md](.github/copilot-instructions.md) | [docs/AI-SECURITY.md](docs/AI-SECURITY.md) | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)

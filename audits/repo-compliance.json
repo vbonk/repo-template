@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-03-14T17:55:20Z",
+  "generated_at": "2026-03-30T19:41:48Z",
   "template_version": "2.0.0",
-  "total_weight": 116,
+  "total_weight": 156,
   "features": [
     {
       "id": "claude-md",
@@ -106,6 +106,42 @@
       "weight": 3
     },
     {
+      "id": "secure-repo-script",
+      "name": "Secure repo script",
+      "category": "security",
+      "weight": 4
+    },
+    {
+      "id": "secret-scan-workflow",
+      "name": "Secret scan PR workflow",
+      "category": "security",
+      "weight": 4
+    },
+    {
+      "id": "precommit-hook",
+      "name": "Pre-commit secrets hook",
+      "category": "security",
+      "weight": 3
+    },
+    {
+      "id": "hook-installer",
+      "name": "Hook installer script",
+      "category": "security",
+      "weight": 2
+    },
+    {
+      "id": "gitattributes",
+      "name": ".gitattributes",
+      "category": "security",
+      "weight": 3
+    },
+    {
+      "id": "fork-security",
+      "name": "Fork security guide",
+      "category": "security",
+      "weight": 2
+    },
+    {
       "id": "contributing-md",
       "name": "CONTRIBUTING.md",
       "category": "community",
@@ -208,15 +244,69 @@
       "weight": 2
     },
     {
+      "id": "getting-started",
+      "name": "Getting Started guide",
+      "category": "docs",
+      "weight": 4
+    },
+    {
+      "id": "doc-guide",
+      "name": "Documentation patterns guide",
+      "category": "docs",
+      "weight": 2
+    },
+    {
       "id": "docs-index",
       "name": "docs/README.md index",
       "category": "docs",
       "weight": 2
     },
     {
+      "id": "prod-checklist",
+      "name": "Production checklist",
+      "category": "docs",
+      "weight": 3
+    },
+    {
       "id": "meta-ci",
       "name": "Template self-validation",
       "category": "ci-cd",
+      "weight": 2
+    },
+    {
+      "id": "detect-conflicts",
+      "name": "Merge conflict detection",
+      "category": "ci-cd",
+      "weight": 2
+    },
+    {
+      "id": "update-contributors",
+      "name": "Contributor tracking",
+      "category": "community",
+      "weight": 2
+    },
+    {
+      "id": "contributors-md",
+      "name": "CONTRIBUTORS.md",
+      "category": "community",
+      "weight": 2
+    },
+    {
+      "id": "sbom-release",
+      "name": "SBOM in releases",
+      "category": "security",
+      "weight": 3
+    },
+    {
+      "id": "skills-dir",
+      "name": "Claude skills directory",
+      "category": "ai-config",
+      "weight": 2
+    },
+    {
+      "id": "agents-dir",
+      "name": "Claude agents directory",
+      "category": "ai-config",
       "weight": 2
     }
   ],
@@ -224,8 +314,8 @@
     {
       "name": "repo-template",
       "full_name": "vbonk/repo-template",
-      "compliance_score": 100,
-      "grade": "A+",
+      "compliance_score": 94,
+      "grade": "A",
       "features": [
         {
           "id": "claude-md",
@@ -293,6 +383,30 @@
         },
         {
           "id": "branch-protection",
+          "present": true
+        },
+        {
+          "id": "secure-repo-script",
+          "present": true
+        },
+        {
+          "id": "secret-scan-workflow",
+          "present": true
+        },
+        {
+          "id": "precommit-hook",
+          "present": true
+        },
+        {
+          "id": "hook-installer",
+          "present": true
+        },
+        {
+          "id": "gitattributes",
+          "present": true
+        },
+        {
+          "id": "fork-security",
           "present": true
         },
         {
@@ -364,12 +478,48 @@
           "present": true
         },
         {
+          "id": "getting-started",
+          "present": true
+        },
+        {
+          "id": "doc-guide",
+          "present": true
+        },
+        {
           "id": "docs-index",
+          "present": true
+        },
+        {
+          "id": "prod-checklist",
           "present": true
         },
         {
           "id": "meta-ci",
           "present": true
+        },
+        {
+          "id": "detect-conflicts",
+          "present": false
+        },
+        {
+          "id": "update-contributors",
+          "present": false
+        },
+        {
+          "id": "contributors-md",
+          "present": false
+        },
+        {
+          "id": "sbom-release",
+          "present": true
+        },
+        {
+          "id": "skills-dir",
+          "present": false
+        },
+        {
+          "id": "agents-dir",
+          "present": false
         }
       ]
     }

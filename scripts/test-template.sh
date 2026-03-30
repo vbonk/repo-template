@@ -86,7 +86,7 @@ run_layer_1() {
   # 1.2 Workflow count
   local wf_count
   wf_count=$(find .github/workflows -name '*.yml' -type f | wc -l | tr -d ' ')
-  assert_count "GitHub Actions workflows" 16 "$wf_count"
+  assert_count "GitHub Actions workflows" 18 "$wf_count"
 
   # 1.3 Issue template count (excluding config.yml)
   local tmpl_count
@@ -167,7 +167,7 @@ run_layer_1() {
 
   # 1.8 README claims match (spot checks)
   assert_contains README.md "7 AI" "README mentions 7 AI agents"
-  assert_contains README.md "16 Workflows" "README mentions 16 workflows"
+  assert_contains README.md "18 Workflows" "README mentions 18 workflows"
   assert_contains README.md "repo-template-example" "README links to example repo"
 }
 
@@ -317,7 +317,9 @@ with open('$f') as fh:
            templates/linting/commitlint.config.js.template \
            docs/AI-SECURITY.md docs/ARCHITECTURE.md docs/BRANCH-PROTECTION.md \
            docs/FORK-SECURITY.md docs/GITHUB-ENVIRONMENTS.md docs/PROD_CHECKLIST.md \
-           docs/GETTING-STARTED.md docs/DOCUMENTATION-GUIDE.md; do
+           docs/GETTING-STARTED.md docs/DOCUMENTATION-GUIDE.md \
+           .claude/skills/README.md .claude/agents/README.md \
+           CONTRIBUTORS.md; do
     assert_file_exists "$f"
   done
 }
