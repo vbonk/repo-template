@@ -1,21 +1,34 @@
 # repo-template
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![AI Agents: 6](https://img.shields.io/badge/AI%20Agents-6%20Supported-blue)](https://github.com/vbonk/repo-template)
 [![CI](https://github.com/vbonk/repo-template/actions/workflows/ci.yml/badge.svg)](https://github.com/vbonk/repo-template/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/vbonk/repo-template)](https://github.com/vbonk/repo-template/releases)
 [![GitHub stars](https://img.shields.io/github/stars/vbonk/repo-template)](https://github.com/vbonk/repo-template/stargazers)
-[![GitHub last commit](https://img.shields.io/github/last-commit/vbonk/repo-template)](https://github.com/vbonk/repo-template/commits)
 
-**The AI-first GitHub repository template.** Six AI agents. Security by default. Production-ready in 2 minutes.
+Every new repository starts the same way. You write a `.gitignore`. Set up CI. Add issue templates. Configure Dependabot. Write a security policy. And if you use AI coding tools, you create context files so the agent actually understands your project. It takes 30-45 minutes, and you forget something every time.
 
-Stop wasting time on boilerplate. Start every project with CI/CD, security scanning, six AI agent configs, issue management, and compliance auditing already in place.
+This template does all of it before you write your first line of code.
+
+> **What you get:** 7 AI agent configs (Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf, Aider), 16 GitHub Actions workflows, pre-commit secret scanning, one-command security hardening, 5 issue templates with label taxonomy, and a compliance audit that scores any repo against these standards. Everything is customizable. Nothing is locked in.
+
+```
+Your new repo on day one:
+
+  CI/CD pipeline          ready (Node, Python, Go, Rust, Bun)
+  Security scanning       active (secrets, dependencies, code)
+  AI agent context        configured (7 agents, project-aware)
+  Branch protection       enforced (force-push blocked, tags protected)
+  Issue management        structured (templates, labels, task scripts)
+  Pre-commit hooks        installed (catches credentials before commit)
+```
 
 <p align="center">
   <a href="https://github.com/vbonk/repo-template/generate">
     <img src="https://img.shields.io/badge/Use%20This%20Template-238636?style=for-the-badge&logo=github&logoColor=white" alt="Use this template">
   </a>
 </p>
+
+> See it in action: [repo-template-example](https://github.com/vbonk/repo-template-example) is a Node.js/TypeScript project built from this template with every placeholder filled.
 
 ---
 
@@ -45,33 +58,24 @@ Stop wasting time on boilerplate. Start every project with CI/CD, security scann
 
 ---
 
-## Who Is This For?
+## Why This Exists
 
-This template is built for:
+AI coding agents perform dramatically better when they have project context — your conventions, your stack, your architecture. Without it, every session starts cold. But writing `CLAUDE.md`, `.cursorrules`, `copilot-instructions.md`, and the rest for each new project is tedious, and keeping them consistent across agents is worse.
 
-- **Solo developers** tired of repetitive project setup
-- **Teams** wanting consistent structure across repositories
-- **AI-first developers** using Claude Code, GitHub Copilot, Codex, or similar tools
-- **Security-conscious developers** who want sensible defaults without the research
+This template solves both problems. The AI configs are pre-written with sensible defaults and a single command (`/project:init-template`) customizes everything to your project. The security layer ensures no secret reaches GitHub, no branch gets force-pushed, and no AI agent runs unchecked.
 
-If you create GitHub repositories regularly and want them production-ready from the start, this is for you.
-
----
-
-## Why This Template?
-
-| Traditional Setup | With This Template |
-|-------------------|-------------------|
-| 30+ minutes configuring | 2 minutes to start |
-| Security gaps from forgetting steps | Secure by default |
-| AI agents need context each session | AI agents productive immediately |
-| Inconsistent structure across projects | Same patterns everywhere |
+| Without template | With template |
+|-----------------|---------------|
+| 30-45 min setup, something forgotten | 2 minutes, nothing missed |
+| AI agents start cold every session | Agents productive from first command |
+| Secrets accidentally committed | Pre-commit hook + CI scanning blocks them |
+| Security configured manually (or not) | One-command hardening with scorecard |
 
 ---
 
 ## Features
 
-- **🤖 Six AI Agents** — Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf — all configured
+- **7 AI Agents** — Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf, Aider — all configured with project context
 - **🔒 Secure by Default** — SHA-pinned Actions, CodeQL scanning, dependency review, prompt injection defense, secret scanning (pre-commit + CI), automated repo hardening
 - **⚡ Quick or Full Setup** — 2-minute quick mode or comprehensive 8-step configuration
 - **📋 Issue Management** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync
