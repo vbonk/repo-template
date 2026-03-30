@@ -65,6 +65,19 @@ updates:
   #     prefix: "deps"
   #     include: "scope"
 
+  # --- bun (Bun uses npm ecosystem) ---
+  # Note: Bun uses bun.lockb but Dependabot reads package.json.
+  # Use the npm ecosystem for Bun projects.
+  # - package-ecosystem: "npm"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #   open-pull-requests-limit: 10
+  #   commit-message:
+  #     prefix: "deps"
+  #     include: "scope"
+
   # --- cargo (Rust) ---
   # - package-ecosystem: "cargo"
   #   directory: "/"

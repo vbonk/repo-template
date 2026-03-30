@@ -1,0 +1,45 @@
+# Docker Compose template
+# Customize services for your stack.
+
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      # - DATABASE_URL=postgres://user:pass@db:5432/myapp
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    restart: unless-stopped
+
+  # --- Database (uncomment one) ---
+
+  # PostgreSQL
+  # db:
+  #   image: postgres:17-alpine
+  #   environment:
+  #     POSTGRES_DB: myapp
+  #     POSTGRES_USER: user
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U user -d myapp"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Redis
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+
+# volumes:
+#   pgdata:
