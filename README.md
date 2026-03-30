@@ -108,7 +108,7 @@ This template solves both problems. The AI configs are pre-written with sensible
 - **🔒 Secure by Default** — SHA-pinned Actions, CodeQL scanning, dependency review, prompt injection defense, secret scanning (pre-commit + CI), automated repo hardening
 - **⚡ Quick or Full Setup** — 2-minute quick mode or comprehensive 8-step configuration
 - **📋 Issue Management** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync
-- **🔄 13 Workflows** — CI, releases, stale management, auto-labeling, PR sizing, security scanning
+- **🔄 16 Workflows** — CI, releases, stale management, auto-labeling, PR sizing, secret scanning, drift detection, dependency review, CodeQL
 - **🛡️ AI Security** — CODEOWNERS on AI configs, PR injection scanner, defense documentation
 - **📦 Dev Experience** — Devcontainer, linting templates, pre-commit hooks, VS Code settings
 - **📊 Compliance Audit** — Score any repo against template standards with `scripts/audit-compliance.sh`
