@@ -1,0 +1,23 @@
+# Aider AI coding assistant configuration
+# Docs: https://aider.chat/docs/config/aider_conf.html
+
+# Model selection
+# model: claude-sonnet-4-20250514
+
+# Repository context
+# read:
+#   - CLAUDE.md
+#   - docs/ARCHITECTURE.md
+
+# Git settings
+auto-commits: true
+dirty-commits: false
+attribute-author: true
+attribute-committer: false
+
+# Code style
+# lint-cmd: npm run lint
+# test-cmd: npm test
+
+# Security — never auto-add sensitive files
+# aiderignore patterns are in .aiderignore (if created)
