@@ -1,12 +1,38 @@
 # repo-template Execution Plan
 
-> Generated: 2026-03-30 | Author: Anthony Velte (@vbonk)
+> Generated: 2026-03-30 | Updated: 2026-03-30 | Author: Anthony Velte (@vbonk)
 > Status: APPROVED — ready for execution
 > Test baseline: 100 checks passing (82 unit + 18 E2E)
+> Open issues: 15 (#75, #79, #98-#110)
 
 ## Project Context
 
-repo-template is a production-ready GitHub template repository with 7 AI agent configs, 16 workflows, 6-layer security, and 100 automated tests. v1.0.0 is released. This plan covers the path from v1.0.0 to v1.1.0 based on 4 research reports analyzing the competitive landscape, OSSF scorecard, top 50 templates, and scaffolding UX patterns.
+repo-template is a production-ready GitHub template repository with 7 AI agent configs, 16 workflows, 6-layer security, and 100 automated tests. v1.0.0 is released. This plan covers the path from v1.0.0 to v1.1.0 based on 5 research reports: competitive landscape, OSSF scorecard, top 50 templates, scaffolding UX patterns, and audience analysis.
+
+## Target Audience (Validated)
+
+**Primary:** Solo developers and agentic coders using AI coding tools (Claude Code, Cursor, Copilot) who lack professional team GitHub experience. Three personas:
+1. **Vibe Coders** (63% non-developers) — largest, fastest-growing segment
+2. **Solo Builders** — technical but always worked alone
+3. **AI-Augmented Devs** — experienced, new to AI tools
+
+**Key insight:** They've never had a senior engineer set up their repo. The template IS that senior engineer.
+
+**Key stats driving documentation strategy:**
+- 29M secrets leaked on GitHub in 2025 (AI commits at 2x leak rate)
+- 0/15 AI-built test apps had CSRF protection or security headers
+- Adding .env to .gitignore prevents 89% of secret leaks
+- They read inline config comments more than documentation files
+
+## Research Reports (in `_admin/research/`)
+
+| Report | File | Key Finding |
+|--------|------|-------------|
+| R1: AI Ecosystem | r1-ai-ecosystem.md | repo-template has best AI agent coverage (7 agents, closest competitor has 4) |
+| R2: OSSF Scorecard | r2-ossf-scorecard.md | Current ~5.8/10, achievable ~8.0 with Tier 1 fixes |
+| R3: Top 50 Templates | r3-top-templates.md | Gap: PROD_CHECKLIST, CONTRIBUTORS, commitlint. Strength: security+governance unique |
+| R4: Init UX | r4-init-ux.md | "Recommended defaults" meta-prompt, non-interactive mode needed |
+| R5: Audience | audience-analysis.md | 3 personas validated, security is highest-value education |
 
 ## Research-Driven Priorities
 
@@ -279,6 +305,94 @@ Run: bash scripts/test-template.sh to verify.
 - [ ] MCP memory saved
 - [ ] v1.1.0 release published
 - [ ] Compliance audit saved
+
+---
+
+### Issue 1.11: Getting Started Guide + Documentation Patterns (#108)
+
+**Objective:** Create the primary on-ramp document for solo agentic coders + documentation pattern library.
+**See GitHub issue #108 for full spec, DOD, and agent prompt.**
+
+Key deliverables:
+- `docs/GETTING-STARTED.md` — progressive disclosure guide (4 levels)
+- `docs/DOCUMENTATION-GUIDE.md` — pattern library (Mermaid, callouts, structure)
+- `.claude/commands/getting-started.md` — interactive first-session command
+- `.claude/commands/update-docs.md` — documentation health checker
+- Enriched template files showing patterns by example
+- Real security stats and OWASP context
+
+---
+
+### Issue 1.12: Working Skills + Agent Templates (#109)
+
+**Objective:** Transform template from file collection to capability platform.
+**See GitHub issue #109 for full spec, DOD, and agent prompt.**
+
+Key deliverables:
+- `.claude/skills/security-check.md` — proactive, auto-discovered
+- `.claude/skills/doc-health.md` — proactive, auto-discovered
+- `.claude/skills/_example-skill.md` — template with explained frontmatter
+- `.claude/agents/_example-agent.md` — template with explained frontmatter
+- `.claude/settings.json.template` — sensible defaults
+- `.claude/SESSION_STATE.json.template` — session persistence pattern
+- `.claude/commands/verify.md` — runs tests, explains results
+
+---
+
+### Issue 1.13: Inline Documentation + Config Enrichment (#110)
+
+**Objective:** Every config file explains WHY, not just WHAT. Config files are the docs this audience actually reads.
+**See GitHub issue #110 for full spec, DOD, and agent prompt.**
+
+Key deliverables:
+- All config files (.gitignore, ci.yml, dependabot.yml, CLAUDE.md, CODEOWNERS, .editorconfig, .env.example, .gitattributes, .aider.conf.yml) enriched with WHY comments
+- Plain English, no jargon
+- Section headers explaining purpose
+
+---
+
+## Updated Execution Strategy
+
+### Complete Issue List (v1.1.0)
+
+| # | Issue | GH# | Batch | Status |
+|---|-------|-----|-------|--------|
+| 1.1 | Sigstore release signing | #101 | A | Pending |
+| 1.2 | SBOM generation | #104 | B | Pending (blocked by 1.1) |
+| 1.3 | OpenSSF badge | #106 | C | Pending (human) |
+| 1.4 | PROD_CHECKLIST.md | #102 | A | Pending |
+| 1.5 | CONTRIBUTORS.md + workflow | #103 | B | Pending |
+| 1.6 | .claude skills/ + agents/ dirs | #98 | A | Pending |
+| 1.7 | Commitlint config | #105 | A | Pending |
+| 1.8 | Conflict detection workflow | #100 | B | Pending |
+| 1.9 | Update counts + tests | #107 | C | Pending (blocked by all) |
+| 1.10 | Docs + memory + release | #99 | C | Pending (blocked by all) |
+| 1.11 | Getting Started + doc patterns | #108 | A | Pending |
+| 1.12 | Working skills + agents | #109 | B | Pending |
+| 1.13 | Inline config enrichment | #110 | A | Pending |
+
+### Revised Parallel Batches
+
+```
+Batch A (parallel — no file conflicts):
+  #101 Sigstore        → release.yml only
+  #102 PROD_CHECKLIST  → docs/PROD_CHECKLIST.md (new)
+  #98  .claude dirs    → .claude/skills/, .claude/agents/ (new)
+  #105 Commitlint      → templates/linting/ (new)
+  #108 Getting Started  → docs/GETTING-STARTED.md, docs/DOCUMENTATION-GUIDE.md (new)
+  #110 Inline config    → enriches existing config files (comments only)
+
+Batch B (parallel — depends on Batch A for some files):
+  #104 SBOM            → release.yml (after #101)
+  #103 CONTRIBUTORS    → CONTRIBUTORS.md + workflow (new)
+  #100 Conflicts       → workflow (new)
+  #109 Skills/agents   → .claude/skills/, .claude/agents/ (after #98)
+
+Batch C (sequential — touches shared files):
+  #106 OSSF Badge      → README.md (human step)
+  #107 Counts update   → test-template.sh, audit-compliance.sh, README.md
+  #99  Release         → CHANGELOG, memory, release
+```
 
 ---
 
