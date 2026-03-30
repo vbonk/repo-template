@@ -5,21 +5,50 @@
 [![GitHub release](https://img.shields.io/github/v/release/vbonk/repo-template)](https://github.com/vbonk/repo-template/releases)
 [![GitHub stars](https://img.shields.io/github/stars/vbonk/repo-template)](https://github.com/vbonk/repo-template/stargazers)
 
-Every new repository starts the same way. You write a `.gitignore`. Set up CI. Add issue templates. Configure Dependabot. Write a security policy. And if you use AI coding tools, you create context files so the agent actually understands your project. It takes 30-45 minutes, and you forget something every time.
+Every new repository starts the same way. You write a `.gitignore`. Set up CI. Add issue templates. Configure Dependabot. Write a security policy. And if you use AI coding tools, you create context files so the agent actually understands your project — your conventions, your stack, your architecture. It takes 30-45 minutes, you forget something every time, and nobody configures the deep settings (branch protection rules, tag protection, secret scanning, Actions permissions, pre-commit hooks) because who has time to research all of that on every project.
 
 This template does all of it before you write your first line of code.
 
-> **What you get:** 7 AI agent configs (Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf, Aider), 16 GitHub Actions workflows, pre-commit secret scanning, one-command security hardening, 5 issue templates with label taxonomy, and a compliance audit that scores any repo against these standards. Everything is customizable. Nothing is locked in.
+### Works with your AI tools — one, some, or all
+
+The template includes context files for 7 AI coding agents. Use whichever you work with — they're independent files, not a package deal. Each one tells the agent about your project structure, conventions, commands, and security boundaries so it's productive from the first session instead of starting cold.
+
+| Agent | Config File | What It Gives the Agent |
+|-------|------------|------------------------|
+| Claude Code | `CLAUDE.md` | Full project context + `/project:init-template` and `/project:security-audit` commands |
+| GitHub Copilot | `.github/copilot-instructions.md` | Code generation guidelines, security rules |
+| Cursor | `.cursorrules` | Architecture, testing, workflow conventions |
+| OpenAI Codex | `AGENTS.md` | Cross-agent compatibility layer |
+| Google Gemini | `GEMINI.md` | Commands, conventions, project structure |
+| Windsurf | `.windsurfrules` | Same depth as Cursor config |
+| Aider | `.aider.conf.yml` | Model selection, git settings, lint/test commands |
+
+If you only use Copilot, you get a tuned `copilot-instructions.md` and can ignore the rest. If you use Claude Code and Cursor, both work with project-specific context from day one. The files don't conflict or depend on each other.
+
+### Built for agentic development
+
+When AI agents create repositories — or when you're spinning up projects frequently — the setup tax multiplies. Every repo needs the same security baseline, the same CI structure, the same issue taxonomy. Without a template, each one starts from zero and ends up slightly different.
+
+This template is designed to be the default starting point. Use it from the GitHub UI, from the CLI, or hand it to an autonomous agent:
+
+```bash
+gh repo create my-project --template vbonk/repo-template --public --clone
+cd my-project && bash scripts/secure-repo.sh && bash templates/hooks/setup-hooks.sh
+```
+
+Three commands. Repository created, security hardened, hooks installed. The agent (or you) can start building immediately, and the deep settings — the ones that prevent secrets from leaking, branches from being force-pushed, dependencies from going unpatched — are already in place.
 
 ```
 Your new repo on day one:
 
-  CI/CD pipeline          ready (Node, Python, Go, Rust, Bun)
-  Security scanning       active (secrets, dependencies, code)
-  AI agent context        configured (7 agents, project-aware)
-  Branch protection       enforced (force-push blocked, tags protected)
-  Issue management        structured (templates, labels, task scripts)
-  Pre-commit hooks        installed (catches credentials before commit)
+  CI/CD pipeline          ready (Node, Python, Go, Rust, Bun — uncomment your stack)
+  Security scanning       active (secrets blocked at commit + PR + push)
+  Branch protection       enforced (force-push blocked, tags protected, delete-on-merge)
+  AI agent context        configured (whichever agents you use, project-aware)
+  Issue management        structured (5 templates, 25+ labels, task scripts)
+  Pre-commit hooks        installed (catches credentials before they reach git)
+  Compliance audit        built in (score any repo against these standards)
+  Drift detection         available (reusable workflow checks downstream repos weekly)
 ```
 
 <p align="center">
@@ -28,7 +57,7 @@ Your new repo on day one:
   </a>
 </p>
 
-> See it in action: [repo-template-example](https://github.com/vbonk/repo-template-example) is a Node.js/TypeScript project built from this template with every placeholder filled.
+> See it in action: [repo-template-example](https://github.com/vbonk/repo-template-example) is a Node.js/TypeScript project built from this template with every placeholder filled and security hardened.
 
 ---
 
