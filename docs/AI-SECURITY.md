@@ -1,5 +1,12 @@
 # AI Security: Prompt Injection Defense
 
+If you use AI coding tools, your repo has an attack surface you probably don't know about. AI-generated code contains vulnerabilities 40-62% of the time, and zero out of 15 AI-built apps in a 2025 study included CSRF protection or security headers.
+
+This is not a theoretical problem. AI-assisted commits leak secrets at twice the baseline rate. In 2025 alone, 29 million secrets were leaked on GitHub — and AI tools made it worse. The defenses in this document exist because AI agents are powerful but not careful. They will happily commit your API keys, skip security checks, or follow malicious instructions if nobody tells them not to.
+
+> [!IMPORTANT]
+> **Why this matters to you:** If you're building with Claude Code, Cursor, Copilot, or any AI coding tool, the code it writes for you is statistically likely to contain security issues. You don't need to become a security expert — but you do need guardrails that catch the mistakes before they reach your repo. That's what this page sets up.
+
 > **Threat Model at a Glance** -- This repository defends against prompt injection attacks through 6 layers of defense-in-depth: CODEOWNERS review gates, branch protection, CI validation, hook-based scanning, agent-level instructions, and secret detection. All AI config files are protected by CODEOWNERS. All changes require PR review. Agents cannot self-approve.
 
 ---

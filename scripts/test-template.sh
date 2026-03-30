@@ -167,7 +167,7 @@ run_layer_1() {
 
   # 1.8 README claims match (spot checks)
   assert_contains README.md "7 AI" "README mentions 7 AI agents"
-  assert_contains README.md "18 Workflows" "README mentions 18 workflows"
+  assert_contains README.md "18 workflow" "README mentions 18 workflows"
   assert_contains README.md "repo-template-example" "README links to example repo"
 }
 

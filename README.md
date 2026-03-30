@@ -5,11 +5,21 @@
 [![GitHub release](https://img.shields.io/github/v/release/vbonk/repo-template)](https://github.com/vbonk/repo-template/releases)
 [![GitHub stars](https://img.shields.io/github/stars/vbonk/repo-template)](https://github.com/vbonk/repo-template/stargazers)
 
-Every new repository starts the same way. You write a `.gitignore`. Set up CI. Add issue templates. Configure Dependabot. Write a security policy. And if you use AI coding tools, you create context files so the agent actually understands your project — your conventions, your stack, your architecture. It takes 30-45 minutes, you forget something every time, and nobody configures the deep settings (branch protection rules, tag protection, secret scanning, Actions permissions, pre-commit hooks) because who has time to research all of that on every project.
+29 million secrets were leaked on GitHub in 2025. AI-assisted commits leak credentials at **twice the baseline rate**. One solo developer's exposed AWS key cost [$3,200 in unauthorized charges](docs/PROD_CHECKLIST.md) — bots found it within minutes.
 
-This template does all of it before you write your first line of code.
+Most of this is preventable. A pre-commit hook, a `.gitignore` that covers `.env`, branch protection that blocks force-push. But if you've never worked on a team that set these up for you, you don't know they exist — let alone how to configure them.
 
-> **New here?** Start with the [Getting Started Guide](docs/GETTING-STARTED.md) — it covers security, AI agents, and workflow setup in about 10 minutes.
+**This template is the senior engineer you never had.** It sets up security, CI, AI agent configuration, and repository governance before you write your first line of code. Three commands, two minutes, nothing missed.
+
+> **New here?** Start with the [Getting Started Guide](docs/GETTING-STARTED.md) — security, AI agents, and workflow setup in about 10 minutes.
+
+### Who is this for?
+
+- **Solo developers and indie hackers** — You can code, but you've always worked alone. You've never had someone set up branch protection, configure Dependabot, or explain why `.env` goes in `.gitignore` before your first commit.
+- **Vibe coders** — You're building with AI tools but don't come from a software background. 63% of vibe coders are non-developers: founders, marketers, designers shipping real products. The AI writes your code — this template makes sure the repo around it is safe.
+- **Early-career developers** — You're 0-2 years in, using AI tools heavily, but nobody's shown you the team workflows that prevent disasters: PR reviews, secret scanning, CI pipelines, release management.
+
+If any of that sounds familiar, this template delivers the institutional knowledge that normally takes years on a team to absorb — as a one-click GitHub template.
 
 ### Works with your AI tools — one, some, or all
 
@@ -91,29 +101,35 @@ Your new repo on day one:
 
 ## Why This Exists
 
-AI coding agents perform dramatically better when they have project context — your conventions, your stack, your architecture. Without it, every session starts cold. But writing `CLAUDE.md`, `.cursorrules`, `copilot-instructions.md`, and the rest for each new project is tedious, and keeping them consistent across agents is worse.
+> [!WARNING]
+> **AI-generated code contains vulnerabilities 40-62% of the time.** Zero out of 15 AI-built apps in one study included CSRF protection. Zero set security headers. Over 40% of junior developers deploy AI-generated code they don't fully understand. If you're building with AI tools, the code may work — but the repo around it is probably exposed.
 
-This template solves both problems. The AI configs are pre-written with sensible defaults and a single command (`/project:init-template`) customizes everything to your project. The security layer ensures no secret reaches GitHub, no branch gets force-pushed, and no AI agent runs unchecked.
+No existing solution combines all three things a solo AI-assisted developer needs:
+1. **Security-hardened repository governance** — secrets blocked, branches protected, dependencies monitored
+2. **AI agent configuration** — your tools understand your project from session one
+3. **Documentation that explains WHY** — not enterprise docs, not "hello world" — the level a helpful senior engineer would use with a new teammate
 
-| Without template | With template |
-|-----------------|---------------|
-| 30-45 min setup, something forgotten | 2 minutes, nothing missed |
-| AI agents start cold every session | Agents productive from first command |
-| Secrets accidentally committed | Pre-commit hook + CI scanning blocks them |
-| Security configured manually (or not) | One-command hardening with scorecard |
+| Your repo today | Your repo with this template |
+|-----------------|------------------------------|
+| No `.gitignore` or a minimal one — `.env` files slip through | Comprehensive `.gitignore` covering secrets, IDE files, OS files, build artifacts |
+| No CI — you find out code is broken when users tell you | CI pipeline catches failures on every push |
+| Secrets in source code — API keys committed, bots find them in minutes | Pre-commit hook + CI scanning blocks secrets at three levels |
+| Force-push to main can erase your commit history | Branch protection enforced — one-command setup |
+| AI agent starts cold every session | 7 agent configs with your project context, ready on first session |
+| No issue tracking — mental to-do lists | 5 templates, 25+ labels, helper scripts |
 
 ---
 
 ## Features
 
-- **7 AI Agents** — Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf, Aider — all configured with project context
-- **🔒 Secure by Default** — SHA-pinned Actions, CodeQL scanning, dependency review, prompt injection defense, secret scanning (pre-commit + CI), automated repo hardening
-- **⚡ Quick or Full Setup** — 2-minute quick mode or comprehensive 8-step configuration
-- **📋 Issue Management** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync
-- **🔄 18 Workflows** — CI, releases, stale management, auto-labeling, PR sizing, secret scanning, drift detection, dependency review, CodeQL, conflict detection, contributor tracking
-- **🛡️ AI Security** — CODEOWNERS on AI configs, PR injection scanner, defense documentation
-- **📦 Dev Experience** — Devcontainer, linting templates, pre-commit hooks, VS Code settings
-- **📊 Compliance Audit** — Score any repo against template standards with `scripts/audit-compliance.sh`
+- **Your AI tools work from day one** — 7 agents configured (Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf, Aider) with project context, conventions, and security boundaries
+- **Secrets never reach GitHub** — Pre-commit hooks catch API keys before commit, CI scans every PR, and `.gitignore` covers the patterns that cause 89% of credential leaks
+- **Mistakes get caught, not shipped** — 18 workflows running CI, dependency review, CodeQL scanning, secret detection, conflict detection, and stale issue management
+- **Security you don't have to think about** — One-command hardening (branch protection, Dependabot alerts, tag protection), SHA-pinned Actions, prompt injection defense on AI config files
+- **Two minutes from zero to production-grade** — Quick setup or comprehensive 8-step configuration with interactive prompts
+- **Issues and tasks, not mental to-do lists** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync, helper scripts
+- **Score any repo** — Compliance audit scores repos against template standards with a letter grade (A+ through D)
+- **Works for any stack** — Node.js, Python, Go, Rust, Bun — uncomment your stack, everything else adjusts
 
 ---
 
@@ -713,5 +729,5 @@ This template incorporates best practices from:
 ---
 
 <p align="center">
-  <sub>Built for developers who'd rather write code than configure repos.</sub>
+  <sub>The institutional knowledge of a senior engineering team, delivered as a GitHub template.</sub>
 </p>

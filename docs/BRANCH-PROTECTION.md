@@ -1,5 +1,10 @@
 # Branch Protection
 
+> [!WARNING]
+> **Branch protection prevents your worst-case scenario: losing work to a bad force-push or an accidental merge.** If you're a solo developer thinking "I'm the only one working on this, why do I need protection?" — that's exactly when you need it. There's no teammate to catch your mistake, no code review to stop a bad merge, and no IT department to recover your history. You are the entire team, which means you're also the only person who can accidentally destroy everything.
+
+A single `git push --force` to an unprotected `main` branch can erase your entire commit history. It has happened to solo developers — one bad command and weeks of work vanish with no way to recover it. Branch protection is a seatbelt, not enterprise governance. It takes 30 seconds to enable and costs nothing. You hope you never need it, but when you do, it saves everything.
+
 > **Protection at a Glance** -- Require PR reviews, CI checks, signed commits, and linear history on `main`. AI agents must use PRs and cannot self-approve. CODEOWNERS gates AI config file changes behind human review.
 >
 > | Protection | Status | Notes |

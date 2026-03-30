@@ -1,5 +1,10 @@
 # Fork Security Guide
 
+If you forked a public repo and pushed a secret, deleting the commit is not enough. GitHub shares object storage across the fork network — your "deleted" commit may still be fetchable from any repo in the fork graph. GitHub's garbage collection runs on an unpredictable schedule, and anyone with the commit SHA can retrieve the data from any repository in the network.
+
+> [!WARNING]
+> **29 million secrets were leaked on GitHub in 2025** (GitGuardian), and AI-assisted commits leak at twice the baseline rate. If you push a credential to a fork — even for a few seconds — bots can scrape it before you delete it, and the fork network's shared object store means your "deleted" commit may persist for weeks or months. **The only reliable fix is rotating the credential immediately.** Treat it as compromised from the moment it was pushed, then clean up history second.
+
 > **Fork Security at a Glance** -- Forks share a git object store with the upstream repository. Deleted commits may still be fetchable by SHA from any repo in the fork network. If you accidentally push a secret, **rotate it immediately** -- deleting the commit is never sufficient. Always block upstream push, work on feature branches, and install pre-commit hooks.
 
 ---
