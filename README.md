@@ -137,41 +137,37 @@ No existing solution combines all three things a solo AI-assisted developer need
 ## What's Included
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  repo-template                                              │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  📁 .github/                                                │
-│     ├── workflows/ci.yml      → CI pipeline (multi-stack)  │
-│     ├── workflows/sync-status → Label → Project board sync │
-│     ├── ISSUE_TEMPLATE/       → 5 issue forms + config     │
-│     ├── PULL_REQUEST_TEMPLATE → PR checklist               │
-│     ├── dependabot.yml        → Dependency updates         │
-│     └── copilot-instructions  → GitHub Copilot config      │
-│                                                             │
-│  📁 .claude/                                                │
-│     ├── commands/             → Custom slash commands       │
-│     ├── skills/               → Auto-discovered capabilities│
-│     └── agents/               → Specialized sub-agents      │
-│                                                             │
-│  📁 scripts/                                                │
-│     ├── labels.sh             → Create/update labels       │
-│     ├── my-tasks.sh           → Filtered issue views       │
-│     └── close-issue.sh        → Close with status:done     │
-│                                                             │
-│  📁 src/                      → Your source code            │
-│  📁 tests/                    → Your tests                  │
-│  📁 docs/                     → Documentation               │
-│                                                             │
-│  📄 CLAUDE.md                 → Claude Code instructions    │
-│  📄 AGENTS.md                 → Cross-agent compatibility   │
-│  📄 CONTRIBUTORS.md           → Auto-generated contributors  │
-│  📄 CONTRIBUTING.md           → Contribution guidelines     │
-│  📄 SECURITY.md               → Security policy             │
-│  📄 .gitignore                → Comprehensive patterns      │
-│  📄 .editorconfig             → Consistent formatting       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+repo-template/
+├── .github/
+│   ├── workflows/ci.yml        CI pipeline (multi-stack)
+│   ├── workflows/sync-status   Label → Project board sync
+│   ├── ISSUE_TEMPLATE/         5 issue forms + config
+│   ├── PULL_REQUEST_TEMPLATE   PR checklist
+│   ├── dependabot.yml          Dependency updates
+│   └── copilot-instructions    GitHub Copilot config
+├── .claude/
+│   ├── commands/               Custom slash commands
+│   ├── skills/                 Auto-discovered capabilities
+│   └── agents/                 Specialized sub-agents
+├── scripts/
+│   ├── secure-repo.sh          One-command security hardening
+│   ├── audit-compliance.sh     Repo compliance scoring
+│   ├── labels.sh               Create/update labels
+│   ├── my-tasks.sh             Filtered issue views
+│   └── close-issue.sh          Close with status:done
+├── templates/
+│   ├── hooks/                  Pre-commit secret scanning
+│   └── linting/                Commitlint, ESLint, Ruff configs
+├── docs/                       Getting Started, AI Security, more
+├── src/                        Your source code
+├── tests/                      Your tests
+├── CLAUDE.md                   Claude Code instructions
+├── AGENTS.md                   Cross-agent compatibility
+├── CONTRIBUTORS.md             Auto-generated contributors
+├── CONTRIBUTING.md             Contribution guidelines
+├── SECURITY.md                 Security policy
+├── .gitignore                  Comprehensive patterns
+└── .editorconfig               Consistent formatting
 ```
 
 ---
