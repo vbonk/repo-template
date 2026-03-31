@@ -5,6 +5,9 @@
 # Requires: gh CLI authenticated with admin access.
 set -euo pipefail
 
+# shellcheck source=_lib.sh
+source "$(dirname "$0")/_lib.sh"
+
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
@@ -24,11 +27,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$REPO" ]]; then
-  REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner' 2>/dev/null || true)
-  if [[ -z "$REPO" ]]; then
-    echo -e "${RED}Could not detect repository. Use --repo owner/repo${NC}"
-    exit 1
-  fi
+  check_gh_repo
 fi
 
 echo "============================================"

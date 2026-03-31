@@ -124,9 +124,9 @@ No existing solution combines all three things a solo AI-assisted developer need
 ## Features
 
 - **Your AI tools work from day one** — 7 agents configured (Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf, Aider) with project context, conventions, and security boundaries
-- **Secrets never reach GitHub** — Pre-commit hooks catch API keys before commit, CI scans every PR, and `.gitignore` covers the patterns that cause 89% of credential leaks
-- **Mistakes get caught, not shipped** — 18 workflows running CI, dependency review, CodeQL scanning, secret detection, conflict detection, and stale issue management
-- **Security you don't have to think about** — One-command hardening (branch protection, Dependabot alerts, tag protection), SHA-pinned Actions, prompt injection defense on AI config files
+- **Secrets never reach GitHub** — `.gitignore` blocks credential patterns immediately; one command (`setup-hooks.sh`) adds pre-commit scanning; CI scans every PR automatically
+- **Mistakes get caught, not shipped** — 18 workflows included (dependency review, secret detection, stale management active by default; CI and CodeQL ready to enable for your stack)
+- **Security in one command** — `secure-repo.sh` enables branch protection, Dependabot alerts, and tag protection. SHA-pinned Actions and prompt injection defense are active from day one
 - **Two minutes from zero to production-grade** — Quick setup or comprehensive 8-step configuration with interactive prompts
 - **Issues and tasks, not mental to-do lists** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync, helper scripts
 - **Score any repo** — Compliance audit scores repos against template standards with a letter grade (A+ through D)

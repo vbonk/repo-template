@@ -5,9 +5,14 @@
 # Output: JSON to stdout
 set -euo pipefail
 
+# shellcheck source=_lib.sh
+source "$(dirname "$0")/_lib.sh"
+check_gh_auth
+
 REPOS=("$@")
 if [ ${#REPOS[@]} -eq 0 ]; then
-  REPOS=("$(gh repo view --json nameWithOwner -q '.nameWithOwner')")
+  check_gh_repo
+  REPOS=("$REPO")
 fi
 
 export AUDIT_REPOS="${REPOS[*]}"

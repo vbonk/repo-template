@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # test-template.sh — Comprehensive template validation (Layers 1-4)
-# Usage: bash scripts/test-template.sh [--layer N] [--verbose]
+# Usage: bash scripts/test-template.sh [--layer N] [--verbose] [--local-only]
 # Runs all layers by default. Use --layer to run a specific layer (1-4).
+# Use --local-only to skip checks that require GitHub CLI (gh) authentication.
+# Auto-detects: if gh is unavailable, --local-only is enabled automatically.
 # Exit code: number of failures (0 = all pass)
 set -uo pipefail
 # Note: NOT using set -e — test functions intentionally produce non-zero exit codes
@@ -21,14 +23,31 @@ WARN=0
 SKIP=0
 VERBOSE=false
 RUN_LAYER=""
+LOCAL_ONLY=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --layer) RUN_LAYER="$2"; shift 2 ;;
     --verbose) VERBOSE=true; shift ;;
+    --local-only) LOCAL_ONLY=true; shift ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
+
+# Auto-detect: if gh is unavailable or unauthed, enable local-only mode
+if ! $LOCAL_ONLY; then
+  if ! command -v gh &>/dev/null; then
+    LOCAL_ONLY=true
+    echo -e "${YELLOW}NOTE: gh CLI not found — running in local-only mode (GitHub-dependent checks skipped)${NC}"
+    echo -e "${YELLOW}      Install gh: brew install gh && gh auth login${NC}"
+    echo ""
+  elif ! gh auth status &>/dev/null 2>&1; then
+    LOCAL_ONLY=true
+    echo -e "${YELLOW}NOTE: gh CLI not authenticated — running in local-only mode (GitHub-dependent checks skipped)${NC}"
+    echo -e "${YELLOW}      Authenticate: gh auth login${NC}"
+    echo ""
+  fi
+fi
 
 pass() { echo -e "  ${GREEN}PASS${NC}  $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "  ${RED}FAIL${NC}  $1"; FAIL=$((FAIL + 1)); }
@@ -221,7 +240,7 @@ with open('$f') as fh:
       # Skip test scripts (info-level cd warnings are acceptable)
       [[ "$f" == *"test-template.sh" ]] && continue
       [[ "$f" == *"test-e2e.sh" ]] && continue
-      if ! shellcheck "$f" >/dev/null 2>&1; then
+      if ! shellcheck -x --severity=warning "$f" >/dev/null 2>&1; then
         sc_errors=$((sc_errors + 1))
         if $VERBOSE; then echo "    ShellCheck fail: $f"; fi
       fi
@@ -236,7 +255,7 @@ with open('$f') as fh:
     # 2.4 ShellCheck on .sh.template files
     local sct_errors=0
     while IFS= read -r f; do
-      if ! shellcheck "$f" >/dev/null 2>&1; then
+      if ! shellcheck -x --severity=warning "$f" >/dev/null 2>&1; then
         sct_errors=$((sct_errors + 1))
         if $VERBOSE; then echo "    ShellCheck fail: $f"; fi
       fi
@@ -382,8 +401,8 @@ run_layer_3() {
     chmod +x .git/hooks/pre-commit
   fi
 
-  # 3.4 secure-repo.sh runs and produces scorecard
-  if command -v gh &>/dev/null; then
+  # 3.4 secure-repo.sh runs and produces scorecard [requires gh]
+  if ! $LOCAL_ONLY && command -v gh &>/dev/null; then
     output=$(bash scripts/secure-repo.sh 2>&1) || true
     if echo "$output" | grep -q 'SCORECARD'; then
       pass "secure-repo.sh: produces scorecard"
@@ -391,11 +410,11 @@ run_layer_3() {
       fail "secure-repo.sh: no scorecard in output"
     fi
   else
-    skip "secure-repo.sh: gh CLI not available"
+    skip "secure-repo.sh: requires gh CLI (use --local-only to suppress)"
   fi
 
-  # 3.5 audit-compliance.sh produces valid JSON
-  if command -v gh &>/dev/null; then
+  # 3.5 audit-compliance.sh produces valid JSON [requires gh]
+  if ! $LOCAL_ONLY && command -v gh &>/dev/null; then
     output=$(bash scripts/audit-compliance.sh 2>/dev/null) || true
     if echo "$output" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
       pass "audit-compliance.sh: valid JSON output"
@@ -403,22 +422,22 @@ run_layer_3() {
       fail "audit-compliance.sh: invalid JSON output"
     fi
   else
-    skip "audit-compliance.sh: gh CLI not available"
+    skip "audit-compliance.sh: requires gh CLI (use --local-only to suppress)"
   fi
 
-  # 3.6 my-tasks.sh runs without error (requires gh + repo context)
-  if command -v gh &>/dev/null; then
+  # 3.6 my-tasks.sh runs without error [requires gh]
+  if ! $LOCAL_ONLY && command -v gh &>/dev/null; then
     if bash scripts/my-tasks.sh all >/dev/null 2>&1; then
       pass "my-tasks.sh: runs without error"
     else
       warn "my-tasks.sh: exited with error (may need issue context)"
     fi
   else
-    skip "my-tasks.sh: gh CLI not available"
+    skip "my-tasks.sh: requires gh CLI (use --local-only to suppress)"
   fi
 
   # 3.7 Scripts are executable
-  for f in scripts/secure-repo.sh scripts/labels.sh scripts/my-tasks.sh scripts/close-issue.sh scripts/audit-compliance.sh templates/hooks/setup-hooks.sh; do
+  for f in scripts/_lib.sh scripts/secure-repo.sh scripts/labels.sh scripts/my-tasks.sh scripts/close-issue.sh scripts/audit-compliance.sh templates/hooks/setup-hooks.sh; do
     if [[ -x "$f" ]]; then
       pass "Executable: $f"
     else

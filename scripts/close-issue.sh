@@ -5,15 +5,15 @@
 
 set -euo pipefail
 
+# shellcheck source=_lib.sh
+source "$(dirname "$0")/_lib.sh"
+
 if [ $# -lt 1 ]; then
   echo "Usage: $0 <issue-number> [comment]" >&2
   exit 1
 fi
 
-REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner' 2>/dev/null) || {
-  echo "Error: not in a GitHub repo or gh not authenticated" >&2
-  exit 1
-}
+check_gh_repo
 
 ISSUE=$1
 COMMENT=${2:-""}

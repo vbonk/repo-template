@@ -12,10 +12,9 @@
 
 set -euo pipefail
 
-REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner' 2>/dev/null) || {
-  echo "Error: not in a GitHub repo or gh not authenticated" >&2
-  exit 1
-}
+# shellcheck source=_lib.sh
+source "$(dirname "$0")/_lib.sh"
+check_gh_repo
 
 FILTER=${1:-mine}
 

@@ -9,11 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
--
+- `scripts/_lib.sh` — shared capability detection library (require_gh, check_gh_auth, check_gh_repo, has_gh)
+- `--local-only` flag for `test-template.sh` — skips GitHub-dependent checks gracefully
+- Auto-detection: if `gh` CLI is unavailable, test suite runs in local-only mode automatically
+- Prerequisites section in Getting Started guide
 
 ### Changed
 
--
+- All scripts use shared `_lib.sh` for consistent prerequisite detection and remediation messages
+- README feature claims refined to distinguish "active by default" vs "ready to enable"
+- ShellCheck invocations use `-x --severity=warning` for source-file resolution
+- CONTRIBUTING.md documents `--local-only` testing mode
 
 ### Fixed
 

@@ -69,7 +69,13 @@ go mod download    # Go
 ### Running Tests
 
 ```bash
-# Adapt to your stack
+# Template validation (89 checks across 4 layers)
+bash scripts/test-template.sh
+
+# Local-only mode (skips GitHub-dependent checks — no gh CLI needed)
+bash scripts/test-template.sh --local-only
+
+# Your project's tests (adapt to your stack)
 npm test           # Node.js
 pytest             # Python
 go test ./...      # Go

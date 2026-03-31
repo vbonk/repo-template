@@ -4,6 +4,17 @@
 
 ---
 
+## Prerequisites
+
+- **Git** — installed and configured
+- **GitHub CLI (`gh`)** — required for repo creation and security hardening. [Install guide](https://cli.github.com/). Run `gh auth login` to authenticate.
+- **An AI coding tool** (optional) — Claude Code, Cursor, Copilot, etc. The template works without one, but the AI agent configs are a major feature.
+
+> [!NOTE]
+> Most template features work without `gh` (the `.gitignore`, AI configs, issue templates, and workflows all transfer via "Use this template"). The CLI is needed for `secure-repo.sh` (security hardening) and `audit-compliance.sh` (scoring). If you skip it, you can configure security settings manually in GitHub's Settings UI.
+
+---
+
 ## Level 1: Your Repo, Production-Grade
 
 **Time: 2 minutes.**
