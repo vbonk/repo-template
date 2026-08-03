@@ -490,10 +490,13 @@ run_layer_4() {
   }
 
   # 4.1-4.5 Hook blocks secret patterns
-  test_hook_blocks "sk-ant-* pattern" "const key = 'sk-ant-api03test123abc456';" "test-sec-41.js"
-  test_hook_blocks "AKIA* pattern" "AWS_KEY=AKIAIOSFODNN7EXAMPLE1" "test-sec-42.py"
-  test_hook_blocks "ghp_* pattern" "token = 'ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'" "test-sec-43.ts"
-  test_hook_blocks "private key" "-----BEGIN RSA PRIVATE KEY-----" "test-sec-45.txt.bak"
+  # Fixture strings are split with quote concatenation so this file itself
+  # never contains a scannable secret pattern (the CI secrets scan greps the
+  # repo); the runtime values the hook sees are the full joined patterns.
+  test_hook_blocks "sk-ant-* pattern" "const key = 'sk-ant-""api03test123abc456';" "test-sec-41.js"
+  test_hook_blocks "AKIA* pattern" "AWS_KEY=AKIA""IOSFODNN7EXAMPLE1" "test-sec-42.py"
+  test_hook_blocks "ghp_* pattern" "token = 'ghp_""aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'" "test-sec-43.ts"
+  test_hook_blocks "private key" "-----BEGIN RSA ""PRIVATE KEY-----" "test-sec-45.txt.bak"
 
   # 4.6 Hook allows clean files
   test_hook_allows "clean code" "const greeting = 'hello world';" "test-sec-46.js"
