@@ -1,15 +1,35 @@
-# # Welcome First-Time Contributors
-# # Posts a friendly message on first issue or PR from a new contributor.
-# # TEMPLATE: Uncomment to enable. Customize messages below.
-#
-# name: Welcome
+# Welcome First-Time Contributors
+# Posts a friendly message on first issue or PR from a new contributor.
+# TEMPLATE: Ships disabled. A fully commented-out workflow file fails to parse
+# and shows a failed "workflow file issue" run on every push, so this valid
+# placeholder stub keeps Actions quiet until you enable the real workflow.
+# To enable: delete the placeholder `on:`/`permissions:`/`jobs:` stub below,
+# uncomment the real configuration at the bottom, and customize the messages.
+
+name: Welcome
+
+on:
+  workflow_dispatch: # Placeholder trigger — real triggers are in the commented block below
+
+permissions: {}
+
+jobs:
+  template-disabled:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Explain how to enable
+        run: |
+          echo "The Welcome workflow ships disabled in this template."
+          echo "Edit .github/workflows/welcome.yml and follow the TEMPLATE comments to enable it."
+
+# ── Real configuration (uncomment to enable, and delete the stub above) ──
 #
 # on:
-#   # issues:
-#   #   types: [opened]
-#   # pull_request_target:
-#   #   types: [opened]
-#   workflow_dispatch: # Placeholder — uncomment triggers above
+#   issues:
+#     types: [opened]
+#   pull_request_target:
+#     types: [opened]
 #
 # permissions:
 #   issues: write

@@ -1,9 +1,30 @@
-# # PR/Issue Body Scanner (Prompt Injection Detection)
-# # Scans PR and issue bodies for prompt injection patterns.
-# # Adds a warning comment if detected — does NOT block the PR.
-# # TEMPLATE: Uncomment to enable. Opt-in only.
-#
-# name: Scan PR Body
+# PR/Issue Body Scanner (Prompt Injection Detection)
+# Scans PR and issue bodies for prompt injection patterns.
+# Adds a warning comment if detected — does NOT block the PR.
+# TEMPLATE: Ships disabled (opt-in only). A fully commented-out workflow file
+# fails to parse and shows a failed "workflow file issue" run on every push,
+# so this valid placeholder stub keeps Actions quiet until you enable it.
+# To enable: delete the placeholder `on:`/`permissions:`/`jobs:` stub below
+# and uncomment the real configuration at the bottom.
+
+name: Scan PR Body
+
+on:
+  workflow_dispatch: # Placeholder trigger — real triggers are in the commented block below
+
+permissions: {}
+
+jobs:
+  template-disabled:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Explain how to enable
+        run: |
+          echo "The Scan PR Body workflow ships disabled in this template."
+          echo "Edit .github/workflows/scan-pr-body.yml and follow the TEMPLATE comments to enable it."
+
+# ── Real configuration (uncomment to enable, and delete the stub above) ──
 #
 # on:
 #   issues:

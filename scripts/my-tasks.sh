@@ -13,6 +13,7 @@
 set -euo pipefail
 
 # shellcheck source=_lib.sh
+# shellcheck disable=SC1091
 source "$(dirname "$0")/_lib.sh"
 check_gh_repo
 
