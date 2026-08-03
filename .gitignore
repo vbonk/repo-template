@@ -1,3 +1,6 @@
+# NOTE: gitignore comments must be on their own line — a "#" after a pattern
+# is treated as part of the pattern, silently breaking it.
+
 # =============================================
 # SECRETS & CREDENTIALS
 # Why: Files in this section often contain passwords, API keys, and tokens.
@@ -7,17 +10,28 @@
 # =============================================
 .env
 .env.*
-!.env.example          # .env.example is safe — it has placeholder values only
-*.pem                  # SSL/TLS certificates and private keys
-*.key                  # Private key files
-*.p12                  # PKCS#12 certificate bundles (contain private keys)
-*.pfx                  # Windows certificate bundles (contain private keys)
-credentials.json       # Cloud provider credentials (GCP, Firebase, etc.)
-secrets.json           # Application secrets
-**/secrets/            # Any directory named "secrets"
-.netrc                 # Machine login credentials (used by curl, git, etc.)
-.npmrc                 # npm auth tokens for private registries
-.pypirc                # PyPI upload credentials
+# .env.example is safe — it has placeholder values only
+!.env.example
+# SSL/TLS certificates and private keys
+*.pem
+# Private key files
+*.key
+# PKCS#12 certificate bundles (contain private keys)
+*.p12
+# Windows certificate bundles (contain private keys)
+*.pfx
+# Cloud provider credentials (GCP, Firebase, etc.)
+credentials.json
+# Application secrets
+secrets.json
+# Any directory named "secrets"
+**/secrets/
+# Machine login credentials (used by curl, git, etc.)
+.netrc
+# npm auth tokens for private registries
+.npmrc
+# PyPI upload credentials
+.pypirc
 
 # =============================================
 # OS GENERATED FILES
@@ -25,14 +39,20 @@ secrets.json           # Application secrets
 # They contain metadata about your folders (icon positions, thumbnails).
 # They have no place in a codebase — they clutter PRs and differ per machine.
 # =============================================
-.DS_Store              # macOS folder metadata
+# macOS folder metadata
+.DS_Store
 .DS_Store?
-._*                    # macOS resource forks
-.Spotlight-V100        # macOS search index
-.Trashes               # macOS trash
-ehthumbs.db            # Windows thumbnail cache
-Thumbs.db              # Windows thumbnail cache
-Desktop.ini            # Windows folder display settings
+# macOS resource forks
+._*
+# macOS search index
+.Spotlight-V100
+# macOS trash
+.Trashes
+# Windows thumbnail cache
+ehthumbs.db
+Thumbs.db
+# Windows folder display settings
+Desktop.ini
 
 # =============================================
 # IDE & EDITOR FILES
@@ -41,15 +61,22 @@ Desktop.ini            # Windows folder display settings
 # every collaborator (or AI agent) who clones the repo.
 # Exception: settings.json and extensions.json are shared project settings.
 # =============================================
-.vscode/                # VS Code / Cursor workspace config
-!.vscode/settings.json  # Keep: shared project settings (formatting, etc.)
-!.vscode/extensions.json # Keep: recommended extensions for the project
-.idea/                  # JetBrains (WebStorm, PyCharm, IntelliJ, etc.)
-*.swp                   # Vim swap files (created while editing)
-*.swo                   # Vim swap files
-*~                      # Emacs backup files
-*.sublime-workspace     # Sublime Text workspace
-*.sublime-project       # Sublime Text project
+# VS Code / Cursor workspace config
+.vscode/
+# Keep: shared project settings (formatting, etc.)
+!.vscode/settings.json
+# Keep: recommended extensions for the project
+!.vscode/extensions.json
+# JetBrains (WebStorm, PyCharm, IntelliJ, etc.)
+.idea/
+# Vim swap files (created while editing)
+*.swp
+*.swo
+# Emacs backup files
+*~
+# Sublime Text workspace/project
+*.sublime-workspace
+*.sublime-project
 
 # =============================================
 # NODE.JS / JAVASCRIPT / TYPESCRIPT
@@ -57,27 +84,41 @@ Desktop.ini            # Windows folder display settings
 # It is NEVER committed — anyone can regenerate it with `npm install`.
 # Build outputs (dist/, build/) are also regenerated, not source code.
 # =============================================
-node_modules/           # Installed packages — regenerate with npm/yarn/pnpm install
-npm-debug.log*          # npm crash logs
-yarn-debug.log*         # yarn debug logs
-yarn-error.log*         # yarn error logs
-.pnpm-debug.log*        # pnpm debug logs
-.npm                    # npm cache directory
-.yarn/cache             # Yarn package cache
+# Installed packages — regenerate with npm/yarn/pnpm install
+node_modules/
+# npm/yarn/pnpm crash and debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+# npm cache directory
+.npm
+# Yarn package cache
+.yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
-.pnp.*                  # Yarn Plug'n'Play (alternative to node_modules)
-*.tsbuildinfo           # TypeScript incremental compilation cache
-.eslintcache            # ESLint cache (speeds up repeated runs)
-.parcel-cache           # Parcel bundler cache
-.next/                  # Next.js build output
-.nuxt/                  # Nuxt.js build output
-dist/                   # Compiled/bundled output
-build/                  # Compiled/bundled output
-out/                    # Static export output
-coverage/               # Test coverage reports (generated, not source)
-.nyc_output/            # NYC coverage tool output
+# Yarn Plug'n'Play (alternative to node_modules)
+.pnp.*
+# TypeScript incremental compilation cache
+*.tsbuildinfo
+# ESLint cache (speeds up repeated runs)
+.eslintcache
+# Parcel bundler cache
+.parcel-cache
+# Next.js build output
+.next/
+# Nuxt.js build output
+.nuxt/
+# Compiled/bundled output
+dist/
+build/
+# Static export output
+out/
+# Test coverage reports (generated, not source)
+coverage/
+# NYC coverage tool output
+.nyc_output/
 
 # =============================================
 # PYTHON
@@ -85,14 +126,19 @@ coverage/               # Test coverage reports (generated, not source)
 # creates them to speed up imports. Virtual environments (.venv/) contain
 # installed packages, like node_modules. Never commit either.
 # =============================================
-__pycache__/            # Python bytecode cache (auto-generated)
-*.py[cod]               # Compiled Python files (.pyc, .pyo, .pyd)
-*$py.class              # Jython compiled files
-*.so                    # Compiled C extensions
-.Python                 # Python build artifacts
-build/                  # Build output
-develop-eggs/           # Setuptools development eggs
-dist/                   # Distribution packages
+# Python bytecode cache (auto-generated)
+__pycache__/
+# Compiled Python files (.pyc, .pyo, .pyd)
+*.py[cod]
+# Jython compiled files
+*$py.class
+# Compiled C extensions
+*.so
+# Python build artifacts
+.Python
+build/
+develop-eggs/
+dist/
 downloads/
 eggs/
 .eggs/
@@ -102,41 +148,57 @@ parts/
 sdist/
 var/
 wheels/
-*.egg-info/             # Package metadata
+# Package metadata
+*.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
-.venv/                  # Virtual environment — regenerate with python -m venv
+# Virtual environment — regenerate with python -m venv
+.venv/
 venv/
 ENV/
 env/
-.pytest_cache/          # Pytest cache (speeds up repeated test runs)
-.mypy_cache/            # Mypy type checker cache
-.ruff_cache/            # Ruff linter cache
-htmlcov/                # HTML coverage reports
+# Pytest cache (speeds up repeated test runs)
+.pytest_cache/
+# Mypy type checker cache
+.mypy_cache/
+# Ruff linter cache
+.ruff_cache/
+# HTML coverage reports
+htmlcov/
 
 # =============================================
 # GO
 # Why: Go compiles to a single binary — no need to commit compiled output.
 # vendor/ is an optional copy of dependencies (regenerate with go mod vendor).
 # =============================================
-*.exe                   # Windows executables
-*.exe~                  # Windows executable backups
-*.dll                   # Windows shared libraries
-*.so                    # Linux shared libraries
-*.dylib                 # macOS shared libraries
-*.test                  # Go test binaries
-*.out                   # Go coverage output
-vendor/                 # Vendored dependencies (regenerate with go mod vendor)
+# Windows executables and backups
+*.exe
+*.exe~
+# Windows shared libraries
+*.dll
+# Linux shared libraries
+*.so
+# macOS shared libraries
+*.dylib
+# Go test binaries
+*.test
+# Go coverage output
+*.out
+# Vendored dependencies (regenerate with go mod vendor)
+vendor/
 
 # =============================================
 # RUST
 # Why: target/ contains compiled artifacts and can grow to several GB.
 # Cargo.lock is ignored for libraries (not applications) — see Rust docs.
 # =============================================
-target/                 # Compiled output (debug + release builds)
-Cargo.lock              # Dependency lock — commit this for binaries, ignore for libraries
-*.rlib                  # Rust library files
+# Compiled output (debug + release builds)
+target/
+# Dependency lock — commit this for binaries, ignore for libraries
+Cargo.lock
+# Rust library files
+*.rlib
 
 # =============================================
 # LOGS & DATABASES
@@ -144,11 +206,15 @@ Cargo.lock              # Dependency lock — commit this for binaries, ignore f
 # Local database files (.sqlite, .db) contain user data that should never
 # be shared — and they cause merge conflicts since they are binary.
 # =============================================
-*.log                   # Application log files
-logs/                   # Log directories
-*.sqlite                # SQLite databases
-*.sqlite3               # SQLite databases
-*.db                    # Database files
+# Application log files
+*.log
+# Log directories
+logs/
+# SQLite databases
+*.sqlite
+*.sqlite3
+# Database files
+*.db
 
 # =============================================
 # TEMPORARY FILES
@@ -157,9 +223,11 @@ logs/                   # Log directories
 # =============================================
 *.tmp
 *.temp
-*.bak                   # Backup files created by editors
-*.cache                 # Various tool caches
-.cache/                 # Generic cache directory
+# Backup files created by editors
+*.bak
+# Various tool caches
+*.cache
+.cache/
 tmp/
 temp/
 
@@ -168,19 +236,25 @@ temp/
 # Why: These are compiled object files produced by C/C++/Rust compilers.
 # They are machine-specific and regenerated on every build.
 # =============================================
-*.o                     # Unix object files
-*.obj                   # Windows object files
-*.a                     # Unix static libraries
-*.lib                   # Windows static libraries
+# Unix object files
+*.o
+# Windows object files
+*.obj
+# Unix static libraries
+*.a
+# Windows static libraries
+*.lib
 
 # =============================================
 # LOCAL DEVELOPMENT
 # Why: *.local files contain machine-specific overrides (ports, paths,
 # personal preferences). They should never override the shared project config.
 # =============================================
-.claude.local.md        # Personal Claude Code overrides (not shared)
-CLAUDE.local.md         # Personal Claude Code overrides (not shared)
-*.local                 # Generic local overrides (e.g., .env.local)
+# Personal Claude Code overrides (not shared)
+.claude.local.md
+CLAUDE.local.md
+# Generic local overrides (e.g., .env.local)
+*.local
 
 # =============================================
 # CLAUDE CODE SESSION FILES
