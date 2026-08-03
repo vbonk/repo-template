@@ -15,7 +15,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-cd "$REPO_ROOT"
+cd "$REPO_ROOT" || exit 1
 
 PASS=0
 FAIL=0
@@ -82,6 +82,7 @@ assert_contains() {
   fi
 }
 
+# shellcheck disable=SC2317,SC2329  # assertion helper kept alongside assert_contains
 assert_not_contains() {
   local file="$1" pattern="$2" label="$3"
   if grep -q "$pattern" "$file" 2>/dev/null; then
@@ -98,8 +99,10 @@ run_layer_1() {
   header "Layer 1: Claim Consistency"
 
   # 1.1 AI agent config count
-  local agent_count
-  agent_count=$(ls CLAUDE.md AGENTS.md GEMINI.md .cursorrules .windsurfrules .github/copilot-instructions.md .aider.conf.yml 2>/dev/null | wc -l | tr -d ' ')
+  local agent_count=0
+  for f in CLAUDE.md AGENTS.md GEMINI.md .cursorrules .windsurfrules .github/copilot-instructions.md .aider.conf.yml; do
+    [[ -f "$f" ]] && agent_count=$((agent_count + 1))
+  done
   assert_count "AI agent configs" 7 "$agent_count"
 
   # 1.2 Workflow count
@@ -172,6 +175,7 @@ run_layer_1() {
   # 1.7 Mermaid diagram syntax (basic check — no empty diagrams)
   local empty_mermaid=0
   while IFS= read -r file; do
+    # shellcheck disable=SC2016  # literal backticks in the pattern, not command substitution
     if grep -Pzo '```mermaid\n\s*```' "$file" >/dev/null 2>&1; then
       empty_mermaid=$((empty_mermaid + 1))
       if $VERBOSE; then echo "    Empty mermaid block in: $file"; fi
@@ -272,7 +276,7 @@ with open('$f') as fh:
 
   # 2.5 SHA-pinned Actions
   local unpinned
-  unpinned=$(grep -rn 'uses:.*@v[0-9]' .github/workflows/ 2>/dev/null | grep -v '#' | grep -v 'dependabot/fetch-metadata' | wc -l | tr -d ' ')
+  unpinned=$(grep -rn 'uses:.*@v[0-9]' .github/workflows/ 2>/dev/null | grep -v '#' | grep -vc 'dependabot/fetch-metadata' || true)
   if [[ "$unpinned" -eq 0 ]]; then
     pass "Actions: all SHA-pinned"
   else
@@ -486,10 +490,13 @@ run_layer_4() {
   }
 
   # 4.1-4.5 Hook blocks secret patterns
-  test_hook_blocks "sk-ant-* pattern" "const key = 'sk-ant-api03test123abc456';" "test-sec-41.js"
-  test_hook_blocks "AKIA* pattern" "AWS_KEY=AKIAIOSFODNN7EXAMPLE1" "test-sec-42.py"
-  test_hook_blocks "ghp_* pattern" "token = 'ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'" "test-sec-43.ts"
-  test_hook_blocks "private key" "-----BEGIN RSA PRIVATE KEY-----" "test-sec-45.txt.bak"
+  # Fixture strings are split with quote concatenation so this file itself
+  # never contains a scannable secret pattern (the CI secrets scan greps the
+  # repo); the runtime values the hook sees are the full joined patterns.
+  test_hook_blocks "sk-ant-* pattern" "const key = 'sk-ant-""api03test123abc456';" "test-sec-41.js"
+  test_hook_blocks "AKIA* pattern" "AWS_KEY=AKIA""IOSFODNN7EXAMPLE1" "test-sec-42.py"
+  test_hook_blocks "ghp_* pattern" "token = 'ghp_""aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'" "test-sec-43.ts"
+  test_hook_blocks "private key" "-----BEGIN RSA ""PRIVATE KEY-----" "test-sec-45.txt.bak"
 
   # 4.6 Hook allows clean files
   test_hook_allows "clean code" "const greeting = 'hello world';" "test-sec-46.js"

@@ -44,6 +44,7 @@ WORK_DIR=$(mktemp -d)
 REPOS_TO_DELETE=()
 DIRS_TO_DELETE=("$WORK_DIR")
 
+# shellcheck disable=SC2317,SC2329  # invoked indirectly via the EXIT trap below
 cleanup() {
   if $KEEP; then
     echo ""
@@ -191,7 +192,7 @@ if [[ "${TEST_5_1_SKIP:-}" != "true" ]]; then
     warn "Compliance audit returned unexpected output"
   fi
 
-  cd "$REPO_ROOT"
+  cd "$REPO_ROOT" || exit 1
 fi
 
 # ============================================================
@@ -216,7 +217,7 @@ if [[ "${TEST_5_2_SKIP:-}" != "true" ]]; then
   git clone "https://github.com/$TEST_REPO_2.git" "$REPO_NAME_2" >/dev/null 2>&1 || {
     # New empty repos need an initial commit
     mkdir -p "$REPO_NAME_2"
-    cd "$REPO_NAME_2"
+    cd "$REPO_NAME_2" || exit 1
     git init >/dev/null 2>&1
     git remote add origin "https://github.com/$TEST_REPO_2.git" 2>/dev/null
     echo "# My Project" > README.md
@@ -274,7 +275,7 @@ if [[ "${TEST_5_2_SKIP:-}" != "true" ]]; then
     warn "secure-repo.sh had issues on retrofitted repo"
   fi
 
-  cd "$REPO_ROOT"
+  cd "$REPO_ROOT" || exit 1
 fi
 
 # ============================================================
@@ -285,7 +286,7 @@ header "5.3: Three-Command Setup (README Hero)"
 # We already tested this in 5.1 essentially — verify the exact commands work
 # Using the repo from 5.1 if it exists
 if [[ "${TEST_5_1_SKIP:-}" != "true" ]] && [[ -d "$WORK_DIR/$REPO_NAME_1" ]]; then
-  cd "$WORK_DIR/$REPO_NAME_1"
+  cd "$WORK_DIR/$REPO_NAME_1" || exit 1
 
   # The three commands from the README hero:
   # 1. gh repo create (already done in 5.1)
@@ -293,7 +294,7 @@ if [[ "${TEST_5_1_SKIP:-}" != "true" ]] && [[ -d "$WORK_DIR/$REPO_NAME_1" ]]; th
   # 3. bash templates/hooks/setup-hooks.sh (already tested in 5.1)
   pass "Three-command setup: all 3 commands succeeded (verified in 5.1)"
 
-  cd "$REPO_ROOT"
+  cd "$REPO_ROOT" || exit 1
 else
   warn "Three-command setup: skipped (5.1 repo not available)"
 fi
@@ -304,7 +305,7 @@ fi
 header "5.4: Drift Detection"
 
 if [[ "${TEST_5_1_SKIP:-}" != "true" ]] && [[ -d "$WORK_DIR/$REPO_NAME_1" ]]; then
-  cd "$WORK_DIR/$REPO_NAME_1"
+  cd "$WORK_DIR/$REPO_NAME_1" || exit 1
 
   # Simulate drift by modifying SECURITY.md
   if [[ -f SECURITY.md ]]; then
@@ -343,7 +344,7 @@ if [[ "${TEST_5_1_SKIP:-}" != "true" ]] && [[ -d "$WORK_DIR/$REPO_NAME_1" ]]; th
     warn "Drift detection: .gitattributes not found"
   fi
 
-  cd "$REPO_ROOT"
+  cd "$REPO_ROOT" || exit 1
 else
   warn "Drift detection: skipped (5.1 repo not available)"
 fi

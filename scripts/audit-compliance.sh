@@ -6,12 +6,14 @@
 set -euo pipefail
 
 # shellcheck source=_lib.sh
+# shellcheck disable=SC1091
 source "$(dirname "$0")/_lib.sh"
 check_gh_auth
 
 REPOS=("$@")
 if [ ${#REPOS[@]} -eq 0 ]; then
   check_gh_repo
+  # shellcheck disable=SC2153  # REPO is set by check_gh_repo in _lib.sh
   REPOS=("$REPO")
 fi
 
