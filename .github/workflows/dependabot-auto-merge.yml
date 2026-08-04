@@ -1,6 +1,11 @@
 # Dependabot Auto-Merge
-# Automatically merges minor and patch Dependabot PRs after CI passes.
-# Major version bumps still require human review.
+# Arms GitHub auto-merge for minor and patch Dependabot PRs. The merge only
+# happens after required status checks pass — so this workflow REQUIRES:
+#   1. repo setting allow_auto_merge = true
+#   2. a ruleset with required_status_checks on the default branch
+# Without both, it refuses to arm and emits a warning (merging dependency
+# bumps unattended without CI gating is unsafe).
+# Major version bumps always require human review.
 
 name: Dependabot Auto-Merge
 
@@ -24,8 +29,23 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Verify merge gating exists
+        id: gate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          AUTO=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.allow_auto_merge')
+          CHECKS=$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/main" \
+            --jq '[.[] | select(.type=="required_status_checks")] | length')
+          if [ "$AUTO" != "true" ] || [ "$CHECKS" -eq 0 ]; then
+            echo "::warning::Auto-merge NOT armed (allow_auto_merge=$AUTO, required-check rules=$CHECKS). Enable both — see docs/BRANCH-PROTECTION.md. Unattended dependency merges without CI gating are unsafe."
+            echo "armed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "armed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Auto-merge minor and patch updates
-        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major' && steps.gate.outputs.armed == 'true'
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
