@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: contributors-${{ github.ref }}
@@ -29,17 +30,6 @@ jobs:
 
       - name: Update contributors list
         run: |
-          # Extract unique contributors from git history
-          contributors=$(git log --format='%aN' | sort -uf)
-
-          # Format as markdown list
-          contributor_list=""
-          while IFS= read -r name; do
-            if [ -n "$name" ]; then
-              contributor_list="${contributor_list}- **${name}**\n"
-            fi
-          done <<< "$contributors"
-
           # Replace content between marker comments in CONTRIBUTORS.md
           awk '
             /<!-- CONTRIBUTORS-START -->/ {
@@ -59,11 +49,23 @@ jobs:
           ' CONTRIBUTORS.md > CONTRIBUTORS.md.tmp
           mv CONTRIBUTORS.md.tmp CONTRIBUTORS.md
 
-      - name: Commit and push changes
+      # Opens a PR instead of pushing to main: main requires passing status
+      # checks, so direct pushes from workflows are rejected by the ruleset.
+      - name: Open PR with contributor updates
         run: |
-          git diff --quiet CONTRIBUTORS.md || \
-            (git config user.name 'github-actions[bot]' && \
-             git config user.email 'github-actions[bot]@users.noreply.github.com' && \
-             git add CONTRIBUTORS.md && \
-             git commit -m 'docs: update contributors list [skip ci]' && \
-             git push)
+          if git diff --quiet CONTRIBUTORS.md; then
+            echo "No contributor changes."
+            exit 0
+          fi
+          BRANCH="bot/update-contributors-$(date +%Y%m%d%H%M%S)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -b "$BRANCH"
+          git add CONTRIBUTORS.md
+          git commit -m 'docs: update contributors list'
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title 'docs: update contributors list' \
+            --body 'Automated contributor list refresh from git history.'
+          gh pr merge --auto --squash "$BRANCH" || \
+            echo "::warning::Auto-merge not armed (enable allow_auto_merge + required checks); merge the PR manually."
