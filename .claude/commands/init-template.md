@@ -35,7 +35,7 @@ Ask for:
 | `.github/copilot-instructions.md` | Mirror changes |
 | `.github/workflows/ci.yml` | Uncomment relevant language section |
 | `.github/dependabot.yml` | Uncomment relevant ecosystem |
-| `.github/CODEOWNERS` | Fill in owner username |
+| `.github/CODEOWNERS` | Replace every `@vbonk` with the user's GitHub handle (rules ship ACTIVE — do not comment them out) |
 | `CODE_OF_CONDUCT.md` | Fill in enforcement email |
 | `SECURITY.md` | Add security contact email |
 

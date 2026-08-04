@@ -523,10 +523,17 @@ run_layer_4() {
   assert_contains .github/workflows/secret-scan-pr.yml "pull-requests: write" "secret-scan-pr: pull-requests write permission"
   assert_contains .github/workflows/secret-scan-pr.yml "KNOWN LIMITATION" "secret-scan-pr: fork limitation documented"
 
-  # 4.11 CODEOWNERS covers security files
-  assert_contains .github/CODEOWNERS "secure-repo.sh" "CODEOWNERS: secure-repo.sh listed"
-  assert_contains .github/CODEOWNERS "templates/hooks" "CODEOWNERS: templates/hooks listed"
-  assert_contains .github/CODEOWNERS ".gitattributes" "CODEOWNERS: .gitattributes listed"
+  # 4.11 CODEOWNERS covers security files with ACTIVE (uncommented) rules.
+  # Design check, not existence check: a commented-out rule protects nothing,
+  # so we only accept lines that are not comments.
+  local co_pattern
+  for co_pattern in "secure-repo.sh" "templates/hooks" ".gitattributes"; do
+    if grep -E '^[^#[:space:]]' .github/CODEOWNERS 2>/dev/null | grep -q "$co_pattern"; then
+      pass "CODEOWNERS: $co_pattern actively owned"
+    else
+      fail "CODEOWNERS: $co_pattern rule missing or commented out (inert)"
+    fi
+  done
 
   # 4.12 .gitignore blocks .env
   echo "SECRET=test" > .env.test-verify

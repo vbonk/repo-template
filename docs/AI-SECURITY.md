@@ -7,7 +7,7 @@ This is not a theoretical problem. AI-assisted commits leak secrets at twice the
 > [!IMPORTANT]
 > **Why this matters to you:** If you're building with Claude Code, Cursor, Copilot, or any AI coding tool, the code it writes for you is statistically likely to contain security issues. You don't need to become a security expert — but you do need guardrails that catch the mistakes before they reach your repo. That's what this page sets up.
 
-> **Threat Model at a Glance** -- This repository defends against prompt injection attacks through 6 layers of defense-in-depth: CODEOWNERS review gates, branch protection, CI validation, hook-based scanning, agent-level instructions, and secret detection. All AI config files are protected by CODEOWNERS. All changes require PR review. Agents cannot self-approve.
+> **Threat Model at a Glance** -- This repository defends against prompt injection attacks through 6 layers of defense-in-depth: CODEOWNERS review gates, branch protection, CI validation, hook-based scanning, agent-level instructions, and secret detection. AI config files carry active CODEOWNERS rules (review is *requested* automatically; to make it *blocking*, enable "Require review from Code Owners" — see docs/BRANCH-PROTECTION.md). On a hardened repo, all changes to `main` must arrive by PR with passing status checks — direct pushes are rejected, including from agents.
 
 ---
 
@@ -80,13 +80,14 @@ These files control AI agent behavior and are protected by CODEOWNERS:
 | `.github/copilot-instructions.md` | GitHub Copilot | Copilot custom instructions |
 | `.claude/hooks/` | Claude Code hooks | Pre/post tool-use automation |
 | `.claude/commands/` | Claude Code commands | Slash command definitions |
-| `.claude/settings.json` | Claude Code settings | Agent behavior configuration |
+| `.claude/skills/` | Claude Code skills | Executable skill instructions |
+| `.claude/agents/` | Claude Code agents | Sub-agent definitions |
 
 ## Best Practices
 
 ### For Maintainers
 
-1. **Enable CODEOWNERS** -- Uncomment the AI config protection lines in `.github/CODEOWNERS` and replace `@your-username` with your GitHub handle.
+1. **Verify CODEOWNERS is yours** -- The AI config protection rules ship active; `/project:init-template` replaces the maintainer's handle with yours. Confirm with `grep -E '^[^#]' .github/CODEOWNERS` that the active rules name YOUR handle.
 
 2. **Enable branch protection** -- See [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md) for the recommended settings and a `gh api` script.
 
