@@ -5,16 +5,16 @@
 
 A single `git push --force` to an unprotected `main` branch can erase your entire commit history. It has happened to solo developers — one bad command and weeks of work vanish with no way to recover it. Branch protection is a seatbelt, not enterprise governance. It takes 30 seconds to enable and costs nothing. You hope you never need it, but when you do, it saves everything.
 
-> **Protection at a Glance** -- Require PR reviews, CI checks, signed commits, and linear history on `main`. AI agents must use PRs and cannot self-approve. CODEOWNERS gates AI config file changes behind human review.
+> **Protection at a Glance** -- What `scripts/secure-repo.sh` enforces out of the box, and what you can add on top. Be precise about which is which: a protection listed as "opt-in" protects nothing until you enable it.
 >
-> | Protection | Status | Notes |
-> |------------|--------|-------|
-> | PR required before merge | Required | At least 1 approval |
-> | CODEOWNERS review | Required | For AI config files |
-> | Status checks (CI, CodeQL) | Required | Must pass before merge |
-> | Signed commits | Recommended | Proves authorship |
-> | Linear history | Recommended | Enforces rebase/squash |
-> | Force push / deletion | Blocked | On `main` and `v*` tags |
+> | Protection | Out of the box (secure-repo.sh) | Opt-in upgrade |
+> |------------|--------------------------------|----------------|
+> | Force push / deletion blocked | ✅ `main` and `v*` tags (rulesets) | — |
+> | Status checks required before merge | ✅ once your CI jobs exist (rejects direct pushes too) | Add more required contexts |
+> | PR required with approvals | — | 1+ approvals; needed for teams |
+> | CODEOWNERS review *blocking* | Review auto-requested (rules ship active) | "Require review from Code Owners" makes it blocking |
+> | Signed commits | — | Proves authorship |
+> | Linear history | — | Enforces rebase/squash |
 
 ---
 
@@ -37,32 +37,69 @@ Apply to the `main` branch (or your default branch):
 - [x] **Do not allow force pushes**
 - [x] **Do not allow deletions**
 
-## Apply via GitHub CLI
+## Apply via GitHub CLI (rulesets — recommended)
+
+Rulesets are GitHub's current mechanism (classic branch protection still works
+but new capabilities only land in rulesets). This creates the same protection
+this template's maintainer repo runs:
 
 ```bash
-# Requires gh CLI authenticated with admin access
-# Adjust owner/repo and required checks for your project
+# Requires gh CLI authenticated with admin access.
+# Adjust the required check contexts to YOUR CI job names.
 
 OWNER="your-username"
 REPO="your-repo"
 
-gh api \
-  --method PUT \
-  "repos/$OWNER/$REPO/branches/main/protection" \
-  -f 'required_status_checks[strict]=true' \
-  -f 'required_status_checks[contexts][]=ci' \
-  -f 'required_status_checks[contexts][]=codeql' \
-  -f 'required_pull_request_reviews[dismiss_stale_reviews]=true' \
-  -f 'required_pull_request_reviews[require_code_owner_reviews]=true' \
-  -F 'required_pull_request_reviews[required_approving_review_count]=1' \
-  -f 'enforce_admins=true' \
-  -f 'restrictions=null' \
-  -f 'required_linear_history=true' \
-  -f 'allow_force_pushes=false' \
-  -f 'allow_deletions=false'
-
-echo "Branch protection applied to main"
+gh api --method POST "repos/$OWNER/$REPO/rulesets" --input - <<'EOF'
+{
+  "name": "Protect Main",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+  "rules": [
+    { "type": "deletion" },
+    { "type": "non_fast_forward" },
+    { "type": "required_status_checks",
+      "parameters": { "strict_required_status_checks_policy": false,
+        "required_status_checks": [ { "context": "build" }, { "context": "validate" } ] } }
+  ],
+  "bypass_actors": [ { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "pull_request" } ]
+}
+EOF
+echo "Ruleset applied to default branch"
 ```
+
+> [!TIP]
+> The `bypass_actors` entry lets repo admins bypass **only via pull request** —
+> never use `"bypass_mode": "always"`, which lets an admin (or an agent with
+> admin credentials) sidestep every rule. Scope conditions to
+> `~DEFAULT_BRANCH`: a ruleset matching `~ALL` branches breaks Dependabot,
+> which force-pushes to its own branches when rebasing.
+
+<details>
+<summary>Classic branch-protection API (legacy alternative)</summary>
+
+```bash
+# NOTE: the payload must be sent as a JSON body. gh's -f flag sends strings
+# ("null" is NOT JSON null), which this endpoint rejects with a 422.
+gh api --method PUT "repos/$OWNER/$REPO/branches/main/protection" --input - <<'EOF'
+{
+  "required_status_checks": { "strict": true, "contexts": ["build", "validate"] },
+  "required_pull_request_reviews": {
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": true,
+    "required_approving_review_count": 1
+  },
+  "enforce_admins": true,
+  "restrictions": null,
+  "required_linear_history": true,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+EOF
+```
+
+</details>
 
 ## Protected Tags
 

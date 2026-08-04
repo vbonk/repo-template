@@ -666,7 +666,7 @@ Yes! See Workflow F. Add your AI configuration files (CLAUDE.md, etc.) and exclu
 
 This template includes prompt injection defenses — a first for GitHub templates:
 
-- **CODEOWNERS** protects AI config files (CLAUDE.md, AGENTS.md, .cursorrules, etc.) — changes require owner review
+- **CODEOWNERS** ships with active rules on AI config files (CLAUDE.md, AGENTS.md, .cursorrules, etc.) — owner review is auto-requested on changes; enable "Require review from Code Owners" in branch protection to make it blocking
 - **PR body scanner** (opt-in workflow) detects common injection patterns in issue/PR text
 - **Hook templates** validate inputs before AI agents process them
 - **Documentation** in [docs/AI-SECURITY.md](docs/AI-SECURITY.md) covers attack vectors and best practices
