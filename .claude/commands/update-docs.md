@@ -20,9 +20,9 @@ Report broken links with their source file and target.
 
 Check that claims in README.md match reality:
 - "7 AI" agents — count: `ls CLAUDE.md AGENTS.md GEMINI.md .cursorrules .windsurfrules .github/copilot-instructions.md .aider.conf.yml 2>/dev/null | wc -l`
-- "16 Workflows" — count: `find .github/workflows -name '*.yml' -type f | wc -l`
+- Workflow count claims — count the real number (`find .github/workflows -name '*.yml' -type f | wc -l`) and compare against EVERY count the README/docs state (never assume an expected value — the claim must match the filesystem)
 - "5 templates" — count: `find .github/ISSUE_TEMPLATE -name '*.yml' -not -name 'config.yml' -type f | wc -l`
-- "25+ labels" — count: `grep -c 'gh label create' scripts/labels.sh`
+- Label count claims — count what the script actually emits: `bash scripts/labels.sh --dry-run --repo example/example | grep -c '^gh label create'`
 
 Report any mismatches.
 
