@@ -25,7 +25,14 @@ AUDIT=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --audit) AUDIT=true; shift ;;
-    --repo) REPO="$2"; shift 2 ;;
+    --repo)
+      # Validate strictly: REPO is interpolated into eval'd commands below,
+      # so a metacharacter-bearing value would execute under your gh auth.
+      if [[ ! "${2:-}" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+        echo "Error: --repo must be owner/repo" >&2
+        exit 1
+      fi
+      REPO="$2"; shift 2 ;;
     --skip-wiki) SKIP_WIKI=true; shift ;;
     --skip-projects) SKIP_PROJECTS=true; shift ;;
     *) echo "Unknown option: $1"; exit 1 ;;

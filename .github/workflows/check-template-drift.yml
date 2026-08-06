@@ -51,6 +51,7 @@ jobs:
 
           DRIFT=0
           WARNINGS=0
+          FETCH_FAILURES=0
 
           check_file() {
             local file="$1"
@@ -66,6 +67,12 @@ jobs:
 
             TEMPLATE_SHA=$(gh api "repos/$TEMPLATE_REPO/contents/$file" --jq '.sha' 2>/dev/null || echo "")
             if [ -z "$TEMPLATE_SHA" ]; then
+              # FAIL CLOSED: an unreadable template blob (auth failure, rate
+              # limit, renamed file, outage) is NOT "no drift" — silently
+              # returning here produced reassuring zero-drift reports during
+              # exactly the conditions where drift goes unnoticed.
+              echo "::error::Cannot fetch template SHA for $file — drift status UNVERIFIED"
+              FETCH_FAILURES=$((FETCH_FAILURES + 1))
               return
             fi
 
@@ -104,12 +111,18 @@ jobs:
           check_file "templates/hooks/setup-hooks.sh" "warn"
 
           echo ""
-          echo "=== Results: $DRIFT missing | $WARNINGS drifted ==="
+          echo "=== Results: $DRIFT missing | $WARNINGS drifted | $FETCH_FAILURES unverifiable ==="
 
           if [ "$DRIFT" -gt 0 ]; then
             echo ""
             echo "Run /project:init-template or manually copy missing files from the template."
             echo "Template: https://github.com/$TEMPLATE_REPO"
+          fi
+
+          # Fail closed: files we could not verify are not "no drift".
+          if [ "$FETCH_FAILURES" -gt 0 ]; then
+            echo "::error::$FETCH_FAILURES file(s) could not be verified against the template — treat this run as inconclusive, not clean"
+            exit 1
           fi
 
           if [ "$DRIFT" -gt 0 ] && [ "$SEVERITY" = "error" ]; then

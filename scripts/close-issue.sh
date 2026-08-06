@@ -19,13 +19,16 @@ check_gh_repo
 ISSUE=$1
 COMMENT=${2:-""}
 
-# Add status:done label
-gh issue edit "$ISSUE" --repo "$REPO" --add-label "status:done" 2>/dev/null || true
+# Add status:done label — status labels are the documented source of truth,
+# so a failure here must be VISIBLE, not swallowed (the issue still closes).
+if ! gh issue edit "$ISSUE" --repo "$REPO" --add-label "status:done" 2>/dev/null; then
+  echo "WARNING: could not add status:done to #$ISSUE (label missing? run scripts/labels.sh)" >&2
+fi
 
-# Remove other status labels
-gh issue edit "$ISSUE" --repo "$REPO" --remove-label "status:planning" 2>/dev/null || true
-gh issue edit "$ISSUE" --repo "$REPO" --remove-label "status:in-progress" 2>/dev/null || true
-gh issue edit "$ISSUE" --repo "$REPO" --remove-label "status:blocked" 2>/dev/null || true
+# Remove other status labels (label simply not present is the normal case)
+for lbl in "status:planning" "status:in-progress" "status:blocked"; do
+  gh issue edit "$ISSUE" --repo "$REPO" --remove-label "$lbl" 2>/dev/null || true
+done
 
 # Close with optional comment
 if [ -n "$COMMENT" ]; then

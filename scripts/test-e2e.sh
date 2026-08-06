@@ -261,18 +261,19 @@ if [[ "${TEST_5_2_SKIP:-}" != "true" ]]; then
     fail "Existing code was lost"
   fi
 
-  # Copy secure-repo.sh from template and run
-  cp "$REPO_ROOT/scripts/secure-repo.sh" scripts/secure-repo.sh 2>/dev/null || {
-    mkdir -p scripts
-    cp "$REPO_ROOT/scripts/secure-repo.sh" scripts/secure-repo.sh
-  }
+  # Copy secure-repo.sh AND its dependency from template and run.
+  # (_lib.sh is sourced by secure-repo.sh — copying the script alone
+  # guaranteed failure, which the old WARN then masked.)
+  mkdir -p scripts
+  cp "$REPO_ROOT/scripts/secure-repo.sh" scripts/secure-repo.sh
+  cp "$REPO_ROOT/scripts/_lib.sh" scripts/_lib.sh
   chmod +x scripts/secure-repo.sh
 
   secure_output=$(bash scripts/secure-repo.sh 2>&1) || true
   if echo "$secure_output" | grep -q 'SCORECARD'; then
     pass "secure-repo.sh works on retrofitted repo"
   else
-    warn "secure-repo.sh had issues on retrofitted repo"
+    fail "secure-repo.sh failed on retrofitted repo: $(echo "$secure_output" | head -2)"
   fi
 
   cd "$REPO_ROOT" || exit 1
