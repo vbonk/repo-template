@@ -2,15 +2,21 @@
 
 Run a comprehensive security posture check on this repository.
 
+> [!IMPORTANT]
+> This command is READ-ONLY. It reports posture and remediation commands but
+> changes nothing. Only run `bash scripts/secure-repo.sh` (no flag — the
+> hardening mode, which mutates repo settings) when the user explicitly asks
+> to apply fixes.
+
 ## Steps
 
-### 1. Run the hardening script in audit mode
+### 1. Run the audit (read-only)
 
 ```bash
-bash scripts/secure-repo.sh
+bash scripts/secure-repo.sh --audit
 ```
 
-This checks GitHub settings (Dependabot, branch protection, tag protection, Actions permissions) and local protections (pre-commit hooks, forbidden tokens, .gitattributes, commit signing). Outputs a letter grade (A+ through D).
+This reads GitHub settings (Dependabot, branch/tag rulesets, required checks, Actions permissions) and local protections (pre-commit hooks, forbidden tokens, .gitattributes, commit signing) via GET requests only, printing each gap with the exact fix command. Outputs a letter grade (A+ through D).
 
 ### 2. Review the scorecard
 
@@ -41,13 +47,13 @@ Beyond the script, manually verify:
 
 - **CodeQL configured**: Check if a language is uncommented in `.github/workflows/codeql.yml`
 
-### 4. Offer to fix
+### 4. Offer to fix — but do NOT run fixes unprompted
 
-For any issues found, offer to run the fix commands. Group them:
+Present the fix commands and ask the user which to apply. Only after explicit confirmation:
 
-**Quick fixes (safe to run now):**
-- `bash scripts/secure-repo.sh` (if not already run)
-- `bash templates/hooks/setup-hooks.sh` (if hooks missing)
+**Quick fixes (after user confirms):**
+- `bash scripts/secure-repo.sh` (hardening mode — mutates GitHub settings)
+- `bash templates/hooks/setup-hooks.sh` (if hooks missing — local only)
 
 **Manual steps (provide instructions):**
 - Commit signing setup (see `docs/BRANCH-PROTECTION.md`)
