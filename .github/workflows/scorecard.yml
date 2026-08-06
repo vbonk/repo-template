@@ -1,0 +1,47 @@
+# OpenSSF Scorecard — automated supply-chain security scoring
+# Scores this repo against the OpenSSF Scorecard checks (branch protection,
+# SHA-pinning, token permissions, SAST, dependency update tooling, and more)
+# and publishes results so the README badge stays current.
+#
+# Why: Scorecard is the industry-standard measure of repo security posture.
+# Running it weekly catches regressions (a rule someone disabled, a new
+# unpinned action) that point-in-time hardening misses.
+
+name: OpenSSF Scorecard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "30 7 * * 1"
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # Needed to upload results to code-scanning and publish the badge
+      security-events: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # v2.4.4
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload to code-scanning
+        uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+        with:
+          sarif_file: results.sarif

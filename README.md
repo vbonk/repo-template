@@ -1,6 +1,7 @@
 # repo-template
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12331/badge)](https://www.bestpractices.dev/projects/12331)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/vbonk/repo-template/badge)](https://scorecard.dev/viewer/?uri=github.com/vbonk/repo-template)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/vbonk/repo-template/actions/workflows/ci.yml/badge.svg)](https://github.com/vbonk/repo-template/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/vbonk/repo-template)](https://github.com/vbonk/repo-template/releases)
@@ -120,7 +121,7 @@ No existing solution combines all three things a solo AI-assisted developer need
 
 - **Claude Code and Codex work from day one** — full project context, conventions, and security boundaries via `CLAUDE.md` and the open `AGENTS.md` standard, plus Claude-native commands, skills, and hooks
 - **Secrets never reach GitHub** — `.gitignore` blocks credential patterns immediately; one command (`setup-hooks.sh`) adds pre-commit scanning; CI scans every PR automatically
-- **Mistakes get caught, not shipped** — 18 workflows included (dependency review, secret detection, stale management active by default; CI and CodeQL ready to enable for your stack)
+- **Mistakes get caught, not shipped** — 19 workflows included (dependency review, secret detection, stale management active by default; CI and CodeQL ready to enable for your stack)
 - **Security in one command** — `secure-repo.sh` enables branch protection, Dependabot alerts, and tag protection. SHA-pinned Actions and prompt injection defense are active from day one
 - **Two minutes from zero to production-grade** — Quick setup or comprehensive 8-step configuration with interactive prompts
 - **Issues and tasks, not mental to-do lists** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync, helper scripts
