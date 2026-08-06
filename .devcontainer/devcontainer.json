@@ -1,6 +1,9 @@
 {
   "name": "Development Container",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  // Digest-pinned (not :ubuntu tag): the same immutability rule as SHA-pinned
+  // Actions — a moving tag is remotely mutable code execution in Codespaces.
+  // Update the digest deliberately, like any dependency.
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu@sha256:1f8bb87ca6d342a587a9163a5a1ea8c487bcd4f149e8483a5ff711f795f0776d",
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
     // === Uncomment for your stack ===
