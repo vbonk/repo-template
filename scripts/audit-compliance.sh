@@ -30,24 +30,80 @@ def check_file(repo, path):
     )
     return result.returncode == 0
 
-def check_workflow_sha_pinned(repo):
-    """Check if workflows use SHA-pinned actions"""
+def list_workflow_files(repo):
+    """Return the .yml/.yaml filenames under .github/workflows (empty on error)"""
     result = subprocess.run(
         ["gh", "api", f"repos/{repo}/contents/.github/workflows"],
         capture_output=True, text=True
     )
     if result.returncode != 0:
-        return False
-    # If workflows dir exists, check for SHA pattern in ci.yml
-    ci_result = subprocess.run(
-        ["gh", "api", f"repos/{repo}/contents/.github/workflows/ci.yml",
+        return []
+    try:
+        entries = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return []
+    return [e["name"] for e in entries
+            if e.get("name", "").endswith((".yml", ".yaml"))]
+
+def fetch_workflow(repo, name):
+    """Raw content of one workflow file, or None on error"""
+    result = subprocess.run(
+        ["gh", "api", f"repos/{repo}/contents/.github/workflows/{name}",
          "-H", "Accept: application/vnd.github.raw"],
         capture_output=True, text=True
     )
-    if ci_result.returncode != 0:
+    return result.stdout if result.returncode == 0 else None
+
+def active_uses_refs(content):
+    """All non-commented `uses:` refs, excluding local and docker refs"""
+    refs = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            continue
+        m = re.search(r'(?:^|\s)uses:\s*([^\s#]+)', stripped)
+        if not m:
+            continue
+        ref = m.group(1).strip("\"'")
+        if ref.startswith("./") or ref.startswith("docker://"):
+            continue
+        refs.append(ref)
+    return refs
+
+def check_workflow_sha_pinned(repo):
+    """EVERY third-party action in EVERY workflow must be pinned to a
+    40-hex-char SHA. One pinned action does not vouch for the rest —
+    a single mutable ref (@main, @v4) is the whole supply-chain hole."""
+    names = list_workflow_files(repo)
+    if not names:
         return False
-    # Check for SHA-pinned pattern (40-char hex after @)
-    return bool(re.search(r'uses:.*@[a-f0-9]{40}', ci_result.stdout))
+    saw_any = False
+    for name in names:
+        content = fetch_workflow(repo, name)
+        if content is None:
+            return False  # unverifiable is not a pass
+        for ref in active_uses_refs(content):
+            saw_any = True
+            if not re.search(r'@[0-9a-f]{40}$', ref):
+                return False
+    return saw_any
+
+def check_workflow_permissions(repo):
+    """Every workflow declares a top-level `permissions:` block
+    (least-privilege). Unverifiable or missing anywhere = not compliant."""
+    names = list_workflow_files(repo)
+    if not names:
+        return False
+    for name in names:
+        content = fetch_workflow(repo, name)
+        if content is None or not re.search(r'^permissions:', content, re.M):
+            return False
+    return True
+
+def check_sbom_release(repo):
+    """release.yml exists and contains an SBOM generation step."""
+    content = fetch_workflow(repo, "release.yml")
+    return bool(content) and ("sbom" in content.lower())
 
 # Feature definitions: (id, name, category, weight, check_path_or_special)
 FEATURES = [
@@ -60,7 +116,7 @@ FEATURES = [
     ("claude-commands", ".claude/commands/", "ai-config", 3, ".claude/commands"),
     ("ci-workflow", "CI workflow", "ci-cd", 5, ".github/workflows/ci.yml"),
     ("ci-sha-pinned", "Actions SHA-pinned", "ci-cd", 4, "__sha_check__"),
-    ("ci-permissions", "Explicit permissions", "ci-cd", 3, "__skip__"),
+    ("ci-permissions", "Explicit permissions", "ci-cd", 3, "__permissions_check__"),
     ("dependabot", "dependabot.yml", "ci-cd", 4, ".github/dependabot.yml"),
     ("release-workflow", "Release workflow", "ci-cd", 3, ".github/workflows/release.yml"),
     ("codeql", "CodeQL scanning", "security", 4, ".github/workflows/codeql.yml"),
@@ -99,7 +155,7 @@ FEATURES = [
     ("detect-conflicts", "Merge conflict detection", "ci-cd", 2, ".github/workflows/detect-conflicts.yml"),
     ("update-contributors", "Contributor tracking", "community", 2, ".github/workflows/update-contributors.yml"),
     ("contributors-md", "CONTRIBUTORS.md", "community", 2, "CONTRIBUTORS.md"),
-    ("sbom-release", "SBOM in releases", "security", 3, "__skip__"),
+    ("sbom-release", "SBOM in releases", "security", 3, "__sbom_check__"),
     ("skills-dir", "Claude skills directory", "ai-config", 2, ".claude/skills/README.md"),
     ("agents-dir", "Claude agents directory", "ai-config", 2, ".claude/agents/README.md"),
 ]
@@ -115,8 +171,10 @@ for repo in repos_env:
     for fid, fname, fcat, fweight, fpath in FEATURES:
         if fpath == "__sha_check__":
             present = check_workflow_sha_pinned(repo)
-        elif fpath == "__skip__":
-            present = True  # Can't easily check remotely
+        elif fpath == "__permissions_check__":
+            present = check_workflow_permissions(repo)
+        elif fpath == "__sbom_check__":
+            present = check_sbom_release(repo)
         else:
             present = check_file(repo, fpath)
 
