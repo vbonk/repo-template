@@ -27,7 +27,7 @@ Perform a comprehensive code review on the specified files or changes.
 ### Step 1: Understand the Context
 
 - Read the PR description or change summary
-- Identify which files were modified: `git diff --name-only HEAD~1`
+- Identify which files were modified: `git diff --name-only origin/main...HEAD` (the full branch, not just the last commit — multi-commit PRs are the norm; add `git status --short` to catch uncommitted work)
 - Read each modified file to understand the changes
 
 ### Step 2: Review for Correctness

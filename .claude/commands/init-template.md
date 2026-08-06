@@ -6,12 +6,19 @@ Customize this repository template for your project.
 
 Ask: **"Quick setup (essentials only) or full setup (all features)?"**
 
-- **Quick** (Steps 1-4): Get coding fast — core files + language setup
-- **Full** (Steps 1-8): Everything — issues, security, dev tooling, releases
+- **Quick** (Steps 1-5): Get coding fast — core files + language setup + cleanup
+- **Full** (Steps 1-9): Everything — issues, security, dev tooling, releases
+- **Resuming Full after a Quick run?** Skip straight to Step 6 — do NOT redo
+  Steps 1-5 (re-asking project info and re-editing files is wasted, and an
+  agent following this literally would clobber prior answers).
+
+> **Local-first repos (Workflow B):** any step using `gh repo edit` or other
+> repo-mutating gh commands requires the GitHub repo to exist — run
+> `gh repo create --source . --push` first if you started from a bare clone.
 
 ---
 
-## Quick Mode (Steps 1-4)
+## Quick Mode (Steps 1-5)
 
 ### 1. Gather Project Information
 
@@ -70,11 +77,11 @@ These are fast, safe, and reversible. No reason to skip them.
 - Offer initial commit: `chore: initialize project from template`
 - Report the security scorecard from `secure-repo.sh`
 
-**If Quick mode: STOP HERE.** Suggest: "Run `/project:init-template` again with Full mode later to add issues, advanced security, dev tooling, and releases."
+**If Quick mode: STOP HERE.** Suggest: "Run `/project:init-template` again later and choose Full mode — it resumes at Step 6 (issues, advanced security, dev tooling, releases) without redoing this setup."
 
 ---
 
-## Full Mode (continues from Step 5)
+## Full Mode (Steps 6-9 — resumes here after a Quick run)
 
 ### 6. GitHub Issues Setup
 
@@ -92,7 +99,7 @@ If yes:
 
 If `secure-repo.sh` was already run in Quick Mode (Step 4), this step covers the advanced options:
 
-- **CodeQL:** Uncomment matching language in `.github/workflows/codeql.yml`
+- **CodeQL:** Easiest path is GitHub's default setup: `gh api -X PATCH repos/OWNER/REPO/code-scanning/default-setup -f state=configured`. To use the workflow instead: `.github/workflows/codeql.yml` ships as a disabled stub — DELETE the stub job, then uncomment the entire real configuration block at the bottom of the file and set your language in its matrix (just uncommenting a language line is not enough)
 - **Branch protection (advanced):** If Step 4's basic protection isn't enough (e.g., require PR reviews, signed commits), run full `gh api` commands from `docs/BRANCH-PROTECTION.md`
 - **Commit signing:** "Set up commit signing?" → see `docs/BRANCH-PROTECTION.md` for SSH/GPG instructions
 - **FUNDING.yml:** "Set up sponsor button?" → uncomment platform + username
@@ -114,7 +121,7 @@ If `secure-repo.sh` was already run in Quick Mode (Step 4), this step covers the
 
 ### 9. Release & Final Setup
 
-- **Release workflow:** "Release method? (Tag-based / semantic-release / skip)" → uncomment variant in `.github/workflows/release.yml`
+- **Release workflow:** `.github/workflows/release.yml` is ACTIVE and tag-based (push a `v*` tag → draft → sign → SBOM → publish). Ask: "Keep tag-based releases, or disable?" — there are no variants to uncomment; to disable, delete the workflow file
 - **License:** "License? (MIT / Apache-2.0 / GPL-3.0 / keep MIT)" → update LICENSE file
 - **Social preview:** Suggest adding a custom image in Settings > Social preview
 
