@@ -226,10 +226,10 @@ run_layer_1() {
   # (endCursor, CURSOR) never false-positive.
   local stale_agents
   stale_agents=$(git grep -ilE "cursorrule[s]|windsu[r]frules|gemin[i]|copilo[t]|aide[r]|windsu[r]f" -- \
-    ':!CHANGELOG.md' ':!CONTRIBUTORS.md' ':!repo-template-example' 2>/dev/null || true)
+    ':!CHANGELOG.md' ':!CONTRIBUTORS.md' ':!docs/decisions/004-two-agent-focus.md' ':!repo-template-example' 2>/dev/null || true)
   local stale_cursor
   stale_cursor=$(git grep -lE "\\bCursor\\b" -- \
-    ':!CHANGELOG.md' ':!CONTRIBUTORS.md' ':!repo-template-example' 2>/dev/null || true)
+    ':!CHANGELOG.md' ':!CONTRIBUTORS.md' ':!docs/decisions/004-two-agent-focus.md' ':!repo-template-example' 2>/dev/null || true)
   if [[ -z "$stale_agents" && -z "$stale_cursor" ]]; then
     pass "Agent focus: no references to removed agents (Claude Code + Codex only)"
   else
