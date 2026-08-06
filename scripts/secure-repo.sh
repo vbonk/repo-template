@@ -137,6 +137,21 @@ if $AUDIT; then
   audit_check "Default workflow permissions: read" \
     "gh api repos/$REPO/actions/permissions/workflow --jq '.default_workflow_permissions' | grep -q read" \
     "bash scripts/secure-repo.sh"
+
+  echo ""
+  echo "Platform Hardening (2025-26 features):"
+  audit_check "Auto-merge enabled" \
+    "gh api repos/$REPO --jq '.allow_auto_merge' | grep -q true" \
+    "bash scripts/secure-repo.sh"
+  audit_check "Actions SHA-pinning platform-enforced" \
+    "gh api repos/$REPO/actions/permissions --jq '.sha_pinning_required' | grep -q true" \
+    "bash scripts/secure-repo.sh"
+  audit_check "Immutable releases" \
+    "gh api repos/$REPO/immutable-releases --jq '.enabled' | grep -q true" \
+    "bash scripts/secure-repo.sh"
+  audit_check "Secret-scanning validity checks (plan-gated: Secret Protection add-on)" \
+    "gh api repos/$REPO --jq '.security_and_analysis.secret_scanning_validity_checks.status' | grep -q enabled" \
+    "requires GitHub Secret Protection; scanning + push protection work without it"
 else
   # ---------- HARDENING (mutations) ----------
   # --- Dependabot Vulnerability Alerts ---
@@ -149,28 +164,96 @@ else
     "gh api -X PUT repos/$REPO/automated-security-fixes" \
     "May require admin access"
 
-  # --- Branch Protection ---
+  # --- Branch Protection (rulesets — GitHub's current mechanism) ---
+  # create-or-update by ruleset NAME so re-runs are idempotent.
+  # shellcheck disable=SC2317,SC2329  # invoked indirectly via run_check eval
+  upsert_ruleset() {
+    local name="$1" payload="$2" existing_id
+    existing_id=$(gh api "repos/$REPO/rulesets" --jq \
+      ".[] | select(.name == \"$name\") | .id" 2>/dev/null | head -1)
+    if [[ -n "$existing_id" ]]; then
+      printf '%s' "$payload" | gh api -X PUT "repos/$REPO/rulesets/$existing_id" --input - --silent
+    else
+      printf '%s' "$payload" | gh api -X POST "repos/$REPO/rulesets" --input - --silent
+    fi
+  }
+
+  # shellcheck disable=SC2317,SC2329  # invoked indirectly via run_check eval
+  harden_main_ruleset() {
+    # Required status checks default to this template's CI job names; adjust
+    # the contexts below to YOUR job names after enabling your stack.
+    upsert_ruleset "Protect Main" '{
+      "name": "Protect Main",
+      "target": "branch",
+      "enforcement": "active",
+      "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+      "rules": [
+        { "type": "deletion" },
+        { "type": "non_fast_forward" },
+        { "type": "required_status_checks",
+          "parameters": { "strict_required_status_checks_policy": false,
+            "required_status_checks": [ { "context": "build" }, { "context": "validate" } ] } }
+      ],
+      "bypass_actors": [ { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "pull_request" } ]
+    }'
+  }
+
+  # shellcheck disable=SC2317,SC2329  # invoked indirectly via run_check eval
+  harden_tag_ruleset() {
+    upsert_ruleset "Protect Release Tags" '{
+      "name": "Protect Release Tags",
+      "target": "tag",
+      "enforcement": "active",
+      "conditions": { "ref_name": { "include": ["refs/tags/v*"], "exclude": [] } },
+      "rules": [ { "type": "deletion" }, { "type": "non_fast_forward" }, { "type": "update" } ],
+      "bypass_actors": []
+    }'
+  }
+
   echo ""
   echo "Branch Protection (${DEFAULT_BRANCH}):"
-  run_check "Block force-push and branch deletion" \
-    "gh api -X PUT repos/$REPO/branches/$DEFAULT_BRANCH/protection --silent --input - <<'BPEOF'
-{
-  \"required_status_checks\": null,
-  \"enforce_admins\": false,
-  \"required_pull_request_reviews\": null,
-  \"restrictions\": null,
-  \"allow_force_pushes\": false,
-  \"allow_deletions\": false
-}
-BPEOF" \
-    "Branch protection may require Pro plan for private repos"
+  run_check "Ruleset: block force-push/deletion + require status checks (build, validate)" \
+    "harden_main_ruleset" \
+    "Rulesets may require Pro plan for private repos; see docs/BRANCH-PROTECTION.md"
+  echo -e "  ${YELLOW}[NOTE]${NC} Required check contexts default to 'build' and 'validate' — edit harden_main_ruleset in this script if your CI job names differ"
 
-  # --- Tag Protection ---
   echo ""
   echo "Tag Protection:"
-  run_check "Protect v* release tags" \
-    "gh api repos/$REPO/tags/protection --method POST -f pattern='v*' --silent" \
-    "Tag protection may already exist or require Pro plan"
+  run_check "Ruleset: protect v* release tags (no delete/move/update)" \
+    "harden_tag_ruleset" \
+    "Tag rulesets may require Pro plan for private repos"
+
+  # --- 2025-26 platform hardening ---
+  echo ""
+  echo "Platform Hardening:"
+  run_check "Auto-merge enabled (pairs with required checks for gated Dependabot merges)" \
+    "gh api -X PATCH repos/$REPO -F allow_auto_merge=true --silent"
+
+  run_check "Actions SHA-pinning required (platform-enforced)" \
+    "gh api -X PUT repos/$REPO/actions/permissions --input - <<'SPEOF'
+{\"enabled\": true, \"allowed_actions\": \"all\", \"sha_pinning_required\": true}
+SPEOF" \
+    "Requires admin; older GHES versions lack this policy"
+
+  run_check "Immutable releases (assets and tags locked after publish)" \
+    "gh api -X PUT repos/$REPO/immutable-releases --silent" \
+    "Requires admin access"
+
+  run_check "Secret-scanning validity checks" \
+    "gh api -X PATCH repos/$REPO --silent --input - <<'VCEOF'
+{\"security_and_analysis\": {\"secret_scanning_validity_checks\": {\"status\": \"enabled\"}}}
+VCEOF
+     gh api repos/$REPO --jq '.security_and_analysis.secret_scanning_validity_checks.status' | grep -q enabled" \
+    "Plan-gated: needs GitHub Secret Protection (paid add-on) — scanning + push protection remain active without it"
+
+  run_check "Secret-scanning non-provider patterns" \
+    "gh api -X PATCH repos/$REPO --silent --input - <<'NPEOF'
+{\"security_and_analysis\": {\"secret_scanning_non_provider_patterns\": {\"status\": \"enabled\"}}}
+NPEOF
+     gh api repos/$REPO --jq '.security_and_analysis.secret_scanning_non_provider_patterns.status' | grep -q enabled" \
+    "Plan-gated: needs GitHub Secret Protection (paid add-on)"
+
+  echo -e "  ${YELLOW}[NOTE]${NC} Push rulesets (server-side path blocks for .env/.pem/keys) are org-owned-repo only — if this repo moves to an org, add one; see docs/BRANCH-PROTECTION.md"
 
   # --- Repository Settings ---
   echo ""
@@ -201,8 +284,11 @@ BPEOF" \
   fi
 
   # --- Default Actions Permissions ---
+  # NOTE: this is the /workflow sub-endpoint. The parent /actions/permissions
+  # endpoint doesn't own this field — and PUTting the parent here would clobber
+  # sha_pinning_required set above.
   run_check "Set default Actions permissions to read" \
-    "gh api -X PUT repos/$REPO/actions/permissions --input - <<'APEOF'
+    "gh api -X PUT repos/$REPO/actions/permissions/workflow --input - <<'APEOF'
 {\"default_workflow_permissions\": \"read\"}
 APEOF" \
     "May require org-level override"
@@ -271,7 +357,7 @@ if [[ $WARN -gt 0 || $FAIL -gt 0 ]]; then
   echo "Next steps:"
   [[ ! -x "$REPO_ROOT/.git/hooks/pre-commit" ]] && echo "  - Install hooks: bash templates/hooks/setup-hooks.sh"
   [[ "$SIGNING" != "true" ]] && echo "  - Set up commit signing: see docs/BRANCH-PROTECTION.md"
-  echo "  - Configure CodeQL language in .github/workflows/codeql.yml"
+  echo "  - Enable CodeQL (recommended: default setup): gh api -X PATCH repos/OWNER/REPO/code-scanning/default-setup -f state=configured"
 fi
 echo ""
 
