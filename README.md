@@ -461,8 +461,10 @@ This template includes instruction files for multiple AI coding assistants:
 | Command | What It Does |
 |---------|-------------|
 | `/project:init-template` | Interactive project setup (Quick or Full mode) |
-| `/project:security-audit` | Run security scorecard — checks GitHub settings, pre-commit hooks, forbidden tokens, commit signing. Outputs letter grade (A+ through D). |
+| `/project:security-audit` | Run security scorecard (read-only) — checks GitHub settings, pre-commit hooks, forbidden tokens, commit signing. Outputs letter grade (A+ through D). |
 | `/project:review` | Code review assistance |
+
+**Bundled skills:** `.claude/skills/` ships six auto-discovered skills — Claude uses them when your request matches, no command needed: `cot` (structured reasoning before risky changes), `hibernate` (pause/reactivate a repo), `repo-docs` (documentation upgrades), `skill-builder` + `skill-validator` (author and debug your own skills), and `task-cleanup`. See the [Skills README](.claude/skills/README.md).
 
 **Proactive security:** All 6 AI agent configs instruct the agent to check if security hardening has been completed on first session. If pre-commit hooks or GitHub protections are missing, the agent will suggest running the setup commands once.
 

@@ -1,6 +1,6 @@
 ---
 name: hibernate
-description: Hibernate or un-hibernate a GitHub repo. Disables Actions, Dependabot, Issues, Projects, Pages, and webhooks to stop all resource consumption and charges. Optionally archives (read-only). Fully reversible. Use when shutting down, pausing, or reactivating a repo. Triggers on "hibernate", "shut down repo", "pause repo", "deactivate repo", "un-hibernate", "reactivate repo", "wake up repo".
+description: Hibernate or un-hibernate a GitHub repo. Disables Actions, Dependabot alerts/fixes, Issues, Projects, and Wiki to stop automated resource consumption. Detects Pages and webhooks and tells you how to stop them (archiving covers webhooks; Pages needs a manual/explicit delete). Reversible for what it disabled — it records prior state and restores those settings on wake. Use when shutting down, pausing, or reactivating a repo. Triggers on "hibernate", "shut down repo", "pause repo", "deactivate repo", "un-hibernate", "reactivate repo", "wake up repo".
 ---
 
 # Hibernate Repo Skill
@@ -103,12 +103,12 @@ Run these commands in order:
 # 1. Disable GitHub Actions
 gh api -X PUT repos/$REPO/actions/permissions -F enabled=false
 
-# 2. Disable vulnerability alerts (Dependabot alerts)
-gh api -X DELETE repos/$REPO/vulnerability-alerts
-
-# 3. Disable automated security fixes (Dependabot PRs)
-# Only works if vulnerability alerts were enabled — ignore errors
+# 2. Disable automated security fixes FIRST (the API requires vulnerability
+# alerts to still be enabled when this runs — order matters)
 gh api -X DELETE repos/$REPO/automated-security-fixes 2>/dev/null
+
+# 3. Disable vulnerability alerts (Dependabot alerts)
+gh api -X DELETE repos/$REPO/vulnerability-alerts
 
 # 4. Disable Issues
 gh api -X PATCH repos/$REPO -F has_issues=false

@@ -1,11 +1,6 @@
 ---
 name: cot
-description: Chain-of-thought analysis before action. Forces structured reasoning, risk assessment, and explicit plan before execution. Use for any complex, destructive, or important request. Invoke with "/cot [request]" or "use cot: [request]".
-triggers:
-  - cot
-  - use cot
-  - chain of thought
-  - think through
+description: Chain-of-thought analysis before action. Forces structured reasoning, risk assessment, and explicit plan before execution. Use for any complex, destructive, or important request. Invoke with "/cot [request]" or "use cot: [request]". Triggers on "cot", "chain of thought", "think through".
 ---
 
 # Chain-of-Thought (COT) Skill

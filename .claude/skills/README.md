@@ -32,7 +32,13 @@ flowchart LR
 
 ## Your First Skill in 2 Minutes
 
-Create a file in this directory with `.md` extension:
+> [!IMPORTANT]
+> **Layout matters: each skill is a DIRECTORY containing a `SKILL.md` file** —
+> `.claude/skills/my-skill/SKILL.md`. Flat files like `.claude/skills/my-skill.md`
+> are silently ignored by Claude Code (verified at runtime). The directory can
+> also hold supporting files the skill references.
+
+Create `my-project-helper/SKILL.md` in this directory:
 
 ```markdown
 ---
@@ -83,9 +89,22 @@ allowed-tools: Bash, Read, Grep  # Optional: limit which tools the skill can sug
 | Dependency auditor | Checks for outdated or vulnerable dependencies | All projects |
 | Test coverage gaps | Identifies untested code paths | All projects |
 
+## Bundled Skills
+
+This template ships six working skills (each in its own directory):
+
+| Skill | What it does |
+|-------|--------------|
+| `cot` | Structured chain-of-thought analysis + risk assessment before complex or destructive actions |
+| `hibernate` | Put a GitHub repo into a dormant state (and wake it back up) |
+| `repo-docs` | Audit and upgrade README + docs/ to production quality |
+| `skill-builder` | Guided creation of new skills with optimized frontmatter |
+| `skill-validator` | Validate and debug existing skills (discovery, structure, descriptions) |
+| `task-cleanup` | Archive or clear completed tasks from the task list |
+
 ## See Also
 
 - [Agents README](../agents/README.md) — for complex, multi-step tasks
 - [Commands](../commands/) — for explicit, user-invoked tools
-- [Example skill](_example-skill.md) — a complete, working skill you can customize
-- [Anthropic Docs: Skills](https://docs.anthropic.com/en/docs/claude-code/skills)
+- [Example skill](_example-skill/SKILL.md) — a complete, working skill you can customize
+- [Claude Code Docs: Skills](https://code.claude.com/docs/en/skills)

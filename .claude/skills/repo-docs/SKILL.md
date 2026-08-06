@@ -78,7 +78,7 @@ Report findings as a checklist:
 ...
 
 ### docs/ Files (Y total, Z passing)
-- docs/strategy.md (6/8) — missing: cross-references, Mermaid diagram
+- docs/EXAMPLE-DOC.md (6/8) — missing: cross-references, Mermaid diagram
 - docs/architecture.md (3/8) — missing: summary, date, callouts, links, diagram
 ...
 
@@ -138,7 +138,7 @@ If the repo has 5+ docs, generate a document index section in README.md:
 
 | Category | Document | Purpose |
 |----------|----------|---------|
-| Strategy | [strategy.md](docs/strategy.md) | Niche positioning, content model, monetization |
+| Strategy | [strategy.md](docs/EXAMPLE-DOC.md) | Niche positioning, content model, monetization |
 | Architecture | [architecture.md](docs/architecture.md) | System design and tech decisions |
 ```
 
@@ -162,7 +162,7 @@ Report final scores:
 
 ### Before → After
 - README.md: 5/14 → 14/14
-- docs/strategy.md: 4/8 → 8/8
+- docs/EXAMPLE-DOC.md: 4/8 → 8/8
 - docs/options.md: 3/8 → 7/8
 
 ### New Files Created

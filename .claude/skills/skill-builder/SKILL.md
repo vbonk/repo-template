@@ -1,14 +1,6 @@
 ---
 name: skill-builder
-description: Create production-ready Claude Code skills with guided workflow, templates, and best practices. Generate SKILL.md files with optimized YAML frontmatter, proper structure, and discovery-optimized descriptions. Use when creating new skills, scaffolding skill directories, building skills from scratch, or need expert guidance on skill design.
-triggers:
-  - skill-builder
-  - create skill
-  - new skill
-  - build skill
-  - scaffold skill
-  - skill template
-  - make a skill
+description: Create production-ready Claude Code skills with guided workflow, templates, and best practices. Generate SKILL.md files with optimized YAML frontmatter, proper structure, and discovery-optimized descriptions. Use when creating new skills, scaffolding skill directories, building skills from scratch, or need expert guidance on skill design. Triggers on "create skill", "new skill", "build skill", "scaffold skill", "make a skill".
 ---
 
 # Skill Builder
@@ -161,10 +153,7 @@ If this throws an error, your frontmatter is broken and the skill won't load.
 ```yaml
 ---
 name: Skill Display Name
-description: "Complete description with capabilities and triggers"
-triggers:            # Alternative invocations
-  - skill-name
-  - alternate-name
+description: "Complete description with capabilities and trigger phrases — put invocation keywords HERE (a separate triggers: field is not part of the documented frontmatter and is ignored)"
 allowed-tools: Read, Grep, Glob, Bash  # Restrict Claude's tool access
 ---
 ```
