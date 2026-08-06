@@ -28,6 +28,11 @@ updates:
     # Why limit: Prevents Dependabot from overwhelming you with 20 PRs at once.
     # 5 is manageable — once you merge them, it opens the next batch.
     open-pull-requests-limit: 5
+    # Why cooldown: after the Sept 2025 npm supply-chain compromises, waiting
+    # a few days before adopting brand-new versions lets poisoned releases get
+    # caught and yanked first. Security updates bypass the cooldown.
+    cooldown:
+      default-days: 3
     commit-message:
       prefix: "ci"          # Creates commits like "ci(deps): bump actions/checkout"
       include: "scope"
@@ -44,6 +49,8 @@ updates:
   #     interval: "weekly"
   #     day: "monday"
   #   open-pull-requests-limit: 10
+  #   cooldown:
+  #     default-days: 3
   #   commit-message:
   #     prefix: "deps"
   #     prefix-development: "deps-dev"  # Distinguishes devDependency updates
@@ -69,6 +76,8 @@ updates:
   #     interval: "weekly"
   #     day: "monday"
   #   open-pull-requests-limit: 10
+  #   cooldown:
+  #     default-days: 3
   #   commit-message:
   #     prefix: "deps"
   #     include: "scope"
@@ -80,6 +89,8 @@ updates:
   #     interval: "weekly"
   #     day: "monday"
   #   open-pull-requests-limit: 10
+  #   cooldown:
+  #     default-days: 3
   #   commit-message:
   #     prefix: "deps"
   #     include: "scope"
@@ -93,6 +104,8 @@ updates:
   #     interval: "weekly"
   #     day: "monday"
   #   open-pull-requests-limit: 10
+  #   cooldown:
+  #     default-days: 3
   #   commit-message:
   #     prefix: "deps"
   #     include: "scope"
@@ -104,6 +117,8 @@ updates:
   #     interval: "weekly"
   #     day: "monday"
   #   open-pull-requests-limit: 10
+  #   cooldown:
+  #     default-days: 3
   #   commit-message:
   #     prefix: "deps"
   #     include: "scope"

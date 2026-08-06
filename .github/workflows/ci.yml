@@ -62,7 +62,7 @@ jobs:
       # Why each step: Lint catches style/quality issues. Test catches bugs.
       # Build confirms your code compiles. All three must pass before merge.
       # - name: Setup Node.js
-      #   uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      #   uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       #   with:
       #     node-version: 'lts/*'    # Uses latest long-term-support version
       #     cache: 'npm'             # Caches node_modules between runs (faster CI)
@@ -82,7 +82,7 @@ jobs:
       # --- Python ---
       # What: Installs dependencies, lints with Ruff, runs tests with pytest.
       # - name: Setup Python
-      #   uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+      #   uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       #   with:
       #     python-version: '3.12'
       #     cache: 'pip'             # Caches pip packages between runs
@@ -102,7 +102,7 @@ jobs:
       # What: Builds all packages and runs all tests.
       # Why ./...: The Go convention for "all packages in this module."
       # - name: Setup Go
-      #   uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
+      #   uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       #   with:
       #     go-version: 'stable'
       #
@@ -141,7 +141,7 @@ jobs:
       # What: Same as Node.js but using Bun (faster JS/TS runtime).
       # Why frozen-lockfile: Ensures CI uses exact same versions as your machine.
       # - name: Setup Bun
-      #   uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.2
+      #   uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       #   with:
       #     bun-version: latest
       #
