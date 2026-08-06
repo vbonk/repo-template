@@ -150,8 +150,20 @@ run_layer_1() {
   local tmpfile
   tmpfile=$(mktemp)
 
-  # Extract all links with their source files
-  find . -name '*.md' -not -path '*/_admin/*' -not -path '*/repo-template-example/*' -not -path '*/.git/*' -exec grep -Hn -oE '\]\([^)]+\)' {} \; 2>/dev/null | head -300 > "$tmpfile"
+  # Extract all links with their source files. Fenced code blocks are
+  # stripped first — links inside ``` fences are examples/sample output,
+  # not assertions that a file exists.
+  while IFS= read -r md; do
+    awk -v src="$md" '
+      /^[[:space:]]*```/ { fence = !fence; next }
+      !fence {
+        line = $0
+        while (match(line, /\]\([^)]+\)/)) {
+          print src ":" NR ":" substr(line, RSTART, RLENGTH)
+          line = substr(line, RSTART + RLENGTH)
+        }
+      }' "$md"
+  done < <(find . -name '*.md' -not -path '*/_admin/*' -not -path '*/repo-template-example/*' -not -path '*/.git/*' 2>/dev/null) | head -300 > "$tmpfile"
 
   while IFS= read -r match; do
     local source_file target dir resolved
@@ -381,6 +393,29 @@ with open('$f') as fh:
            CONTRIBUTORS.md; do
     assert_file_exists "$f"
   done
+
+  # 2.11 Skills use the directory layout Claude Code actually loads
+  # (runtime-verified 2026-08-04: flat .claude/skills/<name>.md files are
+  # silently IGNORED; only <name>/SKILL.md directories are discovered)
+  local skill_layout_errors=0 d
+  for d in .claude/skills/*/; do
+    [[ -d "$d" ]] || continue
+    if [[ ! -f "${d}SKILL.md" ]]; then
+      skill_layout_errors=$((skill_layout_errors + 1))
+      if $VERBOSE; then echo "    Missing SKILL.md: $d"; fi
+    elif ! grep -q '^name:' "${d}SKILL.md" || ! grep -q '^description:' "${d}SKILL.md"; then
+      skill_layout_errors=$((skill_layout_errors + 1))
+      if $VERBOSE; then echo "    Missing name/description frontmatter: ${d}SKILL.md"; fi
+    fi
+  done
+  # Flat .md files (other than README.md) are dead weight — they never load
+  local flat_skills
+  flat_skills=$(find .claude/skills -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l | tr -d ' ')
+  if [[ $skill_layout_errors -eq 0 && "$flat_skills" -eq 0 ]]; then
+    pass "Skills: all use <name>/SKILL.md layout with name+description frontmatter"
+  else
+    fail "Skills: $skill_layout_errors malformed dir(s), $flat_skills flat file(s) that Claude Code will silently ignore"
+  fi
 }
 
 # ============================================================
@@ -499,6 +534,13 @@ run_layer_3() {
 # ============================================================
 run_layer_4() {
   header "Layer 4: Security Verification"
+
+  # Same worktree constraint as Layer 3: hook install/execution needs .git
+  # to be a real directory. Skip VISIBLY rather than false-fail.
+  if [[ ! -d .git ]]; then
+    skip "Layer 4 hook tests: worktree checkout detected (.git is a file) — run from a standard clone to verify hook behavior"
+    return 0
+  fi
 
   # Ensure hooks are installed for testing
   if [[ ! -x .git/hooks/pre-commit ]]; then

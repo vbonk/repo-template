@@ -1,11 +1,6 @@
 ---
 name: task-cleanup
-description: Archive or remove completed tasks from the task list. Use when task list grows large or to clean up after a project phase. Invoke with "/task-cleanup" or "clean up tasks".
-triggers:
-  - task-cleanup
-  - clean up tasks
-  - archive completed tasks
-  - clear completed tasks
+description: Archive or remove completed tasks from the task list. Use when task list grows large or to clean up after a project phase. Invoke with "/task-cleanup" or "clean up tasks". Triggers on "task-cleanup", "archive completed tasks", "clear completed tasks".
 ---
 
 # Task Cleanup Skill

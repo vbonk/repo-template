@@ -1,15 +1,6 @@
 ---
 name: skill-validator
-description: Validate and optimize existing Claude Code skills. Test discovery, check YAML frontmatter, analyze descriptions, suggest improvements, verify file structure, generate test phrases. Use when skills aren't being discovered, validating new skills, debugging skill issues, optimizing discoverability, or testing skill installation.
-triggers:
-  - skill-validator
-  - validate skill
-  - test skill
-  - optimize skill
-  - skill not found
-  - skill not working
-  - check skill
-  - debug skill
+description: Validate and optimize existing Claude Code skills. Test discovery, check YAML frontmatter, analyze descriptions, suggest improvements, verify file structure, generate test phrases. Use when skills aren't being discovered, validating new skills, debugging skill issues, optimizing discoverability, or testing skill installation. Triggers on "validate skill", "test skill", "skill not found", "skill not working", "debug skill".
 ---
 
 # Skill Validator

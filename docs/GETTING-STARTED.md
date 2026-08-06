@@ -280,13 +280,26 @@ If you use Claude Code, explore the custom commands in `.claude/commands/`:
 | Command | What It Does |
 |---------|-------------|
 | `/project:init-template` | Interactive project setup |
-| `/project:security-audit` | Security scorecard (GitHub settings + local protections) |
+| `/project:security-audit` | Security scorecard, read-only (add `--fix` intent via `scripts/secure-repo.sh` to apply hardening) |
 | `/project:review` | Code review assistance |
 | `/project:getting-started` | Walks through this guide interactively |
 | `/project:update-docs` | Checks documentation quality and suggests improvements |
 
+The template also ships six **skills** in `.claude/skills/` — unlike commands, Claude discovers and uses these automatically when your request matches:
+
+| Skill | Fires when you say things like |
+|-------|-------------------------------|
+| `cot` | "think this through", "use cot" — structured reasoning + risk assessment before big changes |
+| `hibernate` | "hibernate this repo", "pause repo" — put a repo into a dormant state, reversibly |
+| `repo-docs` | "fix the readme", "docs audit" — upgrade documentation to production quality |
+| `skill-builder` | "create a skill" — guided authoring of your own skills |
+| `skill-validator` | "my skill isn't working" — debug skill discovery and structure |
+| `task-cleanup` | "clean up tasks" — archive completed task-list entries |
+
+See the [Skills README](../.claude/skills/README.md) for how they work and how to write your own.
+
 > [!TIP]
-> Run `/project:security-audit` periodically to verify your security posture. It checks GitHub settings, pre-commit hooks, forbidden tokens, and commit signing, then outputs a letter grade.
+> Run `/project:security-audit` periodically to verify your security posture. It checks GitHub settings, pre-commit hooks, forbidden tokens, and commit signing, then outputs a letter grade — without changing anything.
 
 ---
 
