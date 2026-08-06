@@ -1,14 +1,24 @@
 # Detect Merge Conflicts
 # Auto-labels open PRs with `needs-rebase` when they have merge conflicts.
-# Runs on push to main (existing PRs may become conflicted) and on PR updates.
+#
+# Design notes (hard-won):
+# - Triggers are push-to-main + daily schedule + manual. NOT pull_request_target:
+#   this job only calls the GitHub API (never checks out PR code), and per-PR
+#   triggers made one PR's red X depend on UNRELATED PRs' state.
+# - The label is created idempotently first — a missing label used to crash
+#   the loop and fail the whole run.
+# - Per-PR failures warn and continue; one broken PR must never fail the run.
+# - mergeable=UNKNOWN means GitHub is still computing — retried once, then
+#   skipped with a warning (the next scheduled run catches it).
 
 name: Detect Merge Conflicts
 
 on:
   push:
     branches: [main]
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,26 +30,44 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
       - name: Check PRs for merge conflicts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          prs=$(gh pr list --json number,mergeable,labels --state open)
+          # Label must exist before any pr edit references it
+          gh label create needs-rebase --repo "$REPO" \
+            --color D93F0B --description "PR has merge conflicts and needs a rebase" \
+            --force || echo "::warning::could not ensure needs-rebase label exists"
 
-          echo "$prs" | jq -c '.[]' | while read -r pr; do
-            number=$(echo "$pr" | jq -r '.number')
-            mergeable=$(echo "$pr" | jq -r '.mergeable')
-            has_label=$(echo "$pr" | jq -r '[.labels[].name] | any(. == "needs-rebase")')
+          check_prs() {
+            gh pr list --repo "$REPO" --json number,mergeable,labels --state open
+          }
+
+          prs=$(check_prs)
+
+          # Retry once for PRs still computing mergeability
+          if printf '%s' "$prs" | jq -e '[.[] | select(.mergeable == "UNKNOWN")] | length > 0' > /dev/null; then
+            echo "Some PRs have mergeable=UNKNOWN — waiting 20s for GitHub to compute"
+            sleep 20
+            prs=$(check_prs)
+          fi
+
+          printf '%s' "$prs" | jq -c '.[]' | while read -r pr; do
+            number=$(printf '%s' "$pr" | jq -r '.number')
+            mergeable=$(printf '%s' "$pr" | jq -r '.mergeable')
+            has_label=$(printf '%s' "$pr" | jq -r '[.labels[].name] | any(. == "needs-rebase")')
 
             if [ "$mergeable" = "CONFLICTING" ] && [ "$has_label" = "false" ]; then
               echo "PR #$number is conflicting — adding needs-rebase label"
-              gh pr edit "$number" --add-label needs-rebase
+              gh pr edit "$number" --repo "$REPO" --add-label needs-rebase \
+                || echo "::warning::failed to label PR #$number — continuing"
             elif [ "$mergeable" = "MERGEABLE" ] && [ "$has_label" = "true" ]; then
               echo "PR #$number is mergeable — removing needs-rebase label"
-              gh pr edit "$number" --remove-label needs-rebase
+              gh pr edit "$number" --repo "$REPO" --remove-label needs-rebase \
+                || echo "::warning::failed to unlabel PR #$number — continuing"
+            elif [ "$mergeable" = "UNKNOWN" ]; then
+              echo "::warning::PR #$number mergeability still UNKNOWN — will resolve on next scheduled run"
             else
               echo "PR #$number — mergeable=$mergeable, has_label=$has_label — no action needed"
             fi
