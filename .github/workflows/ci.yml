@@ -13,14 +13,17 @@
 
 name: CI
 
+# Why NO paths-ignore: the `build` job is a REQUIRED status check on main.
+# A required check that gets path-filtered never reports on docs-only PRs,
+# and the ruleset then blocks the merge forever — the classic GitHub footgun.
+# The placeholder build costs seconds; a required check must ALWAYS run.
+# If you add expensive steps later, keep the job running and skip the
+# expensive STEPS conditionally instead of filtering the workflow.
 on:
   push:
     branches: [main]
-    # Why paths-ignore: Don't waste CI minutes on docs-only changes
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.editorconfig']
   pull_request:
     branches: [main]
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.editorconfig']
 
 # Why concurrency + cancel-in-progress: If you push 3 times in a row, only
 # the latest push runs CI. Prevents wasting your GitHub Actions minutes on
