@@ -61,7 +61,7 @@ Desktop.ini
 # every collaborator (or AI agent) who clones the repo.
 # Exception: settings.json and extensions.json are shared project settings.
 # =============================================
-# VS Code / Cursor workspace config
+# VS Code workspace config
 .vscode/
 # Keep: shared project settings (formatting, etc.)
 !.vscode/settings.json

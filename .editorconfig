@@ -1,13 +1,13 @@
 # EditorConfig — Consistent Formatting Across Editors
 #
-# What this does: Ensures every editor (VS Code, Cursor, Vim, IntelliJ, etc.)
+# What this does: Ensures every editor (VS Code, Vim, IntelliJ, etc.)
 # uses the same indentation, line endings, and whitespace rules for this project.
 #
 # Why it matters: Without this, files get inconsistent formatting depending on
 # which editor touched them last. This causes noisy git diffs (entire files
 # re-indented) and merge conflicts over whitespace — not actual code changes.
 #
-# How it works: Most editors detect this file automatically. VS Code and Cursor
+# How it works: Most editors detect this file automatically. VS Code
 # need the "EditorConfig for VS Code" extension (included in .vscode/extensions.json).
 #
 # Docs: https://editorconfig.org

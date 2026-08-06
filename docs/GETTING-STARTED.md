@@ -8,7 +8,7 @@
 
 - **Git** — installed and configured
 - **GitHub CLI (`gh`)** — required for repo creation and security hardening. [Install guide](https://cli.github.com/). Run `gh auth login` to authenticate.
-- **An AI coding tool** (optional) — Claude Code, Cursor, Copilot, etc. The template works without one, but the AI agent configs are a major feature.
+- **An AI coding tool** (optional) — Claude Code (primary) or Codex. The template works without one, but the agent configuration is a major feature.
 
 > [!NOTE]
 > Most template features work without `gh` (the `.gitignore`, AI configs, issue templates, and workflows all transfer via "Use this template"). The CLI is needed for `secure-repo.sh` (security hardening) and `audit-compliance.sh` (scoring). If you skip it, you can configure security settings manually in GitHub's Settings UI.
@@ -69,7 +69,7 @@ Force-push to main allowed          Branch protection enforced
 
 No issue structure                  5 templates, 25+ labels, helper scripts
 
-AI agents start cold                7 agent configs with project context
+AI agents start cold                Claude Code + Codex configured with project context
 ```
 
 ```mermaid
@@ -96,19 +96,14 @@ AI coding agents perform dramatically better when they have context about your p
 
 ### What the agent config files do
 
-This template includes configuration files for 7 AI coding agents. Each one tells the agent about your project so it's productive from the first session.
+This template configures its two supported agents — Claude Code (primary) and Codex — so each is productive from the first session.
 
 | Agent | Config File | What It Gives the Agent |
 |-------|-------------|-------------------------|
 | Claude Code | `CLAUDE.md` | Full project context, custom slash commands, security boundaries |
-| GitHub Copilot | `.github/copilot-instructions.md` | Code generation guidelines, security rules |
-| Cursor | `.cursorrules` | Architecture, testing, workflow conventions |
-| OpenAI Codex | `AGENTS.md` | Cross-agent compatibility layer |
-| Google Gemini | `GEMINI.md` | Commands, conventions, project structure |
-| Windsurf | `.windsurfrules` | Same depth as Cursor config |
-| Aider | `.aider.conf.yml` | Model selection, git settings, lint/test commands |
+| Codex | `AGENTS.md` | Project context, conventions, and security boundaries via the open AGENTS.md standard |
 
-You don't need all 7. Use whichever tools you work with — they're independent files, not a package deal. If you only use Copilot, the tuned `copilot-instructions.md` is ready. If you use Claude Code and Cursor, both get project-specific context from day one.
+Two files, two agents, zero sync burden. Claude Code additionally gets the `.claude/` toolkit — slash commands, auto-discovered skills, security hook templates, and an example sub-agent. `AGENTS.md` is an open standard, so other tools that adopt it read your Codex config for free.
 
 ### Why this matters
 
@@ -135,10 +130,10 @@ Run the interactive setup command in Claude Code:
 /project:init-template
 ```
 
-This walks you through filling in your project name, tech stack, and commands. All 7 agent config files update to reflect your project. You can also do it manually — every placeholder is marked with `<!-- TODO -->` comments:
+This walks you through filling in your project name, tech stack, and commands. Both agent config files (CLAUDE.md, AGENTS.md) update to reflect your project. You can also do it manually — every placeholder is marked with `<!-- TODO -->` comments:
 
 ```bash
-grep -r "TODO" --include="*.md" CLAUDE.md AGENTS.md GEMINI.md
+grep -r "TODO" --include="*.md" CLAUDE.md AGENTS.md
 ```
 
 ```mermaid

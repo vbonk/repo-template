@@ -102,7 +102,6 @@ jobs:
           echo "--- AI Config Files (info — expected to diverge) ---"
           check_file "CLAUDE.md" "info"
           check_file "AGENTS.md" "info"
-          check_file ".cursorrules" "info"
 
           echo ""
           echo "--- Scripts (warn if missing) ---"

@@ -22,21 +22,16 @@ Most of this is preventable. A pre-commit hook, a `.gitignore` that covers `.env
 
 If any of that sounds familiar, this template delivers the institutional knowledge that normally takes years on a team to absorb — as a one-click GitHub template.
 
-### Works with your AI tools — one, some, or all
+### Built for Claude Code and Codex — deeply, not broadly
 
-The template includes context files for 7 AI coding agents. Use whichever you work with — they're independent files, not a package deal. Each one tells the agent about your project structure, conventions, commands, and security boundaries so it's productive from the first session instead of starting cold.
+This template supports two agents completely instead of seven shallowly:
 
-| Agent | Config File | What It Gives the Agent |
-|-------|------------|------------------------|
-| Claude Code | `CLAUDE.md` | Full project context + `/project:init-template` and `/project:security-audit` commands |
-| GitHub Copilot | `.github/copilot-instructions.md` | Code generation guidelines, security rules |
-| Cursor | `.cursorrules` | Architecture, testing, workflow conventions |
-| OpenAI Codex | `AGENTS.md` | Cross-agent compatibility layer |
-| Google Gemini | `GEMINI.md` | Commands, conventions, project structure |
-| Windsurf | `.windsurfrules` | Same depth as Cursor config |
-| Aider | `.aider.conf.yml` | Model selection, git settings, lint/test commands |
+| Agent | Config File | What It Gets |
+|-------|------------|--------------|
+| **Claude Code** (primary) | `CLAUDE.md` | Full project context, security boundaries, plus the template's Claude-native toolkit: 5 slash commands, 6 auto-discovered skills, security hook templates, and an example sub-agent |
+| **Codex** | `AGENTS.md` | Project context, conventions, and the same security boundaries — in the open `AGENTS.md` standard Codex reads natively |
 
-If you only use Copilot, you get a tuned `copilot-instructions.md` and can ignore the rest. If you use Claude Code and Cursor, both work with project-specific context from day one. The files don't conflict or depend on each other.
+Depth over breadth is a deliberate choice. A config stub for every tool on the market is a maintenance chore that goes stale; two files kept genuinely excellent — context, commands, skills, hooks, and a real security model — make the agents you actually use dramatically better. And because `AGENTS.md` is an open convention, other tools that adopt the standard read it too, for free.
 
 ### Built for agentic development
 
@@ -57,7 +52,7 @@ Your new repo on day one:
   CI/CD pipeline          ready (Node, Python, Go, Rust, Bun — uncomment your stack)
   Security scanning       active (secrets blocked at commit + PR + push)
   Branch protection       enforced (force-push blocked, tags protected, delete-on-merge)
-  AI agent context        configured (whichever agents you use, project-aware)
+  AI agent context        configured (Claude Code + Codex, project-aware from session one)
   Issue management        structured (5 templates, 25+ labels, task scripts)
   Pre-commit hooks        installed (catches credentials before they reach git)
   Compliance audit        built in (score any repo against these standards)
@@ -116,14 +111,14 @@ No existing solution combines all three things a solo AI-assisted developer need
 | No CI — you find out code is broken when users tell you | CI pipeline catches failures on every push |
 | Secrets in source code — API keys committed, bots find them in minutes | Pre-commit hook + CI scanning blocks secrets at three levels |
 | Force-push to main can erase your commit history | Branch protection enforced — one-command setup |
-| AI agent starts cold every session | 7 agent configs with your project context, ready on first session |
+| AI agent starts cold every session | Claude Code and Codex get your full project context, commands, and skills on first session |
 | No issue tracking — mental to-do lists | 5 templates, 25+ labels, helper scripts |
 
 ---
 
 ## Features
 
-- **Your AI tools work from day one** — 7 agents configured (Claude Code, Copilot, Cursor, Codex, Gemini, Windsurf, Aider) with project context, conventions, and security boundaries
+- **Claude Code and Codex work from day one** — full project context, conventions, and security boundaries via `CLAUDE.md` and the open `AGENTS.md` standard, plus Claude-native commands, skills, and hooks
 - **Secrets never reach GitHub** — `.gitignore` blocks credential patterns immediately; one command (`setup-hooks.sh`) adds pre-commit scanning; CI scans every PR automatically
 - **Mistakes get caught, not shipped** — 18 workflows included (dependency review, secret detection, stale management active by default; CI and CodeQL ready to enable for your stack)
 - **Security in one command** — `secure-repo.sh` enables branch protection, Dependabot alerts, and tag protection. SHA-pinned Actions and prompt injection defense are active from day one
@@ -143,8 +138,7 @@ repo-template/
 │   ├── workflows/sync-status   Label → Project board sync
 │   ├── ISSUE_TEMPLATE/         5 issue forms + config
 │   ├── PULL_REQUEST_TEMPLATE   PR checklist
-│   ├── dependabot.yml          Dependency updates
-│   └── copilot-instructions    GitHub Copilot config
+│   └── dependabot.yml          Dependency updates
 ├── .claude/
 │   ├── commands/               Custom slash commands
 │   ├── skills/                 Auto-discovered capabilities
@@ -331,13 +325,13 @@ Best for: Contributing to others' projects with AI assistance
 
 1. Fork the upstream repository
 2. Add template files to your fork:
-   - `CLAUDE.md` — Your personal AI instructions
-   - Optionally: `.github/copilot-instructions.md`
+   - `CLAUDE.md` — Your personal Claude Code instructions
+   - Optionally: `AGENTS.md` for Codex
 3. **Important:** Add these to `.git/info/exclude` (not `.gitignore`) to avoid polluting upstream PRs:
    ```
    # .git/info/exclude
    CLAUDE.md
-   .github/copilot-instructions.md
+   AGENTS.md
    ```
 
 This gives you AI assistance without affecting the upstream project.
@@ -446,13 +440,12 @@ After setup, here are some things to try:
 
 ## AI Agent Configuration
 
-This template includes instruction files for multiple AI coding assistants:
+This template includes instruction files for its two supported agents:
 
 | File | AI Tool | What It Contains |
 |------|---------|------------------|
-| `CLAUDE.md` | Claude Code | Project context, commands, code style, structure |
-| `.github/copilot-instructions.md` | GitHub Copilot | Code generation guidelines, security rules |
-| `AGENTS.md` | Codex, Gemini, Cursor, others | Cross-agent compatibility layer |
+| `CLAUDE.md` | Claude Code (primary) | Project context, commands, code style, structure — plus the `.claude/` toolkit: slash commands, skills, hooks, sub-agents |
+| `AGENTS.md` | Codex (and any tool reading the open AGENTS.md standard) | Project context, conventions, and security boundaries |
 
 **Why this matters:** AI agents perform significantly better when they understand your project's conventions, tech stack, and workflows upfront. Instead of re-explaining your preferences each session, the agent reads these files automatically.
 
@@ -466,7 +459,7 @@ This template includes instruction files for multiple AI coding assistants:
 
 **Bundled skills:** `.claude/skills/` ships six auto-discovered skills — Claude uses them when your request matches, no command needed: `cot` (structured reasoning before risky changes), `hibernate` (pause/reactivate a repo), `repo-docs` (documentation upgrades), `skill-builder` + `skill-validator` (author and debug your own skills), and `task-cleanup`. See the [Skills README](.claude/skills/README.md).
 
-**Proactive security:** All 6 AI agent configs instruct the agent to check if security hardening has been completed on first session. If pre-commit hooks or GitHub protections are missing, the agent will suggest running the setup commands once.
+**Proactive security:** Both agent configs instruct the agent to check if security hardening has been completed on first session. If pre-commit hooks or GitHub protections are missing, the agent will suggest running the setup commands once.
 
 ---
 
@@ -610,7 +603,7 @@ Yes. The template is language-agnostic. The CI workflow has commented sections f
 <details>
 <summary><strong>▶ Do I need to use Claude Code?</strong></summary>
 
-No. The template works with any workflow. The AI configuration files (CLAUDE.md, AGENTS.md, copilot-instructions.md) are just text files — they won't affect anything if you don't use AI tools. But if you do use them, your agents will be more effective.
+No. The template works with any workflow. The AI configuration files (CLAUDE.md, AGENTS.md) are just text files — they won't affect anything if you don't use AI tools. But if you do use Claude Code or Codex, your agent will be dramatically more effective.
 
 </details>
 
@@ -668,7 +661,7 @@ Yes! See Workflow F. Add your AI configuration files (CLAUDE.md, etc.) and exclu
 
 This template includes prompt injection defenses — a first for GitHub templates:
 
-- **CODEOWNERS** ships with active rules on AI config files (CLAUDE.md, AGENTS.md, .cursorrules, etc.) — owner review is auto-requested on changes; enable "Require review from Code Owners" in branch protection to make it blocking
+- **CODEOWNERS** ships with active rules on AI config files (CLAUDE.md, AGENTS.md, and the whole `.claude/` toolkit) — owner review is auto-requested on changes; enable "Require review from Code Owners" in branch protection to make it blocking
 - **PR body scanner** (opt-in workflow) detects common injection patterns in issue/PR text
 - **Hook templates** validate inputs before AI agents process them
 - **Documentation** in [docs/AI-SECURITY.md](docs/AI-SECURITY.md) covers attack vectors and best practices

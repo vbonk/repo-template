@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-03-30T19:41:48Z",
+  "generated_at": "2026-08-06T07:20:40Z",
   "template_version": "2.0.0",
-  "total_weight": 156,
+  "total_weight": 145,
   "features": [
     {
       "id": "claude-md",
@@ -14,30 +14,6 @@
       "name": "AGENTS.md",
       "category": "ai-config",
       "weight": 4
-    },
-    {
-      "id": "copilot-instructions",
-      "name": "copilot-instructions.md",
-      "category": "ai-config",
-      "weight": 3
-    },
-    {
-      "id": "cursorrules",
-      "name": ".cursorrules",
-      "category": "ai-config",
-      "weight": 3
-    },
-    {
-      "id": "gemini-md",
-      "name": "GEMINI.md",
-      "category": "ai-config",
-      "weight": 3
-    },
-    {
-      "id": "windsurfrules",
-      "name": ".windsurfrules",
-      "category": "ai-config",
-      "weight": 2
     },
     {
       "id": "claude-commands",
@@ -314,8 +290,8 @@
     {
       "name": "repo-template",
       "full_name": "vbonk/repo-template",
-      "compliance_score": 94,
-      "grade": "A",
+      "compliance_score": 100,
+      "grade": "A+",
       "features": [
         {
           "id": "claude-md",
@@ -323,22 +299,6 @@
         },
         {
           "id": "agents-md",
-          "present": true
-        },
-        {
-          "id": "copilot-instructions",
-          "present": true
-        },
-        {
-          "id": "cursorrules",
-          "present": true
-        },
-        {
-          "id": "gemini-md",
-          "present": true
-        },
-        {
-          "id": "windsurfrules",
           "present": true
         },
         {
@@ -499,15 +459,15 @@
         },
         {
           "id": "detect-conflicts",
-          "present": false
+          "present": true
         },
         {
           "id": "update-contributors",
-          "present": false
+          "present": true
         },
         {
           "id": "contributors-md",
-          "present": false
+          "present": true
         },
         {
           "id": "sbom-release",
@@ -515,11 +475,11 @@
         },
         {
           "id": "skills-dir",
-          "present": false
+          "present": true
         },
         {
           "id": "agents-dir",
-          "present": false
+          "present": true
         }
       ]
     }

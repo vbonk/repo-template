@@ -1,7 +1,6 @@
 {
   "recommendations": [
-    "editorconfig.editorconfig",
-    "github.copilot"
+    "editorconfig.editorconfig"
     // === Uncomment for your stack ===
     // "dbaeumer.vscode-eslint",        // Node.js/TypeScript
     // "esbenp.prettier-vscode",        // Node.js/TypeScript

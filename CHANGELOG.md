@@ -40,6 +40,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Ruleset scoped to all branches blocked Dependabot rebases for months; scoped to default branch
 - Drift check reported zero drift when it couldn't reach the template (now fails closed as inconclusive)
 
+### Removed
+
+- **Support narrowed to Claude Code (primary) and Codex** — removed `GEMINI.md`, `.cursorrules`, `.windsurfrules`, `.aider.conf.yml`, and `.github/copilot-instructions.md`, plus every reference across docs, tests, workflows, and scoring. Rationale: five shallow config stubs were a sync chore that went stale; two files kept genuinely excellent (`CLAUDE.md` + the open `AGENTS.md` standard) serve the supported agents far better — and a self-test gate now fails CI if a removed-agent reference ever resurfaces
+- `plan.md` (stale maintainer planning doc; superseded by private maintainer docs)
+
 ### Security
 
 - Branch protection reality: required checks live, admin bypass requires PR, tag rulesets active — see docs/BRANCH-PROTECTION.md for the honest out-of-box vs opt-in matrix

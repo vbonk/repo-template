@@ -35,8 +35,4 @@
 | File | Agent | Purpose |
 |------|-------|---------|
 | [CLAUDE.md](../CLAUDE.md) | Claude Code | Primary agent instructions and project context |
-| [AGENTS.md](../AGENTS.md) | Cross-agent (Codex, Cursor, etc.) | Shared rules for all AI agents |
-| [GEMINI.md](../GEMINI.md) | Google Gemini CLI | Gemini-specific configuration |
-| [.cursorrules](../.cursorrules) | Cursor IDE | Cursor agent behavior rules |
-| [.windsurfrules](../.windsurfrules) | Windsurf / Codeium | Windsurf agent behavior rules |
-| [copilot-instructions.md](../.github/copilot-instructions.md) | GitHub Copilot | Copilot custom instructions |
+| [AGENTS.md](../AGENTS.md) | Codex (open AGENTS.md standard) | Codex project instructions and security boundaries |

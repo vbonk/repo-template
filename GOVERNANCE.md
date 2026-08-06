@@ -75,7 +75,7 @@ flowchart TD
 
 ## 🤖 AI Agent Governance
 
-AI coding agents (Claude Code, GitHub Copilot, Cursor, Gemini, Windsurf, etc.) are treated as contributors, not maintainers.
+AI coding agents (Claude Code, Codex) are treated as contributors, not maintainers.
 
 ```mermaid
 flowchart LR
@@ -105,7 +105,7 @@ flowchart LR
 | **Transparency** | Agent-generated commits include a co-author trailer |
 
 > [!WARNING]
-> **AI config changes require owner review** — Modifications to `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.cursorrules`, `.windsurfrules`, or `.github/copilot-instructions.md` must be reviewed by a human maintainer. These files control agent behavior, making them prompt injection targets.
+> **AI config changes require owner review** — Modifications to `CLAUDE.md`, `AGENTS.md`, or anything under `.claude/` must be reviewed by a human maintainer. These files control agent behavior, making them prompt injection targets.
 
 ### Why This Matters
 

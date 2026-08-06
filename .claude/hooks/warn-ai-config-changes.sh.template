@@ -3,8 +3,8 @@
 #
 # PURPOSE: Warn when AI configuration files are being modified.
 #
-# AI config files (CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules, .windsurfrules,
-# .github/copilot-instructions.md) control how AI agents behave in this repo.
+# AI config files (CLAUDE.md, AGENTS.md, and the .claude/ toolkit)
+# control how AI agents behave in this repo.
 # Unauthorized changes to these files are a prompt injection vector — an attacker
 # could modify them to instruct the agent to exfiltrate secrets or bypass checks.
 #
@@ -26,10 +26,6 @@ set -euo pipefail
 AI_CONFIG_FILES=(
   "CLAUDE.md"
   "AGENTS.md"
-  "GEMINI.md"
-  ".cursorrules"
-  ".windsurfrules"
-  ".github/copilot-instructions.md"
   ".claude/settings.json"
   ".claude/commands/"
   ".claude/hooks/"
