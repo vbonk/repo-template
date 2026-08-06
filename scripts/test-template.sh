@@ -118,15 +118,18 @@ run_layer_1() {
   # 1.4 Label count in labels.sh — FUNCTIONAL check via --dry-run: the script
   # must actually parse args and run, not just contain N matching lines
   # (the old grep-count check passed while the script itself couldn't run).
-  local label_count
-  label_count=$(bash scripts/labels.sh --dry-run --repo example/example 2>/dev/null | grep -c '^gh label create' || echo 0)
+  # Capture once — grep -q in a pipeline SIGPIPEs the producer under
+  # pipefail, turning a successful match into a failed pipeline.
+  local labels_dry label_count
+  labels_dry=$(bash scripts/labels.sh --dry-run --repo example/example 2>/dev/null || true)
+  label_count=$(printf '%s\n' "$labels_dry" | grep -c '^gh label create' || true)
   if [[ "$label_count" -ge 27 ]]; then
     pass "labels.sh dry-run emits $label_count labels (>= 27, script executes)"
   else
     fail "labels.sh dry-run emitted $label_count labels (expected >= 27 — script broken or labels missing)"
   fi
   # needs-rebase is REQUIRED by detect-conflicts.yml — its absence broke CI
-  if bash scripts/labels.sh --dry-run --repo example/example 2>/dev/null | grep -q 'needs-rebase'; then
+  if printf '%s\n' "$labels_dry" | grep -q 'needs-rebase'; then
     pass "labels.sh creates needs-rebase (required by detect-conflicts.yml)"
   else
     fail "labels.sh missing needs-rebase label"
