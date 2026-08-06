@@ -133,13 +133,13 @@ Install with: `bash templates/hooks/setup-hooks.sh`
 
 ### AI Security Hooks (`.claude/hooks/`)
 
-- **`validate-pr-body.sh.template`** -- Scans PR content for common injection patterns before the agent processes it.
+- **`validate-pr-body.sh.template`** -- A **PostToolUse** hook: after the agent fetches PR/issue content (`gh pr view`, `gh pr diff`, `gh issue view`), it scans the fetched output for injection patterns and, on a match, exits 2 so Claude Code feeds a warning back to the agent before it acts on that content. (PostToolUse is required — hooks receive a JSON event on stdin, and only *after* execution does the event carry `tool_output` to scan.)
 - **`warn-ai-config-changes.sh.template`** -- Warns when AI config files are modified, prompting human review.
 
 To use them:
 1. Copy the template and remove `.template` extension
 2. Make executable: `chmod +x .claude/hooks/<name>.sh`
-3. Register in `.claude/settings.json`
+3. Register in `.claude/settings.json` — each template's header comment contains its exact registration snippet (event, matcher, command)
 
 ### Clone Detection Hook (Advanced)
 
