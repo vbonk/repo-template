@@ -288,10 +288,11 @@ with open('$f') as fh:
   # 2.5 SHA-pinned Actions — anchored: EVERY active uses: ref must be
   # @<40-hex>. The old check only grepped for @vN and then dropped any line
   # containing '#', so 'uses: foo@v4 # v4' and 'uses: foo@main' both escaped.
-  local unpinned=0 uses_line ref
+  local unpinned=0 uses_line stripped ref
   while IFS= read -r uses_line; do
     # strip leading whitespace; skip full-line comments
-    case "$(echo "$uses_line" | sed 's/^[[:space:]]*//')" in \#*) continue ;; esac
+    stripped="${uses_line#"${uses_line%%[![:space:]]*}"}"
+    case "$stripped" in \#*) continue ;; esac
     ref=$(echo "$uses_line" | sed -E 's/.*uses:[[:space:]]*//; s/[[:space:]]*#.*$//; s/["'\'']//g')
     case "$ref" in
       ./*|docker://*) continue ;;
