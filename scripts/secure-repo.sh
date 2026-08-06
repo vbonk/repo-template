@@ -166,7 +166,7 @@ else
 
   # --- Branch Protection (rulesets — GitHub's current mechanism) ---
   # create-or-update by ruleset NAME so re-runs are idempotent.
-  # shellcheck disable=SC2329  # invoked indirectly via run_check eval
+  # shellcheck disable=SC2317,SC2329  # invoked indirectly via run_check eval
   upsert_ruleset() {
     local name="$1" payload="$2" existing_id
     existing_id=$(gh api "repos/$REPO/rulesets" --jq \
@@ -178,7 +178,7 @@ else
     fi
   }
 
-  # shellcheck disable=SC2329  # invoked indirectly via run_check eval
+  # shellcheck disable=SC2317,SC2329  # invoked indirectly via run_check eval
   harden_main_ruleset() {
     # Required status checks default to this template's CI job names; adjust
     # the contexts below to YOUR job names after enabling your stack.
@@ -198,7 +198,7 @@ else
     }'
   }
 
-  # shellcheck disable=SC2329  # invoked indirectly via run_check eval
+  # shellcheck disable=SC2317,SC2329  # invoked indirectly via run_check eval
   harden_tag_ruleset() {
     upsert_ruleset "Protect Release Tags" '{
       "name": "Protect Release Tags",
