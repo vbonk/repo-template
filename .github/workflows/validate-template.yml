@@ -25,9 +25,15 @@ jobs:
       - name: Validate YAML files
         run: |
           echo "--- Validating YAML files ---"
+          # Probe the validator first: missing pyyaml must fail loudly as
+          # "validator unavailable", never masquerade as N invalid files.
+          if ! python3 -c "import yaml" 2>/dev/null; then
+            echo "::error::pyyaml not available — YAML validation cannot run (this is a hard failure, not a pass)"
+            exit 1
+          fi
           ERRORS=0
           for f in $(find . -name '*.yml' -o -name '*.yaml' | grep -v node_modules | sort); do
-            if python3 -c "import yaml; yaml.safe_load(open('$f'))" 2>/dev/null; then
+            if python3 -c "import sys, yaml; yaml.safe_load(open(sys.argv[1]))" "$f" 2>/dev/null; then
               echo "OK: $f"
             else
               echo "FAIL: $f"
@@ -75,17 +81,23 @@ jobs:
       - name: Verify all actions are SHA-pinned
         run: |
           echo "--- Checking SHA-pinned actions ---"
-          # Find 'uses:' lines with @v* (not SHA-pinned)
-          UNPINNED=$(grep -rn 'uses:.*@v[0-9]' .github/workflows/ \
-            | grep -v '#' \
-            | grep -v 'dependabot/fetch-metadata' \
-            || true)
-          if [ -n "$UNPINNED" ]; then
-            echo "::error::Found actions pinned to tags instead of SHAs:"
-            echo "$UNPINNED"
+          # Anchored check: EVERY active step-key `uses:` ref must end in a
+          # 40-hex SHA. The old grep-for-@vN approach missed `@main` entirely
+          # and dropped any line containing '#' — so `@v4 # v4` escaped too.
+          UNPINNED=0
+          while IFS= read -r line; do
+            case "$(echo "$line" | sed 's/^[[:space:]]*//')" in \#*) continue ;; esac
+            REF=$(echo "$line" | sed -E 's/.*uses:[[:space:]]*//; s/[[:space:]]*#.*$//; s/["'"'"']//g')
+            case "$REF" in ./*|docker://*) continue ;; esac
+            if ! echo "$REF" | grep -qE '@[0-9a-f]{40}$'; then
+              echo "::error::Not SHA-pinned: $REF"
+              UNPINNED=$((UNPINNED + 1))
+            fi
+          done < <(grep -rhE '^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]' .github/workflows/)
+          if [ "$UNPINNED" -gt 0 ]; then
             exit 1
           fi
-          echo "All actions are SHA-pinned."
+          echo "All actions are SHA-pinned (anchored check)."
 
       - name: ShellCheck hook templates
         run: |
