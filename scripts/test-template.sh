@@ -173,14 +173,18 @@ run_layer_1() {
   fi
 
   # 1.7 Mermaid diagram syntax (basic check — no empty diagrams)
+  # awk instead of grep -P: BSD grep has no -P, and the old code swallowed
+  # grep's usage error (exit 2) as "no empty blocks" — a silent no-op on macOS.
   local empty_mermaid=0
   while IFS= read -r file; do
-    # shellcheck disable=SC2016  # literal backticks in the pattern, not command substitution
-    if grep -Pzo '```mermaid\n\s*```' "$file" >/dev/null 2>&1; then
+    if awk '/^```mermaid[[:space:]]*$/ {inblock=1; body=0; next}
+             inblock && /^```[[:space:]]*$/ {if (body==0) found=1; inblock=0; next}
+             inblock && NF > 0 {body=1}
+             END {exit found?0:1}' "$file" 2>/dev/null; then
       empty_mermaid=$((empty_mermaid + 1))
       if $VERBOSE; then echo "    Empty mermaid block in: $file"; fi
     fi
-  done < <(grep -rl '```mermaid' --include='*.md' . 2>/dev/null)
+  done < <(grep -rl '```mermaid' --include='*.md' . 2>/dev/null | grep -v _admin | grep -v repo-template-example)
 
   if [[ $empty_mermaid -eq 0 ]]; then
     pass "Mermaid diagrams: no empty blocks"
@@ -201,9 +205,15 @@ run_layer_2() {
   header "Layer 2: Structural Validation"
 
   # 2.1 YAML validation
+  # Probe the validator FIRST: a missing pyyaml is "validator unavailable",
+  # not "84 invalid files" — a skipped check must be visible, never a pass
+  # and never a false fail. Paths go via argv, not string interpolation.
   local yaml_errors=0
+  if ! python3 -c "import yaml" 2>/dev/null; then
+    fail "YAML files: UNVERIFIED — python3 pyyaml missing (pip install pyyaml). A validator that cannot run is a failure, not a pass."
+  else
   while IFS= read -r f; do
-    if ! python3 -c "import yaml; yaml.safe_load(open('$f'))" 2>/dev/null; then
+    if ! python3 -c "import sys, yaml; yaml.safe_load(open(sys.argv[1]))" "$f" 2>/dev/null; then
       yaml_errors=$((yaml_errors + 1))
       if $VERBOSE; then echo "    Invalid YAML: $f"; fi
     fi
@@ -214,6 +224,7 @@ run_layer_2() {
   else
     fail "YAML files: $yaml_errors invalid"
   fi
+  fi  # end pyyaml probe guard
 
   # 2.2 JSON validation
   local json_errors=0
@@ -274,13 +285,26 @@ with open('$f') as fh:
     skip "ShellCheck: not installed"
   fi
 
-  # 2.5 SHA-pinned Actions
-  local unpinned
-  unpinned=$(grep -rn 'uses:.*@v[0-9]' .github/workflows/ 2>/dev/null | grep -v '#' | grep -vc 'dependabot/fetch-metadata' || true)
+  # 2.5 SHA-pinned Actions — anchored: EVERY active uses: ref must be
+  # @<40-hex>. The old check only grepped for @vN and then dropped any line
+  # containing '#', so 'uses: foo@v4 # v4' and 'uses: foo@main' both escaped.
+  local unpinned=0 uses_line ref
+  while IFS= read -r uses_line; do
+    # strip leading whitespace; skip full-line comments
+    case "$(echo "$uses_line" | sed 's/^[[:space:]]*//')" in \#*) continue ;; esac
+    ref=$(echo "$uses_line" | sed -E 's/.*uses:[[:space:]]*//; s/[[:space:]]*#.*$//; s/["'\'']//g')
+    case "$ref" in
+      ./*|docker://*) continue ;;
+    esac
+    if ! echo "$ref" | grep -qE '@[0-9a-f]{40}$'; then
+      unpinned=$((unpinned + 1))
+      if $VERBOSE; then echo "    Unpinned: $ref"; fi
+    fi
+  done < <(grep -rhE '^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]' .github/workflows/ 2>/dev/null)
   if [[ "$unpinned" -eq 0 ]]; then
-    pass "Actions: all SHA-pinned"
+    pass "Actions: all active refs SHA-pinned (anchored check)"
   else
-    fail "Actions: $unpinned unpinned (using version tags)"
+    fail "Actions: $unpinned ref(s) not pinned to a full SHA"
   fi
 
   # 2.6 Workflow permissions
@@ -352,6 +376,14 @@ with open('$f') as fh:
 # ============================================================
 run_layer_3() {
   header "Layer 3: Functional Tests"
+
+  # Hook tests need .git to be a real directory. In a git WORKTREE, .git is a
+  # file pointing elsewhere and setup-hooks.sh writes to the wrong place —
+  # these tests would false-fail. Skip VISIBLY (a skip is never a pass).
+  if [[ ! -d .git ]]; then
+    skip "Layer 3 hook tests: worktree checkout detected (.git is a file) — run from a standard clone to verify hooks"
+    return 0
+  fi
 
   # 3.1 setup-hooks.sh installs hooks
   # Save existing hook if present
