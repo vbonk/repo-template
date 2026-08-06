@@ -270,3 +270,7 @@ CLAUDE.local.md
 # never part of the template that end users receive.
 # =============================================
 _admin/
+
+# Maintainer-local artifacts (never part of the template)
+/repo-template-example/
+/social-preview.png

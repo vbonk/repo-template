@@ -22,16 +22,23 @@
 Three commands. That's it.
 
 ```bash
-# 1. Create your repo from the template
+# 1. Create your repo from the template (use --private if you prefer —
+#    a few protections downgrade to warnings on free-plan private repos)
 gh repo create my-project --template vbonk/repo-template --public --clone
 cd my-project
 
-# 2. Harden security (Dependabot, branch protection, tag protection)
-bash scripts/secure-repo.sh
-
-# 3. Install pre-commit hooks (catches secrets before they reach git)
+# 2. Install pre-commit hooks (catches secrets before they reach git)
 bash templates/hooks/setup-hooks.sh
+
+# 3. Harden security (Dependabot, branch protection, tag ruleset) + scorecard
+bash scripts/secure-repo.sh
 ```
+
+> [!NOTE]
+> Hooks first, hardening second — the scorecard at the end of `secure-repo.sh`
+> checks that hooks are installed, so this order gives you an honest first
+> grade. Expect **A or B on a fresh repo**: the commit-signing check warns
+> until you enable signing, and that's normal, not a failure.
 
 > [!IMPORTANT]
 > 29 million secrets were leaked on GitHub in 2025. AI-assisted commits leak credentials at twice the baseline rate (3.2% vs 1.5%). The pre-commit hook you just installed is a 3-second check that catches the most common and costly mistake before it happens.
@@ -311,7 +318,7 @@ See the [Skills README](../.claude/skills/README.md) for how they work and how t
 | Harden security | `bash scripts/secure-repo.sh` |
 | Install hooks | `bash templates/hooks/setup-hooks.sh` |
 | Interactive setup | `/project:init-template` (in Claude Code) |
-| Run CI locally | `npm test` or your stack's equivalent |
+| Run CI locally | Your stack's test command (`npm test`, `pytest`, `go test ./...`) once enabled in `ci.yml` |
 | Create labels | `bash scripts/labels.sh` |
 | Security scorecard | `/project:security-audit` or `bash scripts/audit-compliance.sh` |
 | See your tasks | `bash scripts/my-tasks.sh` |
