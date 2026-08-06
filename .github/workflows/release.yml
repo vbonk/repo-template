@@ -13,6 +13,7 @@ jobs:
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -33,12 +34,17 @@ jobs:
           # Write to file for multi-line support
           echo "$CHANGELOG" > /tmp/changelog.txt
 
-      - name: Create release
+      # Created as a DRAFT deliberately: signing and SBOM generation happen
+      # below, and the release publishes only after they succeed. If signing
+      # fails, the draft stays unpublished — no consumer ever sees an
+      # unsigned release, and publish-package.yml (release: published
+      # trigger) never fires for it.
+      - name: Create draft release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           generate_release_notes: true
           body_path: /tmp/changelog.txt
-          draft: false
+          draft: true
           prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
 
       # ──────────────────────────────────────────────────────────
@@ -114,3 +120,10 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           files: /tmp/release-assets/sbom.cyclonedx.json
+
+      # Only reached when signing + SBOM succeeded — the publish gate.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
