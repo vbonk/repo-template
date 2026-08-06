@@ -109,10 +109,6 @@ def check_sbom_release(repo):
 FEATURES = [
     ("claude-md", "CLAUDE.md", "ai-config", 5, "CLAUDE.md"),
     ("agents-md", "AGENTS.md", "ai-config", 4, "AGENTS.md"),
-    ("copilot-instructions", "copilot-instructions.md", "ai-config", 3, ".github/copilot-instructions.md"),
-    ("cursorrules", ".cursorrules", "ai-config", 3, ".cursorrules"),
-    ("gemini-md", "GEMINI.md", "ai-config", 3, "GEMINI.md"),
-    ("windsurfrules", ".windsurfrules", "ai-config", 2, ".windsurfrules"),
     ("claude-commands", ".claude/commands/", "ai-config", 3, ".claude/commands"),
     ("ci-workflow", "CI workflow", "ci-cd", 5, ".github/workflows/ci.yml"),
     ("ci-sha-pinned", "Actions SHA-pinned", "ci-cd", 4, "__sha_check__"),

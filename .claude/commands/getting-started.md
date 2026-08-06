@@ -44,7 +44,7 @@ Tell the user:
 
 5. **Update CLAUDE.md** with the project name, stack, and description. Remove the `<!-- TODO -->` placeholders that were filled.
 
-6. **Update the other agent configs** (AGENTS.md, GEMINI.md, .cursorrules, .windsurfrules, copilot-instructions.md) to mirror the CLAUDE.md changes.
+6. **Update AGENTS.md** to mirror the CLAUDE.md changes (two files, one sync — keep them consistent).
 
 7. **Uncomment the matching language section** in `.github/workflows/ci.yml` and `.github/dependabot.yml`.
 

@@ -129,7 +129,7 @@ scripts/labels.sh             # Create/update labels (idempotent)
 ## Security — AI Agent Boundaries
 
 > [!CAUTION]
-> When AI agents (Claude, Cursor, Copilot) work in your repo, they follow
+> When AI agents (Claude Code, Codex) work in your repo, they follow
 > instructions from files like this one. **"Prompt injection"** is when someone
 > puts hidden instructions in a PR, issue, or code comment that tricks the
 > agent into doing something harmful — like revealing your API keys or
@@ -164,4 +164,4 @@ Run `/project:security-audit` for a full scorecard anytime.
 
 ---
 
-> **See also:** [AGENTS.md](AGENTS.md) | [copilot-instructions.md](.github/copilot-instructions.md) | [docs/AI-SECURITY.md](docs/AI-SECURITY.md) | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+> **See also:** [AGENTS.md](AGENTS.md) (Codex) | [docs/AI-SECURITY.md](docs/AI-SECURITY.md) | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)

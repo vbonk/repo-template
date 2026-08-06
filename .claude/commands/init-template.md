@@ -36,10 +36,6 @@ Ask for:
 | `README.md` | Title, description, badges with correct repo |
 | `CLAUDE.md` | Project name, tech stack, commands, architecture |
 | `AGENTS.md` | Mirror CLAUDE.md changes |
-| `GEMINI.md` | Mirror CLAUDE.md changes |
-| `.cursorrules` | Mirror AGENTS.md changes |
-| `.windsurfrules` | Mirror AGENTS.md changes |
-| `.github/copilot-instructions.md` | Mirror changes |
 | `.github/workflows/ci.yml` | Uncomment relevant language section |
 | `.github/dependabot.yml` | Uncomment relevant ecosystem |
 | `.github/CODEOWNERS` | Replace every `@vbonk` with the user's GitHub handle (rules ship ACTIVE — do not comment them out) |

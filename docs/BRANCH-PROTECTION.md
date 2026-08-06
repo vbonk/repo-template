@@ -150,12 +150,11 @@ graph TD
 
 ## AI Agent Note
 
-AI coding agents (Claude Code, Cursor, Copilot, Gemini, Windsurf) must always work
+AI coding agents (Claude Code, Codex) must always work
 via pull requests. They should never have direct push access to protected branches.
 
 CODEOWNERS requires human review for changes to AI configuration files
-(`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.cursorrules`, `.windsurfrules`,
-`.github/copilot-instructions.md`). This prevents prompt injection via PRs.
+(`CLAUDE.md`, `AGENTS.md`, and the `.claude/` toolkit). This prevents prompt injection via PRs.
 
 See [AI-SECURITY.md](AI-SECURITY.md) for more on prompt injection defense.
 

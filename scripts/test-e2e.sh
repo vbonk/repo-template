@@ -108,8 +108,8 @@ if [[ "${TEST_5_1_SKIP:-}" != "true" ]]; then
 
   # Verify key files transferred
   local_files_ok=true
-  for f in CLAUDE.md AGENTS.md GEMINI.md .cursorrules .windsurfrules .aider.conf.yml \
-           .github/copilot-instructions.md .gitattributes .gitignore \
+  for f in CLAUDE.md AGENTS.md \
+           .gitattributes .gitignore \
            scripts/secure-repo.sh templates/hooks/setup-hooks.sh \
            templates/hooks/pre-commit-secrets.sh.template; do
     if [[ ! -f "$f" ]]; then

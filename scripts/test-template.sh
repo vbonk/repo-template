@@ -100,10 +100,10 @@ run_layer_1() {
 
   # 1.1 AI agent config count
   local agent_count=0
-  for f in CLAUDE.md AGENTS.md GEMINI.md .cursorrules .windsurfrules .github/copilot-instructions.md .aider.conf.yml; do
+  for f in CLAUDE.md AGENTS.md; do
     [[ -f "$f" ]] && agent_count=$((agent_count + 1))
   done
-  assert_count "AI agent configs" 7 "$agent_count"
+  assert_count "AI agent configs (Claude Code + Codex)" 2 "$agent_count"
 
   # 1.2 Workflow count
   local wf_count
@@ -216,8 +216,25 @@ run_layer_1() {
   fi
 
   # 1.8 README claims match (spot checks)
-  assert_contains README.md "7 AI" "README mentions 7 AI agents"
+  assert_contains README.md "Claude Code and Codex" "README states the two supported agents"
   assert_contains README.md "18 workflow" "README mentions 18 workflows"
+
+  # 1.9 Agent-focus gate: the template supports Claude Code + Codex ONLY.
+  # Any resurfacing reference to a removed agent is a regression. CHANGELOG
+  # (history) and CONTRIBUTORS.md (bot commit authors from git history) are
+  # exempt; \bCursor\b is case-sensitive so GraphQL pagination fields
+  # (endCursor, CURSOR) never false-positive.
+  local stale_agents
+  stale_agents=$(git grep -ilE "cursorrule[s]|windsu[r]frules|gemin[i]|copilo[t]|aide[r]|windsu[r]f" -- \
+    ':!CHANGELOG.md' ':!CONTRIBUTORS.md' ':!repo-template-example' 2>/dev/null || true)
+  local stale_cursor
+  stale_cursor=$(git grep -lE "\\bCursor\\b" -- \
+    ':!CHANGELOG.md' ':!CONTRIBUTORS.md' ':!repo-template-example' 2>/dev/null || true)
+  if [[ -z "$stale_agents" && -z "$stale_cursor" ]]; then
+    pass "Agent focus: no references to removed agents (Claude Code + Codex only)"
+  else
+    fail "Agent focus: stale removed-agent references in: $(echo "$stale_agents $stale_cursor" | tr '\n' ' ')"
+  fi
   assert_contains README.md "repo-template-example" "README links to example repo"
 }
 
@@ -376,8 +393,8 @@ with open('$f') as fh:
   fi
 
   # 2.10 Essential files exist
-  for f in CLAUDE.md AGENTS.md GEMINI.md .cursorrules .windsurfrules .aider.conf.yml \
-           .github/copilot-instructions.md .gitattributes .gitignore .editorconfig \
+  for f in CLAUDE.md AGENTS.md \
+           .gitattributes .gitignore .editorconfig \
            CONTRIBUTING.md SECURITY.md CODE_OF_CONDUCT.md GOVERNANCE.md LICENSE \
            SUPPORT.md CHANGELOG.md .env.example \
            scripts/secure-repo.sh scripts/labels.sh scripts/my-tasks.sh scripts/close-issue.sh \

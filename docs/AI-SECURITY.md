@@ -5,7 +5,7 @@ If you use AI coding tools, your repo has an attack surface you probably don't k
 This is not a theoretical problem. AI-assisted commits leak secrets at twice the baseline rate. In 2025 alone, 29 million secrets were leaked on GitHub — and AI tools made it worse. The defenses in this document exist because AI agents are powerful but not careful. They will happily commit your API keys, skip security checks, or follow malicious instructions if nobody tells them not to.
 
 > [!IMPORTANT]
-> **Why this matters to you:** If you're building with Claude Code, Cursor, Copilot, or any AI coding tool, the code it writes for you is statistically likely to contain security issues. You don't need to become a security expert — but you do need guardrails that catch the mistakes before they reach your repo. That's what this page sets up.
+> **Why this matters to you:** If you're building with Claude Code or Codex, the code it writes for you is statistically likely to contain security issues. You don't need to become a security expert — but you do need guardrails that catch the mistakes before they reach your repo. That's what this page sets up.
 
 > **Threat Model at a Glance** -- This repository defends against prompt injection attacks through 6 layers of defense-in-depth: CODEOWNERS review gates, branch protection, CI validation, hook-based scanning, agent-level instructions, and secret detection. AI config files carry active CODEOWNERS rules (review is *requested* automatically; to make it *blocking*, enable "Require review from Code Owners" — see docs/BRANCH-PROTECTION.md). On a hardened repo, all changes to `main` must arrive by PR with passing status checks — direct pushes are rejected, including from agents.
 
@@ -28,7 +28,7 @@ If the AI agent reads this PR body without safeguards, it might comply.
 > [!CAUTION]
 > These are real attack patterns observed in the wild. Treat any PR, issue, or code change that matches these patterns with extreme suspicion.
 
-1. **AI config file poisoning** -- A PR modifies `CLAUDE.md`, `.cursorrules`, or similar files to change agent behavior (e.g., "always approve PRs" or "skip CI checks").
+1. **AI config file poisoning** -- A PR modifies `CLAUDE.md`, `AGENTS.md`, or the `.claude/` toolkit to change agent behavior (e.g., "always approve PRs" or "skip CI checks").
 
 2. **PR body injection** -- Malicious instructions embedded in PR titles, descriptions, or comments that an agent processes during code review.
 
@@ -73,11 +73,7 @@ These files control AI agent behavior and are protected by CODEOWNERS:
 | File | Agent | Why It Matters |
 |------|-------|----------------|
 | `CLAUDE.md` | Claude Code | Primary instruction file for Claude |
-| `AGENTS.md` | Multi-agent (Claude, Cursor, others) | Cross-agent shared instructions |
-| `GEMINI.md` | Google Gemini CLI | Gemini-specific configuration |
-| `.cursorrules` | Cursor AI | Cursor IDE agent rules |
-| `.windsurfrules` | Windsurf / Codeium | Windsurf agent rules |
-| `.github/copilot-instructions.md` | GitHub Copilot | Copilot custom instructions |
+| `AGENTS.md` | Codex (open AGENTS.md standard) | Codex project instructions and security boundaries |
 | `.claude/hooks/` | Claude Code hooks | Pre/post tool-use automation |
 | `.claude/commands/` | Claude Code commands | Slash command definitions |
 | `.claude/skills/` | Claude Code skills | Executable skill instructions |

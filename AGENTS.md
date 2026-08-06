@@ -1,7 +1,9 @@
 # AGENTS.md
 
-> Cross-agent instructions for AI coding assistants.
-> This file is recognized by multiple AI tools including Claude Code, Cursor, Gemini, Codex, and others.
+> Project instructions for **Codex** — and any tool that reads the open
+> AGENTS.md standard. Claude Code users: `CLAUDE.md` is your primary file;
+> keep the two consistent when you change either (they are this template's
+> only two agent configs, by design).
 
 ## Template Initialization
 
@@ -26,15 +28,14 @@ See `.claude/commands/init-template.md` for detailed steps.
 
 ## Architecture
 
-### Multi-Agent File Map
+### Agent File Map
 
 ```mermaid
 graph LR
     subgraph "AI Agent Configuration"
-        AGENTS["AGENTS.md<br/><i>All agents</i>"]
-        CLAUDE["CLAUDE.md<br/><i>Claude Code</i>"]
-        GEMINI["GEMINI.md<br/><i>Gemini CLI</i>"]
-        COPILOT["copilot-instructions.md<br/><i>GitHub Copilot</i>"]
+        AGENTS["AGENTS.md<br/><i>Codex (open standard)</i>"]
+        CLAUDE["CLAUDE.md<br/><i>Claude Code (primary)</i>"]
+        TOOLKIT[".claude/<br/><i>commands · skills · hooks · agents</i>"]
     end
 
     subgraph "Shared References"
@@ -47,16 +48,14 @@ graph LR
     AGENTS --> ARCH
     AGENTS --> SEC
     AGENTS --> ADR
+    AGENTS --> FORK
     CLAUDE --> ARCH
     CLAUDE --> SEC
-    GEMINI --> SEC
-    GEMINI --> FORK
-    COPILOT --> ARCH
+    CLAUDE --> TOOLKIT
 
     style AGENTS fill:#4a9eff,color:#fff
     style CLAUDE fill:#d97706,color:#fff
-    style GEMINI fill:#34d399,color:#000
-    style COPILOT fill:#a78bfa,color:#fff
+    style TOOLKIT fill:#6b7280,color:#fff
 ```
 
 ### System Architecture
@@ -201,11 +200,10 @@ This repository includes automated security tools. On first session, check if th
 ## Additional Context
 
 For tool-specific instructions:
-- **Claude Code**: See [CLAUDE.md](CLAUDE.md) (includes `/project:security-audit` command)
-- **GitHub Copilot**: See [.github/copilot-instructions.md](.github/copilot-instructions.md)
+- **Claude Code**: See [CLAUDE.md](CLAUDE.md) — plus the `.claude/` toolkit: slash commands (incl. `/project:security-audit`), auto-discovered skills, and hook templates
 - **API Reference**: See `docs/` directory
 - **Architecture**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ---
 
-> **See also:** [CLAUDE.md](CLAUDE.md) | [copilot-instructions.md](.github/copilot-instructions.md) | [docs/AI-SECURITY.md](docs/AI-SECURITY.md) | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+> **See also:** [CLAUDE.md](CLAUDE.md) | [docs/AI-SECURITY.md](docs/AI-SECURITY.md) | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
