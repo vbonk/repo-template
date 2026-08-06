@@ -7,15 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-06
+
+The trust-layer release: everything the docs claim is now enforced, everything
+shipped now actually runs, and support is focused on Claude Code and Codex.
+Major version because of the agent-config removals (see Removed).
+
 ### Added
 
 - **Six bundled Claude Code skills** (2026-04, migrated to loadable form 2026-08): `cot`, `hibernate`, `repo-docs`, `skill-builder`, `skill-validator`, `task-cleanup` — auto-discovered project capabilities, now documented in README and Getting Started
 - `--audit` mode for `secure-repo.sh` — genuinely read-only security scorecard; `/project:security-audit` uses it
 - Tag ruleset protecting `v*` releases (replaces the tag-protection API GitHub removed in Aug 2024)
 - Required status checks on `main` — direct pushes are now rejected; all changes arrive by PR with passing CI
+- **OpenSSF Scorecard workflow** (weekly + push) with README badge
+- **Five Architecture Decision Records** (`docs/decisions/001-005`): SHA-pinning, rulesets over classic protection, skills directory format, two-agent focus, drift severity + fail-closed
+- Platform hardening via `secure-repo.sh`: platform-enforced Actions SHA-pinning, immutable releases, auto-merge enablement; plan-gated features (secret-scanning validity checks) reported honestly
+- Dependabot `cooldown` (3 days) on all ecosystems — post-2025-supply-chain-compromise practice
 - `scripts/_lib.sh` — shared capability detection library (require_gh, check_gh_auth, check_gh_repo, has_gh)
 - `--local-only` flag for `test-template.sh`; `--dry-run` for `labels.sh`
-- Skills layout design-check, functional labels.sh check, and fenced-code-aware link checker in the self-test suite
+- Skills layout design-check, functional labels.sh check, fenced-code-aware link checker, and agent-focus regression gate in the self-test suite
 
 ### Changed
 
@@ -26,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - detect-conflicts runs on push/schedule (one PR's checks no longer depend on unrelated PRs)
 - Release flow publishes only AFTER cosign signing and SBOM generation complete
 - Security docs (AI-SECURITY, BRANCH-PROTECTION, README) claim exactly what is enforced — no more aspirational protection claims
+- `secure-repo.sh` speaks rulesets: idempotent create-or-update by name for branch and tag protection (classic API and sunset tag endpoint retired)
+- Commented CI/publish stack stubs refreshed to current action majors (Node-20-era pins removed); devcontainer base image digest-pinned
 - All scripts use shared `_lib.sh`; ShellCheck `-x --severity=warning`
 
 ### Fixed
@@ -93,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Enhanced all markdown documentation with GitHub-flavored callouts, Mermaid diagrams, and visual hierarchy
 
-[unreleased]: ../../compare/v1.1.0...HEAD
+[unreleased]: ../../compare/v2.0.0...HEAD
+[2.0.0]: ../../compare/v1.1.0...v2.0.0
 [1.1.0]: ../../compare/v1.0.0...v1.1.0
 [1.0.0]: ../../releases/tag/v1.0.0
