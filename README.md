@@ -46,10 +46,10 @@ This template is designed to be the default starting point. Use it from the GitH
 
 ```bash
 gh repo create my-project --template vbonk/repo-template --public --clone
-cd my-project && bash scripts/secure-repo.sh && bash templates/hooks/setup-hooks.sh
+cd my-project && bash templates/hooks/setup-hooks.sh && bash scripts/secure-repo.sh
 ```
 
-Three commands. Repository created, security hardened, hooks installed. The agent (or you) can start building immediately, and the deep settings — the ones that prevent secrets from leaking, branches from being force-pushed, dependencies from going unpatched — are already in place.
+Three commands. Repository created, hooks installed, security hardened. (Hooks first — the scorecard at the end checks for them, so this order earns your best first grade. Expect A/B on a fresh repo: the commit-signing check warns until you enable signing, and that's normal. Private repos work too — use `--private`; a few protections downgrade to warnings on free-plan private repos.) The agent (or you) can start building immediately, and the deep settings — the ones that prevent secrets from leaking, branches from being force-pushed, dependencies from going unpatched — are already in place.
 
 ```
 Your new repo on day one:
@@ -430,7 +430,7 @@ After setup, here are some things to try:
 | Action | How |
 |--------|-----|
 | **Add your first feature** | Ask Claude: "Create a basic Express server in src/" |
-| **Run CI locally** | `npm test` or your stack's test command |
+| **Run CI locally** | Your stack's test command — `npm test`, `pytest`, `go test ./...` — after enabling that stack in `ci.yml` |
 | **Create an issue** | Try the bug report form — see how structured it is |
 | **Enable security features** | Settings → Security → Enable secret scanning |
 

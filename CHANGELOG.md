@@ -9,21 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Six bundled Claude Code skills** (2026-04, migrated to loadable form 2026-08): `cot`, `hibernate`, `repo-docs`, `skill-builder`, `skill-validator`, `task-cleanup` — auto-discovered project capabilities, now documented in README and Getting Started
+- `--audit` mode for `secure-repo.sh` — genuinely read-only security scorecard; `/project:security-audit` uses it
+- Tag ruleset protecting `v*` releases (replaces the tag-protection API GitHub removed in Aug 2024)
+- Required status checks on `main` — direct pushes are now rejected; all changes arrive by PR with passing CI
 - `scripts/_lib.sh` — shared capability detection library (require_gh, check_gh_auth, check_gh_repo, has_gh)
-- `--local-only` flag for `test-template.sh` — skips GitHub-dependent checks gracefully
-- Auto-detection: if `gh` CLI is unavailable, test suite runs in local-only mode automatically
-- Prerequisites section in Getting Started guide
+- `--local-only` flag for `test-template.sh`; `--dry-run` for `labels.sh`
+- Skills layout design-check, functional labels.sh check, and fenced-code-aware link checker in the self-test suite
 
 ### Changed
 
-- All scripts use shared `_lib.sh` for consistent prerequisite detection and remediation messages
-- README feature claims refined to distinguish "active by default" vs "ready to enable"
-- ShellCheck invocations use `-x --severity=warning` for source-file resolution
-- CONTRIBUTING.md documents `--local-only` testing mode
+- **Skills migrated from flat `.md` files to `<name>/SKILL.md` directories** — the flat layout was silently ignored by Claude Code (runtime-verified); this is the layout that actually loads
+- CODEOWNERS ships with security-critical rules ACTIVE (init-template substitutes your handle)
+- update-contributors lands via auto-merged PR instead of pushing to main
+- Dependabot auto-merge refuses to arm unless required status checks and repo auto-merge are enabled
+- detect-conflicts runs on push/schedule (one PR's checks no longer depend on unrelated PRs)
+- Release flow publishes only AFTER cosign signing and SBOM generation complete
+- Security docs (AI-SECURITY, BRANCH-PROTECTION, README) claim exactly what is enforced — no more aspirational protection claims
+- All scripts use shared `_lib.sh`; ShellCheck `-x --severity=warning`
 
 ### Fixed
 
--
+- `.gitignore` inline comments silently disabled most patterns (including `*.pem`, `*.key`, `credentials.json`)
+- `labels.sh` could not run at all (unbound `$1`, broken `--repo` passing); now creates `needs-rebase`/`stale` labels workflows depend on
+- Secret scanner republished matched secret content into PR comments — now reports file:line references only
+- Pre-commit hook missed single-quoted secrets on macOS (BSD grep `\x27`); 2026 token formats added (fine-grained PATs, Slack, GCP, npm, JWT, Stripe — fixing a Stripe pattern that could never match)
+- Compliance audit awarded hardcoded credit for unverified checks; SHA-pin check passed with unpinned actions present
+- YAML validation counted a missing PyYAML as "all files invalid"; now fails explicitly as validator-unavailable
+- `setup-hooks.sh` printed a self-test command git rejects (`git add /tmp/...`)
+- Ruleset scoped to all branches blocked Dependabot rebases for months; scoped to default branch
+- Drift check reported zero drift when it couldn't reach the template (now fails closed as inconclusive)
+
+### Security
+
+- Branch protection reality: required checks live, admin bypass requires PR, tag rulesets active — see docs/BRANCH-PROTECTION.md for the honest out-of-box vs opt-in matrix
 
 ## [1.1.0] - 2026-03-30
 
@@ -57,7 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Security hardening**: pre-commit hooks, `scripts/secure-repo.sh` scorecard, CODEOWNERS protection for sensitive files
 - **AI threat model**: `docs/AI-SECURITY.md` with prompt injection defense, data exfiltration prevention, and agent boundary rules
 - **Fork security guide**: `docs/FORK-SECURITY.md` for safely consuming upstream changes
-- **Compliance audit**: `audits/compliance-checklist.md` with verification of all security and governance controls
+- **Compliance audit**: `audits/repo-compliance.json` with verification of all security and governance controls
 - **Pre-commit hooks template**: `templates/hooks/setup-hooks.sh` with secret detection and branch protection
 - **Task management scripts**: `scripts/my-tasks.sh`, `scripts/close-issue.sh`, `scripts/labels.sh` for GitHub Issues workflow
 - **Architecture documentation**: `docs/ARCHITECTURE.md` template with Mermaid diagrams and ADR tracking
