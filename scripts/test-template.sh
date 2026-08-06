@@ -115,13 +115,24 @@ run_layer_1() {
   tmpl_count=$(find .github/ISSUE_TEMPLATE -name '*.yml' -not -name 'config.yml' -type f | wc -l | tr -d ' ')
   assert_count "Issue templates" 5 "$tmpl_count"
 
-  # 1.4 Label count in labels.sh
-  local label_count
-  label_count=$(grep -c 'gh label create' scripts/labels.sh 2>/dev/null || echo 0)
-  if [[ "$label_count" -ge 25 ]]; then
-    pass "Labels in labels.sh: $label_count (>= 25)"
+  # 1.4 Label count in labels.sh — FUNCTIONAL check via --dry-run: the script
+  # must actually parse args and run, not just contain N matching lines
+  # (the old grep-count check passed while the script itself couldn't run).
+  # Capture once — grep -q in a pipeline SIGPIPEs the producer under
+  # pipefail, turning a successful match into a failed pipeline.
+  local labels_dry label_count
+  labels_dry=$(bash scripts/labels.sh --dry-run --repo example/example 2>/dev/null || true)
+  label_count=$(printf '%s\n' "$labels_dry" | grep -c '^gh label create' || true)
+  if [[ "$label_count" -ge 27 ]]; then
+    pass "labels.sh dry-run emits $label_count labels (>= 27, script executes)"
   else
-    fail "Labels in labels.sh: $label_count (expected >= 25)"
+    fail "labels.sh dry-run emitted $label_count labels (expected >= 27 — script broken or labels missing)"
+  fi
+  # needs-rebase is REQUIRED by detect-conflicts.yml — its absence broke CI
+  if printf '%s\n' "$labels_dry" | grep -q 'needs-rebase'; then
+    pass "labels.sh creates needs-rebase (required by detect-conflicts.yml)"
+  else
+    fail "labels.sh missing needs-rebase label"
   fi
 
   # 1.5 Security layers in AI-SECURITY.md
