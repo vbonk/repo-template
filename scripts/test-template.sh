@@ -501,11 +501,20 @@ run_layer_4() {
   # 4.6 Hook allows clean files
   test_hook_allows "clean code" "const greeting = 'hello world';" "test-sec-46.js"
 
-  # 4.7 Hook skips .md files
-  test_hook_allows ".md with patterns" "Example: sk-ant-example123456 is a pattern" "test-sec-47.md"
+  # 4.7 Precise provider tokens BLOCK even in .md — a real key pasted into
+  # a README is just as leaked. Prefix-only prose stays allowed.
+  test_hook_blocks ".md with realistic token" "Example: sk-ant-""api03realistic456 leaked here" "test-sec-47.md"
+  test_hook_allows ".md prefix-only prose" "The hook catches sk-ant-* and AKIA prefixes" "test-sec-47b.md"
 
   # 4.8 Hook skips .template files
   test_hook_allows ".template with patterns" "AKIA pattern check" "test-sec-48.template"
+
+  # 4.13 2026 token formats + single-quoted generic values (BSD-grep regression:
+  # \x27 escapes silently broke single-quote detection on macOS)
+  test_hook_blocks "fine-grained PAT" "pat = 'github_pat_""11ABCDEF0123456789_abcdefghij'" "test-sec-49.py"
+  test_hook_blocks "Slack token" "SLACK='xoxb-""123456789012-abcdef'" "test-sec-50.py"
+  test_hook_blocks "Stripe live key" "stripe = 'sk_live_""ABCDEFGHIJKLMNOPQRSTUVWX99'" "test-sec-51.js"
+  test_hook_blocks "single-quoted password" "password = 'hunter2hunter2'" "test-sec-52.py"
 
   # 4.9 POSIX patterns — no \s in hooks (search for literal backslash-s)
   if grep -q '\\s' templates/hooks/pre-commit-secrets.sh.template 2>/dev/null; then
