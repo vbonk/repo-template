@@ -145,3 +145,21 @@ jobs:
             exit 1
           fi
           echo "No secrets patterns found."
+
+      - name: Verify agent-native Phase 0 contract
+        run: |
+          echo "--- Checking first-agent bootstrap invariants ---"
+          test -f docs/PHASE-0.md || { echo "::error::docs/PHASE-0.md missing"; exit 1; }
+          grep -q 'KEEP / ADAPT / REMOVE / DEFER' docs/PHASE-0.md || { echo "::error::Phase 0 classification contract missing"; exit 1; }
+          grep -q 'Derived-repository mode' CLAUDE.md || { echo "::error::CLAUDE.md missing derived-repository detection"; exit 1; }
+          grep -q 'Derived-repository mode' AGENTS.md || { echo "::error::AGENTS.md missing derived-repository detection"; exit 1; }
+          grep -q 'The Golden Path' README.md || { echo "::error::README missing agent-first golden path"; exit 1; }
+          if grep -qE 'Client.*API Server|npm run dev|DATABASE_URL|NODE_ENV|Production.*main branch' CLAUDE.md AGENTS.md .env.example; then
+            echo "::error::Speculative application defaults returned to root agent/config surfaces"
+            exit 1
+          fi
+          if grep -qE 'Quick setup|Gather Project Information|Ask for project name' .claude/commands/init-template.md; then
+            echo "::error::Legacy interactive initializer behavior returned"
+            exit 1
+          fi
+          echo "Agent-native Phase 0 contract is intact."

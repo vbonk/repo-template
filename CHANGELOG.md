@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Agent-native Phase 0** (`docs/PHASE-0.md`) — canonical first-agent normalization workflow for repositories created from the template, including KEEP / ADAPT / REMOVE / DEFER classification and current-session project intake
+- **ADR 006** — records the decision to make Phase 0 the default derived-repository entry behavior without adding a persistent lifecycle state engine
+- `/project:bootstrap` — thin Claude Code entrypoint to the canonical Phase 0 procedure
+
+### Changed
+
+- `CLAUDE.md` and `AGENTS.md` now distinguish source-template mode from derived-repository mode before treating inherited content as project truth
+- Derived repositories now enter Phase 0 automatically instead of starting with the interactive Quick/Full setup interview
+- `/project:init-template` is retained as a compatibility pointer to Phase 0 rather than the primary initialization model
+- README and Getting Started now lead with the actual agentic workflow: repository already created, existing project session pointed at it, template normalized, project materialized
+- `docs/ARCHITECTURE.md` now documents the actual `repo-template` architecture instead of a fictional client/API/database/cache example
+- `.env.example` is intentionally stack-neutral and no longer suggests a database, runtime, port, or API variable before project intake
+- CODEOWNERS documentation now distinguishes source-template ownership from derived-repository ownership validation
+- Root README and agent instructions are substantially smaller and no longer carry speculative application architecture, commands, deployment URLs, or environment settings
+
 ## [2.0.0] - 2026-08-06
 
 The trust-layer release: everything the docs claim is now enforced, everything

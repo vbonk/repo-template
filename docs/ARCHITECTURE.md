@@ -1,77 +1,88 @@
 # Architecture
 
-> High-level architecture of this project. Keep this document updated as the system evolves.
+> Architecture of the `vbonk/repo-template` source project. In a template-derived repository, Phase 0 treats this as source-template reference material and reconciles it against the real incoming project.
 
-> [!NOTE]
-> This is a **template document**. Replace the TODO placeholders with your project's actual architecture. The Mermaid diagrams, component tables, and constraint sections are structured starting points -- customize them to match your system.
+**Last Updated:** 2026-08-13
 
-<!-- TODO: Brief system description -->
+## System Purpose
 
-## System Diagram
+`repo-template` is an agent-native repository substrate, not an application framework. It provides a secure GitHub baseline, Claude Code/Codex entry instructions, first-agent normalization, optional automation, and verification tooling.
 
-<!-- TODO: Replace with your system's architecture -->
+## Architecture
+
 ```mermaid
 graph TD
-    A[Client] --> B[API Server]
-    B --> C[Database]
-    B --> D[Cache]
-    D --> B
+    T[repo-template source] --> G[GitHub template instance]
+    G --> E[Agent entry: CLAUDE.md / AGENTS.md]
+    E --> P[Phase 0 normalization]
+    P --> Q{Project material available?}
+    Q -->|Yes| R[Project-specific repository]
+    Q -->|No| S[Intake-ready substrate]
+
+    T --> A[.claude toolkit]
+    T --> H[Security and governance]
+    T --> V[Validation and audits]
+    T --> D[Source-template documentation]
+
+    H --> G
+    V --> T
+    D --> E
 ```
 
-## Key Components
+## Components
 
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| <!-- TODO --> | | |
+| Component | Purpose | Primary locations |
+|---|---|---|
+| Agent entry | Distinguish source-template and derived-repository behavior | `CLAUDE.md`, `AGENTS.md` |
+| Phase 0 | Normalize inherited template material before project implementation | `docs/PHASE-0.md` |
+| Claude toolkit | Commands, skills, hooks, and specialized agents | `.claude/` |
+| GitHub governance | PR/issue policy, CODEOWNERS, dependency and workflow configuration | `.github/` |
+| Security baseline | Secret protection, repository hardening, AI threat model | `templates/hooks/`, `scripts/secure-repo.sh`, `docs/AI-SECURITY.md` |
+| Verification | Template regression, E2E, compliance, and CI checks | `scripts/test-template.sh`, `scripts/test-e2e.sh`, `scripts/audit-compliance.sh`, `.github/workflows/` |
+| Documentation | Source-template operation, security, architecture, and decisions | `README.md`, `docs/`, `docs/decisions/` |
 
-## Data Flow
-
-<!-- TODO: Describe how data moves through the system -->
+## Derived-Repository Flow
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant A as API
-    participant D as Database
-    C->>A: Request
-    A->>D: Query
-    D-->>A: Result
-    A-->>C: Response
+    participant U as User / Existing Session
+    participant R as Derived Repository
+    participant A as Claude or Codex
+    participant P as Phase 0
+
+    U->>A: Organize/publish existing project to repo
+    A->>R: Inspect repository identity and state
+    R-->>A: Generic template instance
+    A->>P: Follow canonical normalization SOP
+    P->>A: KEEP / ADAPT / REMOVE / DEFER
+    A->>A: Reuse current-session project context
+    A->>R: Materialize project-specific repository
+    A->>R: Validate and publish through normal workflow
 ```
 
-## Technology Choices
+## Design Constraints
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| <!-- TODO: e.g., Language --> | <!-- e.g., TypeScript --> | <!-- e.g., Type safety, ecosystem --> |
-| <!-- TODO: e.g., Database --> | <!-- e.g., PostgreSQL --> | <!-- e.g., Relational, ACID --> |
-| <!-- TODO: e.g., Hosting --> | <!-- e.g., Railway --> | <!-- e.g., Simple deploys, good DX --> |
+- **GitHub template copying is whole-repository copying.** Source-template files are inherited by derived repositories; agent entry behavior must distinguish reference material from project requirements.
+- **No application stack assumption.** The substrate must remain valid before a runtime/framework is known.
+- **Security before convenience.** Normalization may simplify tooling but must not casually weaken proven safeguards.
+- **Two-agent focus.** Claude Code is primary and Codex is supported through `AGENTS.md`.
+- **Truth over placeholders.** Root agent/documentation surfaces must describe the template project itself rather than fictitious example systems.
+- **No mandatory lifecycle engine.** Repository identity plus project-specific replacement of generic entry files is sufficient for the current Phase 0 transition.
 
-> [!TIP]
-> Record each major technology decision as an ADR in [docs/decisions/](decisions/). The table above is a summary -- the ADRs capture full context and alternatives considered.
+## Decision Records
 
-## Constraints
+Material architecture decisions are recorded in [docs/decisions/](decisions/).
 
-<!-- TODO: What constraints affect the architecture? -->
-
-- **Performance:** <!-- e.g., <200ms p99 latency -->
-- **Security:** <!-- e.g., SOC2 compliance required -->
-- **Budget:** <!-- e.g., <$50/month infrastructure -->
-- **Team:** <!-- e.g., Solo developer, async-first -->
-
-## Architecture Decision Records
-
-Major decisions are tracked as ADRs using the template at [decisions/000-template.md](decisions/000-template.md).
-
-See [docs/decisions/](decisions/) for the full list.
-
-| ADR | Date | Decision | Status |
-|-----|------|----------|--------|
-| [000](decisions/000-template.md) | -- | Template | -- |
+| ADR | Decision |
+|---|---|
+| [001](decisions/001-sha-pinned-actions.md) | SHA-pin GitHub Actions |
+| [002](decisions/002-rulesets-over-classic-protection.md) | Prefer rulesets over classic branch protection |
+| [003](decisions/003-skills-directory-format.md) | Use runtime-supported skill directory format |
+| [004](decisions/004-two-agent-focus.md) | Focus on Claude Code + Codex |
+| [005](decisions/005-drift-severity-and-fail-closed.md) | Severity-aware, fail-closed drift verification |
+| [006](decisions/006-agent-native-phase-zero.md) | Agent-native Phase 0 for derived repositories |
 
 ---
 
-> [!NOTE]
-> Keep this document in sync with the codebase. Review during major changes.
-
-See also: [README.md](../README.md) | [CLAUDE.md](../CLAUDE.md) | [decisions/](decisions/)
+**Referenced by:** [README.md](../README.md), [CLAUDE.md](../CLAUDE.md), [AGENTS.md](../AGENTS.md)  
+**See also:** [Phase 0](PHASE-0.md) | [AI Security](AI-SECURITY.md) | [ADRs](decisions/)

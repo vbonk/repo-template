@@ -2,725 +2,139 @@
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12331/badge)](https://www.bestpractices.dev/projects/12331)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/vbonk/repo-template/badge)](https://scorecard.dev/viewer/?uri=github.com/vbonk/repo-template)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/vbonk/repo-template/actions/workflows/ci.yml/badge.svg)](https://github.com/vbonk/repo-template/actions/workflows/ci.yml)
-[![GitHub release](https://img.shields.io/github/v/release/vbonk/repo-template)](https://github.com/vbonk/repo-template/releases)
-[![GitHub stars](https://img.shields.io/github/stars/vbonk/repo-template)](https://github.com/vbonk/repo-template/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-29 million secrets were leaked on GitHub in 2025. AI-assisted commits leak credentials at **twice the baseline rate**. One solo developer's exposed AWS key cost [$3,200 in unauthorized charges](docs/PROD_CHECKLIST.md) — bots found it within minutes.
-
-Most of this is preventable. A pre-commit hook, a `.gitignore` that covers `.env`, branch protection that blocks force-push. But if you've never worked on a team that set these up for you, you don't know they exist — let alone how to configure them.
-
-**This template is the senior engineer you never had.** It sets up security, CI, AI agent configuration, and repository governance before you write your first line of code. Three commands, two minutes, nothing missed.
-
-> **New here?** Start with the [Getting Started Guide](docs/GETTING-STARTED.md) — security, AI agents, and workflow setup in about 10 minutes.
-
-### Who is this for?
-
-- **Solo developers and indie hackers** — You can code, but you've always worked alone. You've never had someone set up branch protection, configure Dependabot, or explain why `.env` goes in `.gitignore` before your first commit.
-- **Vibe coders** — You're building with AI tools but don't come from a software background. 63% of vibe coders are non-developers: founders, marketers, designers shipping real products. The AI writes your code — this template makes sure the repo around it is safe.
-- **Early-career developers** — You're 0-2 years in, using AI tools heavily, but nobody's shown you the team workflows that prevent disasters: PR reviews, secret scanning, CI pipelines, release management.
-
-If any of that sounds familiar, this template delivers the institutional knowledge that normally takes years on a team to absorb — as a one-click GitHub template.
-
-### Built for Claude Code and Codex — deeply, not broadly
-
-This template supports two agents completely instead of seven shallowly:
-
-| Agent | Config File | What It Gets |
-|-------|------------|--------------|
-| **Claude Code** (primary) | `CLAUDE.md` | Full project context, security boundaries, plus the template's Claude-native toolkit: 5 slash commands, 6 auto-discovered skills, security hook templates, and an example sub-agent |
-| **Codex** | `AGENTS.md` | Project context, conventions, and the same security boundaries — in the open `AGENTS.md` standard Codex reads natively |
-
-Depth over breadth is a deliberate choice. A config stub for every tool on the market is a maintenance chore that goes stale; two files kept genuinely excellent — context, commands, skills, hooks, and a real security model — make the agents you actually use dramatically better. And because `AGENTS.md` is an open convention, other tools that adopt the standard read it too, for free.
-
-### Built for agentic development
-
-When AI agents create repositories — or when you're spinning up projects frequently — the setup tax multiplies. Every repo needs the same security baseline, the same CI structure, the same issue taxonomy. Without a template, each one starts from zero and ends up slightly different.
-
-This template is designed to be the default starting point. Use it from the GitHub UI, from the CLI, or hand it to an autonomous agent:
-
-```bash
-gh repo create my-project --template vbonk/repo-template --public --clone
-cd my-project && bash templates/hooks/setup-hooks.sh && bash scripts/secure-repo.sh
-```
-
-Three commands. Repository created, hooks installed, security hardened. (Hooks first — the scorecard at the end checks for them, so this order earns your best first grade. Expect A/B on a fresh repo: the commit-signing check warns until you enable signing, and that's normal. Private repos work too — use `--private`; a few protections downgrade to warnings on free-plan private repos.) The agent (or you) can start building immediately, and the deep settings — the ones that prevent secrets from leaking, branches from being force-pushed, dependencies from going unpatched — are already in place.
-
-```
-Your new repo on day one:
-
-  CI/CD pipeline          ready (Node, Python, Go, Rust, Bun — uncomment your stack)
-  Security scanning       active (secrets blocked at commit + PR + push)
-  Branch protection       enforced (force-push blocked, tags protected, delete-on-merge)
-  AI agent context        configured (Claude Code + Codex, project-aware from session one)
-  Issue management        structured (5 templates, 25+ labels, task scripts)
-  Pre-commit hooks        installed (catches credentials before they reach git)
-  Compliance audit        built in (score any repo against these standards)
-  Drift detection         available (reusable workflow checks downstream repos weekly)
-```
-
-<p align="center">
-  <a href="https://github.com/vbonk/repo-template/generate">
-    <img src="https://img.shields.io/badge/Use%20This%20Template-238636?style=for-the-badge&logo=github&logoColor=white" alt="Use this template">
-  </a>
-</p>
-
-> See it in action: [repo-template-example](https://github.com/vbonk/repo-template-example) is a Node.js/TypeScript project built from this template with every placeholder filled and security hardened.
-
----
-
-<details>
-<summary><strong>▶ Table of Contents</strong></summary>
-
-- [Who Is This For?](#who-is-this-for)
-- [Why This Template?](#why-this-template)
-- [Features](#features)
-- [What's Included](#whats-included)
-- [Workflows](#workflows)
-  - [New Project Workflows](#new-project-workflows)
-  - [Existing Repository Workflows](#existing-repository-workflows)
-  - [Workflow Comparison](#workflow-comparison)
-- [What's Next?](#whats-next)
-- [AI Agent Configuration](#ai-agent-configuration)
-- [CI/CD](#cicd)
-- [Issue Management](#issue-management)
-- [Customization Guide](#customization-guide)
-- [FAQ](#faq)
-- [Contributing](#contributing)
-- [Security](#security)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
-
-</details>
-
----
-
-## Why This Exists
-
-> [!WARNING]
-> **AI-generated code contains vulnerabilities 40-62% of the time.** Zero out of 15 AI-built apps in one study included CSRF protection. Zero set security headers. Over 40% of junior developers deploy AI-generated code they don't fully understand. If you're building with AI tools, the code may work — but the repo around it is probably exposed.
-
-No existing solution combines all three things a solo AI-assisted developer needs:
-1. **Security-hardened repository governance** — secrets blocked, branches protected, dependencies monitored
-2. **AI agent configuration** — your tools understand your project from session one
-3. **Documentation that explains WHY** — not enterprise docs, not "hello world" — the level a helpful senior engineer would use with a new teammate
-
-| Your repo today | Your repo with this template |
-|-----------------|------------------------------|
-| No `.gitignore` or a minimal one — `.env` files slip through | Comprehensive `.gitignore` covering secrets, IDE files, OS files, build artifacts |
-| No CI — you find out code is broken when users tell you | CI pipeline catches failures on every push |
-| Secrets in source code — API keys committed, bots find them in minutes | Pre-commit hook + CI scanning blocks secrets at three levels |
-| Force-push to main can erase your commit history | Branch protection enforced — one-command setup |
-| AI agent starts cold every session | Claude Code and Codex get your full project context, commands, and skills on first session |
-| No issue tracking — mental to-do lists | 5 templates, 25+ labels, helper scripts |
-
----
-
-## Features
-
-- **Claude Code and Codex work from day one** — full project context, conventions, and security boundaries via `CLAUDE.md` and the open `AGENTS.md` standard, plus Claude-native commands, skills, and hooks
-- **Secrets never reach GitHub** — `.gitignore` blocks credential patterns immediately; one command (`setup-hooks.sh`) adds pre-commit scanning; CI scans every PR automatically
-- **Mistakes get caught, not shipped** — 19 workflows included (dependency review, secret detection, stale management active by default; CI and CodeQL ready to enable for your stack)
-- **Security in one command** — `secure-repo.sh` enables branch protection, Dependabot alerts, and tag protection. SHA-pinned Actions and prompt injection defense are active from day one
-- **Two minutes from zero to production-grade** — Quick setup or comprehensive 8-step configuration with interactive prompts
-- **Issues and tasks, not mental to-do lists** — 5 templates (agent/human/external/bug/feature), 25+ labels, project board sync, helper scripts
-- **Score any repo** — Compliance audit scores repos against template standards with a letter grade (A+ through D)
-- **Works for any stack** — Node.js, Python, Go, Rust, Bun — uncomment your stack, everything else adjusts
-
----
-
-## What's Included
-
-```
-repo-template/
-├── .github/
-│   ├── workflows/ci.yml        CI pipeline (multi-stack)
-│   ├── workflows/sync-status   Label → Project board sync
-│   ├── ISSUE_TEMPLATE/         5 issue forms + config
-│   ├── PULL_REQUEST_TEMPLATE   PR checklist
-│   └── dependabot.yml          Dependency updates
-├── .claude/
-│   ├── commands/               Custom slash commands
-│   ├── skills/                 Auto-discovered capabilities
-│   └── agents/                 Specialized sub-agents
-├── scripts/
-│   ├── secure-repo.sh          One-command security hardening
-│   ├── audit-compliance.sh     Repo compliance scoring
-│   ├── labels.sh               Create/update labels
-│   ├── my-tasks.sh             Filtered issue views
-│   └── close-issue.sh          Close with status:done
-├── templates/
-│   ├── hooks/                  Pre-commit secret scanning
-│   └── linting/                Commitlint, ESLint, Ruff configs
-├── docs/                       Getting Started, AI Security, more
-├── src/                        Your source code
-├── tests/                      Your tests
-├── CLAUDE.md                   Claude Code instructions
-├── AGENTS.md                   Cross-agent compatibility
-├── CONTRIBUTORS.md             Auto-generated contributors
-├── CONTRIBUTING.md             Contribution guidelines
-├── SECURITY.md                 Security policy
-├── .gitignore                  Comprehensive patterns
-└── .editorconfig               Consistent formatting
-```
-
----
-
-## Workflows
-
-Choose the workflow that matches your situation:
-
-### New Project Workflows
-
-<details open>
-<summary><strong>▶ Workflow A: GitHub Template (Recommended for most users)</strong></summary>
-
-Best for: Quick start with GitHub's UI
-
-1. Click **[Use this template](https://github.com/vbonk/repo-template/generate)** → Name your repo → Create
-2. Clone your new repository:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-   cd YOUR_REPO
-   ```
-3. Open with Claude Code and run:
-   ```
-   /project:init-template
-   ```
-4. Answer the prompts — files update automatically
+> A secure, agent-native GitHub repository template for Claude Code and Codex. The primary downstream workflow is: create the repository, point an agent that already understands the project at it, and let the agent normalize the template before materializing the real project.
 
 > [!IMPORTANT]
-> After creating from template, run `scripts/labels.sh` to create issue labels. Labels, branch protection, secrets, and Projects do **not** transfer from template repos. See `docs/BRANCH-PROTECTION.md` for protection setup.
+> **Agent inside a repository created from this template?** If the repository is **not** `vbonk/repo-template`, do not treat this README, template examples, optional workflows, or generic documentation as project requirements. Read `CLAUDE.md` or `AGENTS.md` first and execute [Phase 0](docs/PHASE-0.md). No command or setup interview is required.
+
+## The Golden Path
+
+`repo-template` is optimized for a repository that has **already been created** from the GitHub template and is then entered cold by an engineering agent.
 
 ```mermaid
 flowchart LR
-    A[🎯 Use Template] --> B[📥 Clone Repo]
-    B --> C[🤖 Run /init-template]
-    C --> D[💬 Answer Questions]
-    D --> E[✨ Files Updated]
-    E --> F[🚀 Start Coding]
-
-    style A fill:#238636,color:#fff
-    style F fill:#238636,color:#fff
+    A[Create repo from template] --> B[Point Claude or Codex at repo]
+    B --> C[Agent detects derived repository]
+    C --> D[Phase 0: normalize template]
+    D --> E{Project material already available?}
+    E -->|Yes| F[Ingest current-session project]
+    E -->|No| G[Leave clean intake-ready substrate]
+    F --> H[Project-specific repository]
+    G --> H
 ```
 
-</details>
+The agent should not make you explain the template, repeat project information it already has, or choose a stack merely because the repository is empty.
 
-<details>
-<summary><strong>▶ Workflow B: Local-First (For pre-planned projects)</strong></summary>
+### What Phase 0 does
 
-Best for: When you've already planned your project structure or have existing code
+Before application work, the first agent:
 
-1. Create a local directory for your project:
-   ```bash
-   mkdir my-project && cd my-project
-   git init
-   ```
-2. Start Claude Code in this directory
-3. Add the init command:
-   ```bash
-   mkdir -p .claude/commands
-   curl -sL https://raw.githubusercontent.com/vbonk/repo-template/main/.claude/commands/init-template.md \
-     -o .claude/commands/init-template.md
-   ```
-4. Run `/project:init-template` — the agent will:
-   - Ask about your project objectives and tech stack
-   - Generate customized template files
-   - Create the GitHub repository
-   - Push the initial commit
+1. verifies whether the repository is pristine or already contains user/project work;
+2. treats the template as scaffolding, not as application truth;
+3. classifies inherited artifacts as **KEEP / ADAPT / REMOVE / DEFER**;
+4. removes template identity, examples, false configuration, and irrelevant automation;
+5. preserves useful security and repository hygiene;
+6. uses project context already present in the current session instead of re-interviewing the user;
+7. either integrates that project immediately or leaves a truthful, minimal intake-ready substrate;
+8. verifies the resulting repository before committing.
 
-**Advantage:** Files are customized before the GitHub repo exists — no template placeholders to clean up.
+See [docs/PHASE-0.md](docs/PHASE-0.md) for the canonical first-agent SOP.
 
-**Note:** Requires GitHub CLI (`gh`) to be installed and authenticated.
+## Create a Repository
 
-</details>
-
-<details>
-<summary><strong>▶ Workflow C: Spin-off from Existing Session</strong></summary>
-
-Best for: When working in Claude Code and you realize a component should be its own project
-
-1. While in an existing Claude Code session, describe the new project
-2. Ask Claude to create a new repository for it
-3. The agent will:
-   - Set up the new repo with template standards
-   - Move or generate relevant code
-   - Push to GitHub
-   - Return context to your original project
-
-**Example prompt:** "Let's spin off the authentication module into its own repository called `my-auth-service`"
-
-</details>
-
-<details>
-<summary><strong>▶ Workflow D: Empty GitHub Repo + Manual Setup</strong></summary>
-
-Best for: Users who prefer full control or don't use Claude Code
-
-1. Create an empty repository on GitHub (no README, no .gitignore)
-2. Clone it locally
-3. Copy template files manually or download from this repo
-4. Find and update `TODO` comments:
-   ```bash
-   grep -r "TODO" --include="*.md" --include="*.yml"
-   ```
-
-| File | What to Change |
-|------|---------------|
-| `README.md` | Project name, description, badges |
-| `CLAUDE.md` | Your tech stack and commands |
-| `AGENTS.md` | Same as CLAUDE.md (for other AI tools) |
-| `.github/workflows/ci.yml` | Uncomment your language section |
-| `.github/dependabot.yml` | Uncomment your package ecosystem |
-| `SECURITY.md` | Your security contact email |
-
-</details>
-
----
-
-### Existing Repository Workflows
-
-<details>
-<summary><strong>▶ Workflow E: Retrofit an Existing Repository</strong></summary>
-
-Best for: Bringing an older repo up to template standards
-
-1. First, add the init command to your existing repo:
-   ```bash
-   # From your existing repo root:
-   mkdir -p .claude/commands
-   curl -sL https://raw.githubusercontent.com/vbonk/repo-template/main/.claude/commands/init-template.md \
-     -o .claude/commands/init-template.md
-   ```
-2. Then run the command in Claude Code:
-   ```
-   /project:init-template
-   ```
-3. The agent will:
-   - Analyze your current structure
-   - Add missing template files (CLAUDE.md, CI, etc.)
-   - Preserve your existing code and configuration
-   - Suggest improvements without overwriting your work
-
-> **Why the extra step?** `/project:init-template` is a Claude Code custom command that must exist in your repo's `.claude/commands/` directory before Claude Code can discover it. Repos created from this template already have it.
-
-**What gets added:**
-- AI configuration files (if missing)
-- CI/CD workflow (if missing or outdated)
-- Issue/PR templates (if missing)
-- Security policy (if missing)
-- Security hardening script + pre-commit hooks
-
-**What's preserved:**
-- Your existing README (agent will suggest improvements)
-- Your code and tests
-- Your existing CI (agent will compare and recommend)
-
-</details>
-
-<details>
-<summary><strong>▶ Workflow F: Fork + Personal Standards</strong></summary>
-
-Best for: Contributing to others' projects with AI assistance
-
-1. Fork the upstream repository
-2. Add template files to your fork:
-   - `CLAUDE.md` — Your personal Claude Code instructions
-   - Optionally: `AGENTS.md` for Codex
-3. **Important:** Add these to `.git/info/exclude` (not `.gitignore`) to avoid polluting upstream PRs:
-   ```
-   # .git/info/exclude
-   CLAUDE.md
-   AGENTS.md
-   ```
-
-This gives you AI assistance without affecting the upstream project.
-
-**Security for forks:** See [docs/FORK-SECURITY.md](docs/FORK-SECURITY.md) for upstream push blocking, fork network data leakage risks, and secure contribution workflows.
-
-</details>
-
-<details>
-<summary><strong>▶ Workflow G: Create Organization Template</strong></summary>
-
-Best for: Teams wanting consistent standards across repos
-
-1. Fork or clone repo-template
-2. Customize for your organization:
-   - Add org-specific CI steps (internal registries, compliance checks)
-   - Update SECURITY.md with your security contact
-   - Add org branding to README template
-   - Create additional slash commands for team workflows
-3. Mark as a template repository in GitHub Settings
-4. Team members use your org template instead of this one
-
-</details>
-
-<details>
-<summary><strong>▶ Workflow H: Multi-Stack Projects</strong></summary>
-
-Best for: Projects with multiple languages (e.g., Python backend + TypeScript frontend)
-
-1. Use Workflow A or B to create the repository
-2. In `.github/workflows/ci.yml`, uncomment multiple language sections
-3. In `.github/dependabot.yml`, enable multiple ecosystems
-4. In `CLAUDE.md`, document all stacks:
-   ```markdown
-   ## Commands
-
-   ### Backend (Python)
-   ```bash
-   cd backend && pytest
-   ```
-
-   ### Frontend (TypeScript)
-   ```bash
-   cd frontend && npm test
-   ```
-   ```
-
-</details>
-
-<details>
-<summary><strong>▶ Workflow I: Monorepo</strong></summary>
-
-Best for: Multiple projects in a single repository
-
-1. Apply template at repository root
-2. Customize paths in CI and Dependabot:
-   ```yaml
-   # dependabot.yml
-   - package-ecosystem: "npm"
-     directory: "/packages/frontend"
-   - package-ecosystem: "pip"
-     directory: "/packages/backend"
-   ```
-3. In `CLAUDE.md`, document the monorepo structure and per-package commands
-
-</details>
-
----
-
-### Workflow Comparison
-
-| Workflow | Starting Point | Best For | AI Required |
-|----------|---------------|----------|-------------|
-| A: GitHub Template | GitHub UI | Quick start | Recommended |
-| B: Local-First | Empty directory | Pre-planned projects | Yes |
-| C: Spin-off | Existing session | Breaking out components | Yes |
-| D: Manual | Empty GitHub repo | Full control | No |
-| E: Retrofit | Existing repo | Upgrading old projects | Recommended |
-| F: Fork | Others' repos | Contributing with AI | No |
-| G: Org Template | This template | Team standards | No |
-| H: Multi-Stack | Any | Polyglot projects | No |
-| I: Monorepo | Any | Multi-project repos | No |
-
----
-
-## What's Next?
-
-After setup, here are some things to try:
-
-| Action | How |
-|--------|-----|
-| **Add your first feature** | Ask Claude: "Create a basic Express server in src/" |
-| **Run CI locally** | Your stack's test command — `npm test`, `pytest`, `go test ./...` — after enabling that stack in `ci.yml` |
-| **Create an issue** | Try the bug report form — see how structured it is |
-| **Enable security features** | Settings → Security → Enable secret scanning |
-
-### First Week Checklist
-
-- [ ] Add your source code to `src/`
-- [ ] Write your first test in `tests/`
-- [ ] Push a commit and watch CI run
-- [ ] Invite collaborators (they'll see CONTRIBUTING.md)
-- [ ] Enable GitHub security features (see [Security](#security))
-
----
-
-## AI Agent Configuration
-
-This template includes instruction files for its two supported agents:
-
-| File | AI Tool | What It Contains |
-|------|---------|------------------|
-| `CLAUDE.md` | Claude Code (primary) | Project context, commands, code style, structure — plus the `.claude/` toolkit: slash commands, skills, hooks, sub-agents |
-| `AGENTS.md` | Codex (and any tool reading the open AGENTS.md standard) | Project context, conventions, and security boundaries |
-
-**Why this matters:** AI agents perform significantly better when they understand your project's conventions, tech stack, and workflows upfront. Instead of re-explaining your preferences each session, the agent reads these files automatically.
-
-**Custom commands:** The `.claude/commands/` folder contains slash commands:
-
-| Command | What It Does |
-|---------|-------------|
-| `/project:init-template` | Interactive project setup (Quick or Full mode) |
-| `/project:security-audit` | Run security scorecard (read-only) — checks GitHub settings, pre-commit hooks, forbidden tokens, commit signing. Outputs letter grade (A+ through D). |
-| `/project:review` | Code review assistance |
-
-**Bundled skills:** `.claude/skills/` ships six auto-discovered skills — Claude uses them when your request matches, no command needed: `cot` (structured reasoning before risky changes), `hibernate` (pause/reactivate a repo), `repo-docs` (documentation upgrades), `skill-builder` + `skill-validator` (author and debug your own skills), and `task-cleanup`. See the [Skills README](.claude/skills/README.md).
-
-**Proactive security:** Both agent configs instruct the agent to check if security hardening has been completed on first session. If pre-commit hooks or GitHub protections are missing, the agent will suggest running the setup commands once.
-
----
-
-## CI/CD
-
-The included workflow (`.github/workflows/ci.yml`) supports multiple languages. Uncomment the section for your stack:
-
-| Stack | What It Runs |
-|-------|--------------|
-| **Node.js/TypeScript** | npm ci, lint, test, build |
-| **Python** | pip install, pytest, ruff |
-| **Go** | go build, go test, go vet |
-| **Rust** | cargo build, cargo test, cargo clippy |
-
-### Security Features
-
-The CI workflow follows GitHub's security best practices:
-
-- **Actions pinned to SHA** — Prevents supply chain attacks from compromised tags
-- **Explicit permissions** — Least-privilege access, not default write-all
-- **30-minute timeout** — Prevents runaway jobs from consuming resources
-- **Concurrency controls** — Cancels outdated runs when new commits push
-
----
-
-## Issue Management
-
-This template includes a structured issue tracking system with labels, templates, and automation.
-
-### Issue Templates
-
-| Template | Auto-Labels | Use For |
-|----------|-------------|---------|
-| Agent Task | `owner:agent`, `task` | Work an AI agent can complete autonomously |
-| Human Task | `owner:human`, `task` | ENV vars, accounts, credentials, DNS, decisions |
-| External Blocker | `owner:external`, `status:blocked` | Waiting on a client, vendor, or third party |
-| Bug Report | `bug` | Something is broken |
-| Feature Request | `enhancement` | Suggest a new feature |
-
-### Label Taxonomy
-
-| Category | Labels | Purpose |
-|----------|--------|---------|
-| Status | `status:planning`, `in-progress`, `done`, `blocked` | Drives automation |
-| Owner | `owner:human`, `agent`, `external` | Who does the work |
-| Priority | `priority:high`, `medium`, `low` | Urgency |
-| Type | `bug`, `enhancement`, `task`, `roadmap`, `idea`, etc. | Classification |
-
-Run `scripts/labels.sh` to create all labels. Idempotent — safe to run multiple times.
-
-### Helper Scripts
+Use GitHub's **Use this template** button, or create one from the CLI if that is how you are already working:
 
 ```bash
-scripts/my-tasks.sh              # Your tasks + blocked issues
-scripts/my-tasks.sh agent        # Agent-completable tasks
-scripts/my-tasks.sh high         # High priority only
-scripts/close-issue.sh 23 "Done" # Close with status:done + comment
+gh repo create my-project --template vbonk/repo-template --private --clone
 ```
 
-### Project Board Sync (Optional)
+After creation, the recommended interaction is simply:
 
-The `sync-status.yml` workflow auto-syncs `status:*` labels to a GitHub Projects v2 board (and optionally Notion). Run `/project:init-template` to configure, or fill in the placeholder IDs manually.
+> Organize and publish the project we have been working on to `owner/repo`.
 
----
+A correctly configured Claude Code or Codex session should recognize the derived repository and handle Phase 0 automatically.
 
-## Customization Guide
+## Agent Support
 
-<details>
-<summary><strong>▶ Adding a New Language</strong></summary>
+This template intentionally supports two agent surfaces deeply:
 
-1. Uncomment the relevant section in `.github/workflows/ci.yml`
-2. Uncomment the ecosystem in `.github/dependabot.yml`
-3. Update `CLAUDE.md` with your specific commands
-4. Add language-specific config files (package.json, pyproject.toml, etc.)
+| Agent | Entry point | Behavior |
+|---|---|---|
+| Claude Code | `CLAUDE.md` | Detects source-template vs. derived-repo mode; derived repos run Phase 0 automatically |
+| Codex | `AGENTS.md` | Same bootstrap contract using the open `AGENTS.md` convention |
 
-</details>
+Claude Code also receives `.claude/` commands, skills, hooks, and agents. `/project:bootstrap` is an explicit fallback; normal derived-repo entry does not require the user to invoke it.
 
-<details>
-<summary><strong>▶ Setting Up Pre-commit Hooks</strong></summary>
+## Design Principles
 
-See [CONTRIBUTING.md](CONTRIBUTING.md#pre-commit-hooks-optional) for instructions on setting up Husky and lint-staged.
+- **Agent-first, not wizard-first.** Infer from repository state, current session context, and existing artifacts before asking questions.
+- **Remove assumptions before adding implementation.** No fake architecture, commands, environment variables, dependencies, or deployment targets.
+- **Security survives cleanup.** Template normalization must not casually remove secret protection, safe ignore rules, AI security boundaries, or other proven safeguards.
+- **Truthful configuration only.** A configuration that appears active but is not actually configured is worse than no configuration.
+- **Minimal interruption.** Ask only when a material decision is genuinely unknowable or unsafe to infer.
+- **Repository as durable context.** After intake, project-specific docs and agent instructions replace transient session knowledge.
+- **Claude Code + Codex only.** Depth over broad, shallow agent compatibility.
 
-</details>
+## What Ships
 
-<details>
-<summary><strong>▶ Enabling GitHub Security Features</strong></summary>
+The source template includes a broad security and governance toolkit so Phase 0 can retain the parts appropriate to the incoming project:
 
-**Automated (recommended):** Run the hardening script:
+- secret-aware `.gitignore`, `.gitattributes`, and `.editorconfig`;
+- Claude Code and Codex instruction surfaces;
+- pre-commit secret scanning and GitHub hardening scripts;
+- issue/PR governance and CODEOWNERS;
+- security documentation and prompt-injection defenses;
+- **19 workflows** in the source template, including security, release, maintenance, and validation capabilities;
+- Claude commands, skills, hooks, and an example agent;
+- compliance and self-test tooling.
+
+Not all of these belong in every derived project. **Phase 0 decides what survives.**
+
+## Source Template Development
+
+If you are working on `vbonk/repo-template` itself, do **not** run destructive downstream normalization. Follow `CLAUDE.md` / `AGENTS.md` in source-template mode.
+
+Useful validation commands:
 
 ```bash
-bash scripts/secure-repo.sh
+bash scripts/test-template.sh --local-only
+bash scripts/test-e2e.sh
+bash scripts/audit-compliance.sh --local-only
 ```
 
-This enables Dependabot alerts, automated security fixes, branch protection (block force-push/deletion), tag protection, and delete-branch-on-merge in one command.
-
-**Manual:** In your repository Settings → Security:
-
-1. Enable **Secret scanning** — Detects API keys in commits
-2. Enable **Push protection** — Blocks pushes containing secrets
-3. Enable **Dependabot alerts** — Notifies of vulnerable dependencies
-4. Enable **Code scanning** — Finds vulnerabilities via CodeQL (public repos)
-
-**Pre-commit hooks:** Install the secret scanning hook:
+Repository security hardening is audited with:
 
 ```bash
-bash templates/hooks/setup-hooks.sh
+bash scripts/secure-repo.sh --audit
 ```
 
-Blocks commits containing API keys, private keys, credentials, and custom forbidden tokens. Chains safely with existing hooks (husky, lint-staged, etc.).
+## Documentation
 
-**Fork security:** See [docs/FORK-SECURITY.md](docs/FORK-SECURITY.md) for fork-specific security guidance (upstream push blocking, fork network data leakage, sync workflow).
+| Document | Purpose |
+|---|---|
+| [Phase 0](docs/PHASE-0.md) | Canonical first-agent normalization and project-intake SOP |
+| [Getting Started](docs/GETTING-STARTED.md) | Short agent-first usage guide |
+| [AI Security](docs/AI-SECURITY.md) | Agent threat model and security boundaries |
+| [Branch Protection](docs/BRANCH-PROTECTION.md) | Repository hardening and rulesets |
+| [Documentation Guide](docs/DOCUMENTATION-GUIDE.md) | Documentation quality standard |
+| [Architecture](docs/ARCHITECTURE.md) | Architecture of the template project itself |
+| [ADRs](docs/decisions/) | Material design decisions |
 
-</details>
+The full index is in [docs/README.md](docs/README.md).
 
-<details>
-<summary><strong>▶ Creating Custom Slash Commands</strong></summary>
+## Example
 
-Add Markdown files to `.claude/commands/`:
-
-```markdown
-# .claude/commands/my-command.md
-
-Instructions for Claude when this command is invoked...
-```
-
-Then use with `/project:my-command` in Claude Code.
-
-</details>
-
----
-
-## FAQ
-
-<details>
-<summary><strong>▶ I don't use Node.js. Will this work for me?</strong></summary>
-
-Yes. The template is language-agnostic. The CI workflow has commented sections for Python, Go, and Rust. Uncomment the one you need, or add your own. The directory structure (`src/`, `tests/`, etc.) works for any language.
-
-</details>
-
-<details>
-<summary><strong>▶ Do I need to use Claude Code?</strong></summary>
-
-No. The template works with any workflow. The AI configuration files (CLAUDE.md, AGENTS.md) are just text files — they won't affect anything if you don't use AI tools. But if you do use Claude Code or Codex, your agent will be dramatically more effective.
-
-</details>
-
-<details>
-<summary><strong>▶ The CI workflow failed. What do I do?</strong></summary>
-
-Common causes:
-1. **No package.json/requirements.txt** — The workflow expects dependencies. Comment out the install step or add your dependency file.
-2. **No test script** — Add a test script or comment out the test step.
-3. **Wrong language section** — Make sure you uncommented the right section.
-
-Check the Actions tab for specific error messages.
-
-</details>
-
-<details>
-<summary><strong>▶ How do I update after the template improves?</strong></summary>
-
-Repositories created from templates don't auto-update. To get improvements:
-1. Check the [template repo](https://github.com/vbonk/repo-template) for changes
-2. Manually copy relevant updates to your project
-3. Or use the template again for new projects
-
-</details>
-
-<details>
-<summary><strong>▶ I used "Use this template" but also have local customizations. What now?</strong></summary>
-
-If you created a repo via GitHub's template button but also have locally customized files (e.g., from a previous session), you have divergent git histories. Options:
-
-1. **Force push local work** (recommended if local is more complete):
-   ```bash
-   git push --force origin main
-   ```
-   This replaces the template files with your customized version.
-
-2. **Discard local and customize template**:
-   Clone the GitHub repo and run `/project:init-template` to customize interactively (this command is already included in repos created from the template).
-
-**To avoid this:** Use Workflow B (Local-First) when you have pre-planned customizations, or use Workflow A (GitHub Template) and customize afterward — don't mix both.
-
-</details>
-
-<details>
-<summary><strong>▶ Can I add template standards to someone else's repo I forked?</strong></summary>
-
-Yes! See Workflow F. Add your AI configuration files (CLAUDE.md, etc.) and exclude them from git tracking using `.git/info/exclude` so they don't pollute PRs to the upstream project.
-
-</details>
-
----
-
-<details>
-<summary><strong>▶ AI Security</strong></summary>
-
-This template includes prompt injection defenses — a first for GitHub templates:
-
-- **CODEOWNERS** ships with active rules on AI config files (CLAUDE.md, AGENTS.md, and the whole `.claude/` toolkit) — owner review is auto-requested on changes; enable "Require review from Code Owners" in branch protection to make it blocking
-- **PR body scanner** (opt-in workflow) detects common injection patterns in issue/PR text
-- **Hook templates** validate inputs before AI agents process them
-- **Documentation** in [docs/AI-SECURITY.md](docs/AI-SECURITY.md) covers attack vectors and best practices
-
-See [docs/AI-SECURITY.md](docs/AI-SECURITY.md) for the full threat model.
-
-</details>
-
----
-
-## Show Your Support
-
-If you created your repo with this template, add this badge to your README:
-
-```markdown
-[![Built with repo-template](https://img.shields.io/badge/Built%20with-repo--template-blue?style=flat-square)](https://github.com/vbonk/repo-template)
-```
-
-[![Built with repo-template](https://img.shields.io/badge/Built%20with-repo--template-blue?style=flat-square)](https://github.com/vbonk/repo-template)
-
----
-
-## Contributing
-
-Contributions to improve this template are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-**Ideas for contributions:**
-- Language-specific add-on configs
-- Additional CI/CD patterns
-- Improved documentation
-- New custom slash commands
-
----
+[repo-template-example](https://github.com/vbonk/repo-template-example) demonstrates a fully initialized project derived from the template. It is an example, not a downstream requirement.
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for:
-- How to report vulnerabilities
-- Security features included in this template
-- Recommended GitHub security settings
+Never commit secrets. Derived repositories should retain the template's security baseline unless Phase 0 can show that a control is irrelevant or has been replaced by an equivalent or stronger project-specific control.
 
----
+See [SECURITY.md](SECURITY.md) and [docs/AI-SECURITY.md](docs/AI-SECURITY.md).
 
 ## License
 
-[MIT](LICENSE) — Use freely, attribution appreciated.
-
----
-
-## Acknowledgments
-
-This template incorporates best practices from:
-- [Anthropic's Claude Code documentation](https://www.anthropic.com/engineering/claude-code-best-practices)
-- [GitHub Actions security best practices](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions)
-- Community feedback and real-world usage
-
----
-
-<p align="center">
-  <sub>The institutional knowledge of a senior engineering team, delivered as a GitHub template.</sub>
-</p>
+`repo-template` itself is MIT licensed. A downstream project's license is a separate decision. Do not assume the application's licensing merely because the template uses MIT; preserve any notices required for template material that remains in the derived repository.
