@@ -1,323 +1,110 @@
 # Getting Started
 
-> This guide takes you from "I have a new repo" to "my repo is production-grade" in about 10 minutes. It covers security, AI agent configuration, workflow persistence, and automation — the same things a senior engineering team would set up on day one.
+> The normal workflow is intentionally short: create a repository from `vbonk/repo-template`, point Claude Code or Codex at it, and let the first agent normalize the template before introducing the real project.
 
----
+**Last Updated:** 2026-08-13
 
-## Prerequisites
+## Agent-First Workflow
 
-- **Git** — installed and configured
-- **GitHub CLI (`gh`)** — required for repo creation and security hardening. [Install guide](https://cli.github.com/). Run `gh auth login` to authenticate.
-- **An AI coding tool** (optional) — Claude Code (primary) or Codex. The template works without one, but the agent configuration is a major feature.
+### 1. Create the repository
 
-> [!NOTE]
-> Most template features work without `gh` (the `.gitignore`, AI configs, issue templates, and workflows all transfer via "Use this template"). The CLI is needed for `secure-repo.sh` (security hardening) and `audit-compliance.sh` (scoring). If you skip it, you can configure security settings manually in GitHub's Settings UI.
+Use GitHub's **Use this template** action or your existing automation. The repository should already exist before the project agent enters it.
 
----
-
-## Level 1: Your Repo, Production-Grade
-
-**Time: 2 minutes.**
-
-Three commands. That's it.
+CLI example, when useful:
 
 ```bash
-# 1. Create your repo from the template (use --private if you prefer —
-#    a few protections downgrade to warnings on free-plan private repos)
-gh repo create my-project --template vbonk/repo-template --public --clone
-cd my-project
-
-# 2. Install pre-commit hooks (catches secrets before they reach git)
-bash templates/hooks/setup-hooks.sh
-
-# 3. Harden security (Dependabot, branch protection, tag ruleset) + scorecard
-bash scripts/secure-repo.sh
+gh repo create my-project --template vbonk/repo-template --private --clone
 ```
 
-> [!NOTE]
-> Hooks first, hardening second — the scorecard at the end of `secure-repo.sh`
-> checks that hooks are installed, so this order gives you an honest first
-> grade. Expect **A or B on a fresh repo**: the commit-signing check warns
-> until you enable signing, and that's normal, not a failure.
+### 2. Give the existing project agent the repository
 
-> [!IMPORTANT]
-> 29 million secrets were leaked on GitHub in 2025. AI-assisted commits leak credentials at twice the baseline rate (3.2% vs 1.5%). The pre-commit hook you just installed is a 3-second check that catches the most common and costly mistake before it happens.
+If you have already been designing or building the project in a Claude Code or Codex session, keep that context. A typical instruction can be as small as:
 
-### What just happened
+> Organize and publish the project we have been working on to `owner/repo`.
 
-Here is what those three commands configured for you:
+The agent should not require a separate template explanation or repeat questions whose answers already exist in the current session.
 
-| Command | What It Did |
-|---------|-------------|
-| `gh repo create --template` | Created a new repo with CI, issue templates, security policies, AI agent configs, and documentation scaffolding |
-| `secure-repo.sh` | Enabled Dependabot alerts, branch protection (blocks force-push and branch deletion), tag protection, and delete-branch-on-merge |
-| `setup-hooks.sh` | Installed a pre-commit hook that scans every commit for API keys, private keys, and credentials |
+### 3. Phase 0 runs first
 
-### Before and after
+A derived repository still contains source-template material. `CLAUDE.md` and `AGENTS.md` tell the first agent to execute [Phase 0](PHASE-0.md) automatically.
 
-```
-Before                              After
-------                              -----
-No .gitignore (or minimal)          Comprehensive .gitignore covering secrets,
-                                    IDE files, OS files, build artifacts
+Phase 0:
 
-No CI                               CI pipeline ready for Node, Python, Go, Rust
+- verifies whether the repo is pristine or already contains custom work;
+- classifies inherited artifacts as KEEP / ADAPT / REMOVE / DEFER;
+- removes template identity and false project assumptions;
+- retains useful security/repository hygiene;
+- ingests project material already available to the agent; or
+- leaves a minimal intake-ready substrate if no real project has been provided yet.
 
-No security scanning                Secret scanning at commit + PR + push level
-
-Force-push to main allowed          Branch protection enforced
-
-No issue structure                  5 templates, 25+ labels, helper scripts
-
-AI agents start cold                Claude Code + Codex configured with project context
-```
+No setup wizard is required.
 
 ```mermaid
 flowchart LR
-    A[Create from template] --> B[Run secure-repo.sh]
-    B --> C[Install hooks]
-    C --> D[Customize with init-template]
-    D --> E[Start building]
-
-    style A fill:#238636,color:#fff
-    style E fill:#238636,color:#fff
+    A[Template-derived repo] --> B[First agent enters]
+    B --> C[Phase 0]
+    C --> D{Project context available?}
+    D -->|Yes| E[Materialize project]
+    D -->|No| F[Intake-ready substrate]
 ```
 
-> [!TIP]
-> Adding `.env` to `.gitignore` prevents 89% of accidental secret leaks. Your new repo's `.gitignore` already covers `.env`, `.env.local`, `.env.*.local`, `.pem`, `.key`, and dozens of other sensitive patterns.
+## What the Template Intentionally Does Not Assume
 
----
+Before project intake, the template does not claim that the project uses:
 
-## Level 2: Your AI Agent, Project-Aware
+- Node, Python, Go, Rust, Bun, or any other runtime;
+- React, Next.js, Astro, Vite, or any framework;
+- a database, CMS, authentication provider, analytics platform, or hosting target;
+- particular build, test, lint, or deployment commands;
+- specific environment variables;
+- a public project license.
 
-**Time: 5 minutes.**
+Those are project decisions, not template defaults.
 
-AI coding agents perform dramatically better when they have context about your project. Without it, every session starts cold — the agent doesn't know your conventions, your stack, your architecture, or your security boundaries.
+## Security Baseline
 
-### What the agent config files do
+Cleanup should not casually remove safeguards. Useful defaults include:
 
-This template configures its two supported agents — Claude Code (primary) and Codex — so each is productive from the first session.
+- secret-aware ignore patterns;
+- repository security policy;
+- CODEOWNERS protection for high-impact agent/security files where valid;
+- pre-commit secret scanning;
+- branch/ruleset hardening scripts;
+- AI security boundaries;
+- read-only security audit capability.
 
-| Agent | Config File | What It Gives the Agent |
-|-------|-------------|-------------------------|
-| Claude Code | `CLAUDE.md` | Full project context, custom slash commands, security boundaries |
-| Codex | `AGENTS.md` | Project context, conventions, and security boundaries via the open AGENTS.md standard |
+For a derived repository, Phase 0 keeps, adapts, or removes each control based on actual project needs.
 
-Two files, two agents, zero sync burden. Claude Code additionally gets the `.claude/` toolkit — slash commands, auto-discovered skills, security hook templates, and an example sub-agent. `AGENTS.md` is an open standard, so other tools that adopt it read your Codex config for free.
+See [AI-SECURITY.md](AI-SECURITY.md) and [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md).
 
-### Why this matters
+## If You Are Maintaining repo-template Itself
 
-**Without context**, an AI agent:
-- Doesn't know your project structure or naming conventions
-- Generates code that doesn't match your style
-- Misses your test patterns and deployment targets
-- Has no security boundaries — it will happily commit secrets if asked
+Do not run downstream normalization against `vbonk/repo-template`.
 
-**With context**, the agent:
-- Knows your commands (`npm test`, `cargo build`, etc.)
-- Follows your coding style and architecture patterns
-- Refuses requests that violate security rules
-- Checks for security hardening on its first session
-
-> [!NOTE]
-> Over 40% of junior developers deploy AI-generated code they don't fully understand. The agent config files include security boundaries that instruct the AI to refuse suspicious requests and flag anything that touches credentials or security-sensitive files.
-
-### How to customize
-
-Run the interactive setup command in Claude Code:
-
-```
-/project:init-template
-```
-
-This walks you through filling in your project name, tech stack, and commands. Both agent config files (CLAUDE.md, AGENTS.md) update to reflect your project. You can also do it manually — every placeholder is marked with `<!-- TODO -->` comments:
+Use the source-template validation commands documented in `CLAUDE.md` and `AGENTS.md`, including:
 
 ```bash
-grep -r "TODO" --include="*.md" CLAUDE.md AGENTS.md
+bash scripts/test-template.sh --local-only
+bash scripts/test-e2e.sh
+bash scripts/audit-compliance.sh --local-only
+bash scripts/secure-repo.sh --audit
 ```
 
-```mermaid
-graph TD
-    A[CLAUDE.md<br/>Primary context file] --> B[Commands<br/>dev, build, test, lint]
-    A --> C[Architecture<br/>Components and data flow]
-    A --> D[Security<br/>AI agent boundaries]
-    A --> E[Conventions<br/>Code style, error handling]
+## After Project Intake
 
-    style A fill:#1a5276,color:#fff
-    style D fill:#7d3c98,color:#fff
-```
+The resulting repository should stop looking like `repo-template` and start looking like the actual project.
+
+At that point:
+
+- README describes the real project;
+- `CLAUDE.md` and `AGENTS.md` contain real project operating instructions;
+- architecture documentation reflects actual architecture;
+- CI runs real project checks;
+- dependency automation targets real ecosystems;
+- environment documentation lists real required variables;
+- ADRs record decisions that were actually made.
 
 ---
 
-## Level 3: Your Workflow, Protected
-
-**Time: 5 minutes.**
-
-### Branch protection: a safety net, even for solo developers
-
-**What it is:** Branch protection prevents anyone (including you) from force-pushing to `main`, deleting `main`, or merging broken code.
-
-**Why it matters for solo devs:** "I'm the only one working on this, why do I need protection?" Because mistakes happen. A bad `git push --force` can erase your entire commit history. An accidental merge can overwrite hours of work. Branch protection is a seatbelt — you hope you never need it, but when you do, it saves everything.
-
-**How it works:** After running `secure-repo.sh`, your `main` branch:
-- Cannot be force-pushed (your history is safe)
-- Cannot be deleted
-- Merges automatically clean up feature branches
-
-### Pre-commit hooks: the 3-second safety net
-
-**What they are:** Pre-commit hooks are checks that run automatically every time you commit code. They take about 3 seconds and catch problems before they reach your repository.
-
-**Why they matter:** The hook installed by `setup-hooks.sh` scans every commit for patterns that look like API keys, private keys, AWS credentials, GitHub tokens, and other secrets. This single step is the difference between "oops, I committed my API key" and "my API key is safe."
-
-> [!WARNING]
-> AI-generated code contains vulnerabilities 40-62% of the time. Zero out of 15 AI-built test apps in one study included CSRF protection. Zero set security headers. The pre-commit hook doesn't catch everything, but it catches the most expensive mistake — leaked credentials.
-
-### Secret scanning: defense in depth
-
-Your repository doesn't rely on a single line of defense. It uses 6 layers, each catching what the others miss:
-
-```mermaid
-graph TD
-    L1["CODEOWNERS<br/>Who reviews what"] --> L2["Branch Protection<br/>Safety net for main"]
-    L2 --> L3["CI Validation<br/>Automated checks on every push"]
-    L3 --> L4["Pre-commit Hooks<br/>Catches secrets before commit"]
-    L4 --> L5["Agent Instructions<br/>AI refuses suspicious requests"]
-    L5 --> L6["Secret Scanning<br/>GitHub blocks known credential patterns"]
-
-    style L1 fill:#1a5276,color:#fff
-    style L2 fill:#1a5276,color:#fff
-    style L3 fill:#1a5276,color:#fff
-    style L4 fill:#1a5276,color:#fff
-    style L5 fill:#7d3c98,color:#fff
-    style L6 fill:#7d3c98,color:#fff
-```
-
-If a secret slips past your local hook, the CI pipeline catches it. If it slips past CI, GitHub's secret scanning catches it. If push protection is enabled, GitHub blocks the push entirely before the secret ever lands in the repository.
-
-### OWASP LLM Top 10: what matters for you
-
-The OWASP LLM Top 10 is a security standard for applications that use large language models. Here are the items that directly affect you as someone using AI coding tools:
-
-**Prompt injection** — When someone (or some code) includes hidden instructions that trick your AI agent into doing something unintended. This template protects AI config files with CODEOWNERS review gates and instructs agents to refuse suspicious requests. See [docs/AI-SECURITY.md](AI-SECURITY.md) for the full threat model.
-
-**Sensitive information disclosure** — Your `.env` file contains API keys, database passwords, and other secrets. AI agents can accidentally include these in generated code or commit them. The pre-commit hook and `.gitignore` patterns prevent this. Never hardcode credentials in source files.
-
-**Supply chain vulnerabilities** — AI agents sometimes suggest packages that don't exist. Attackers create real packages with those names (typosquatting). This template uses SHA-pinned GitHub Actions — every action is pinned to a specific commit hash, not a mutable tag that could be hijacked.
-
-### Fork security basics
-
-If you fork someone else's repository:
-
-> [!CAUTION]
-> Forks share a git object store with the upstream repository. A commit you push and then delete may still be fetchable from the upstream repo by its SHA hash. If you accidentally push a secret to a fork, rotate the credential immediately — deleting the commit is never sufficient.
-
-See [docs/FORK-SECURITY.md](FORK-SECURITY.md) for the full guide, including how to block upstream push and contribute safely via PRs.
-
----
-
-## Level 4: Your Development, Automated
-
-**This section is optional.** Everything above gives you a production-grade repo. The items below add automation for teams and projects that grow beyond the basics.
-
-### GitHub Actions: automated checks on every push
-
-The included CI workflow (`.github/workflows/ci.yml`) runs automatically when you push code or open a pull request. It supports Node.js, Python, Go, and Rust — uncomment the section for your stack.
-
-```mermaid
-flowchart LR
-    A[Push code] --> B[CI runs automatically]
-    B --> C{Tests pass?}
-    C -- Yes --> D[Safe to merge]
-    C -- No --> E[Fix and push again]
-    E --> B
-
-    style D fill:#238636,color:#fff
-    style E fill:#b91c1c,color:#fff
-```
-
-**What CI gives you:**
-- Automated tests run on every push — you don't have to remember to run them manually
-- Linting catches style issues before review
-- Build verification confirms your code compiles
-- Security scanning (CodeQL, dependency review) runs alongside your tests
-
-### Issue templates and labels: structured task management
-
-Run `bash scripts/labels.sh` to create 25+ labels organized by status, owner, priority, and type. The 5 issue templates (agent task, human task, external blocker, bug report, feature request) give structure to every task.
-
-Helper scripts make GitHub Issues a task manager:
-
-```bash
-scripts/my-tasks.sh              # Your tasks + blocked issues
-scripts/my-tasks.sh agent        # Tasks an AI agent can handle
-scripts/my-tasks.sh high         # High priority only
-scripts/close-issue.sh 23 "Done" # Close with status update
-```
-
-### Release automation
-
-Tag a version and the release workflow creates a GitHub Release with an auto-generated changelog:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-# Release is created automatically with changelog from commits
-```
-
-### Compliance audit: scoring your repo
-
-Run the compliance audit to score any repository against template standards:
-
-```bash
-bash scripts/audit-compliance.sh
-```
-
-This checks for AI agent configs, CI workflows, security features, community files, issue templates, and developer experience tooling. Output is JSON with a letter grade (A+ through F).
-
-### Claude Code skills and agents
-
-If you use Claude Code, explore the custom commands in `.claude/commands/`:
-
-| Command | What It Does |
-|---------|-------------|
-| `/project:init-template` | Interactive project setup |
-| `/project:security-audit` | Security scorecard, read-only (add `--fix` intent via `scripts/secure-repo.sh` to apply hardening) |
-| `/project:review` | Code review assistance |
-| `/project:getting-started` | Walks through this guide interactively |
-| `/project:update-docs` | Checks documentation quality and suggests improvements |
-
-The template also ships six **skills** in `.claude/skills/` — unlike commands, Claude discovers and uses these automatically when your request matches:
-
-| Skill | Fires when you say things like |
-|-------|-------------------------------|
-| `cot` | "think this through", "use cot" — structured reasoning + risk assessment before big changes |
-| `hibernate` | "hibernate this repo", "pause repo" — put a repo into a dormant state, reversibly |
-| `repo-docs` | "fix the readme", "docs audit" — upgrade documentation to production quality |
-| `skill-builder` | "create a skill" — guided authoring of your own skills |
-| `skill-validator` | "my skill isn't working" — debug skill discovery and structure |
-| `task-cleanup` | "clean up tasks" — archive completed task-list entries |
-
-See the [Skills README](../.claude/skills/README.md) for how they work and how to write your own.
-
-> [!TIP]
-> Run `/project:security-audit` periodically to verify your security posture. It checks GitHub settings, pre-commit hooks, forbidden tokens, and commit signing, then outputs a letter grade — without changing anything.
-
----
-
-## Quick Reference
-
-| What You Want | Command |
-|---------------|---------|
-| Create repo from template | `gh repo create my-project --template vbonk/repo-template --public --clone` |
-| Harden security | `bash scripts/secure-repo.sh` |
-| Install hooks | `bash templates/hooks/setup-hooks.sh` |
-| Interactive setup | `/project:init-template` (in Claude Code) |
-| Run CI locally | Your stack's test command (`npm test`, `pytest`, `go test ./...`) once enabled in `ci.yml` |
-| Create labels | `bash scripts/labels.sh` |
-| Security scorecard | `/project:security-audit` or `bash scripts/audit-compliance.sh` |
-| See your tasks | `bash scripts/my-tasks.sh` |
-
----
-
-> **See also:** [AI-SECURITY.md](AI-SECURITY.md) | [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md) | [FORK-SECURITY.md](FORK-SECURITY.md) | [ARCHITECTURE.md](ARCHITECTURE.md) | [DOCUMENTATION-GUIDE.md](DOCUMENTATION-GUIDE.md)
+**Referenced by:** [README.md](../README.md)  
+**See also:** [Phase 0](PHASE-0.md) | [Documentation Guide](DOCUMENTATION-GUIDE.md) | [AI Security](AI-SECURITY.md)

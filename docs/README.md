@@ -1,38 +1,45 @@
 # Documentation
 
-> Navigation hub for all project documentation. Start here to find what you need.
+> Navigation hub for `repo-template` documentation. Template-derived repositories should begin with Phase 0 so inherited reference material is interpreted in the correct context.
 
----
+**Last Updated:** 2026-08-13
 
-## Docs Reference
+## Start Here
 
-| Document | Description | Key Topics |
-|----------|-------------|------------|
-| [GETTING-STARTED.md](GETTING-STARTED.md) | Setup guide from zero to production-grade | Security, AI agents, workflow protection, automation |
-| [DOCUMENTATION-GUIDE.md](DOCUMENTATION-GUIDE.md) | Pattern library for professional documentation | README structure, Mermaid diagrams, callouts, progressive disclosure |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System design and technical decisions | Components, data flow, technology choices, ADRs |
-| [AI-SECURITY.md](AI-SECURITY.md) | Prompt injection threat model and defenses | 6-layer defense, attack vectors, protected files, hook templates |
-| [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md) | Branch protection setup with `gh` CLI scripts | PR reviews, status checks, signed commits, tag protection |
-| [FORK-SECURITY.md](FORK-SECURITY.md) | Secure fork workflows and data leakage risks | Fork network, upstream push blocking, secret rotation |
-| [GITHUB-ENVIRONMENTS.md](GITHUB-ENVIRONMENTS.md) | Deployment environments and approval gates | Secret scoping, staging/production pipeline, wait timers |
-| [PROD_CHECKLIST.md](PROD_CHECKLIST.md) | Production readiness checklist | Security, performance, monitoring, infrastructure, legal compliance |
-| [decisions/](decisions/) | Architecture Decision Records (ADRs) | Individual design decisions with context and rationale |
+| Document | Purpose |
+|---|---|
+| [PHASE-0.md](PHASE-0.md) | Canonical first-agent normalization and project-intake SOP for template-derived repositories |
+| [GETTING-STARTED.md](GETTING-STARTED.md) | Short agent-first usage guide |
+| [AI-SECURITY.md](AI-SECURITY.md) | Prompt-injection threat model and agent security boundaries |
+| [DOCUMENTATION-GUIDE.md](DOCUMENTATION-GUIDE.md) | Documentation quality standard and pattern library |
 
-## Root-Level Docs
+## Security and Operations
 
-| Document | Description | Key Topics |
-|----------|-------------|------------|
-| [README.md](../README.md) | Project overview and quick start | Setup, features, usage |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guidelines | PR process, code style, testing |
-| [SECURITY.md](../SECURITY.md) | Security policy and vulnerability reporting | Incident response, responsible disclosure |
-| [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Community standards | Expected behavior, enforcement |
-| [GOVERNANCE.md](../GOVERNANCE.md) | Project governance | Decision-making, roles, maintainership |
-| [SUPPORT.md](../SUPPORT.md) | How to get help | Issue templates, discussion channels |
-| [CHANGELOG.md](../CHANGELOG.md) | Version history | Releases, breaking changes |
+| Document | Purpose |
+|---|---|
+| [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md) | Branch/ruleset protection and repository hardening |
+| [FORK-SECURITY.md](FORK-SECURITY.md) | Secure fork workflows and data-leakage considerations |
+| [GITHUB-ENVIRONMENTS.md](GITHUB-ENVIRONMENTS.md) | Deployment environments and approval gates |
+| [PROD_CHECKLIST.md](PROD_CHECKLIST.md) | Production-readiness checklist |
 
-## AI Agent Configuration
+## Architecture and Decisions
 
-| File | Agent | Purpose |
-|------|-------|---------|
-| [CLAUDE.md](../CLAUDE.md) | Claude Code | Primary agent instructions and project context |
-| [AGENTS.md](../AGENTS.md) | Codex (open AGENTS.md standard) | Codex project instructions and security boundaries |
+| Document | Purpose |
+|---|---|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Architecture of the `repo-template` source project |
+| [decisions/](decisions/) | Architecture Decision Records (ADRs), including agent-native bootstrap decisions |
+
+## Root-Level Project Docs
+
+| Document | Purpose |
+|---|---|
+| [README.md](../README.md) | Source template overview and golden path |
+| [CLAUDE.md](../CLAUDE.md) | Claude Code source/derived repository entry rules |
+| [AGENTS.md](../AGENTS.md) | Codex source/derived repository entry rules |
+| [SECURITY.md](../SECURITY.md) | Security policy and vulnerability reporting |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guidelines for the source template |
+| [GOVERNANCE.md](../GOVERNANCE.md) | Source-template governance |
+| [CHANGELOG.md](../CHANGELOG.md) | Version history |
+
+> [!IMPORTANT]
+> Source-template documentation is inherited reference material in a derived repository. Phase 0 determines which parts remain relevant before the downstream project is materialized.
