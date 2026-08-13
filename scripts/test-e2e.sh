@@ -2,8 +2,8 @@
 # test-e2e.sh — End-to-end template validation (Layer 5)
 # Usage: bash scripts/test-e2e.sh [--keep] [--skip-cleanup]
 #
-# Creates one real repository from repo-template, verifies the first-agent
-# contract and security baseline, then deletes the repository on success.
+# Creates one real repository from repo-template, verifies the first-agent,
+# provenance, reconciliation, and security contracts, then deletes it on success.
 # Requires: gh CLI authenticated with repo create/delete permissions.
 set -uo pipefail
 
@@ -42,7 +42,7 @@ WORK_DIR=$(mktemp -d)
 REPOS_TO_DELETE=()
 DIRS_TO_DELETE=("$WORK_DIR")
 
-# shellcheck disable=SC2317,SC2329  # invoked indirectly via EXIT trap
+# shellcheck disable=SC2317,SC2329
 cleanup() {
   if $KEEP; then
     echo ""
@@ -99,17 +99,18 @@ if [[ "${TEST_REPO_SKIP:-}" != "true" ]]; then
   cd "$WORK_DIR/$REPO_NAME" || { fail "Failed to enter cloned repository"; exit 1; }
 
   essential_ok=true
-  for f in README.md CLAUDE.md AGENTS.md docs/PHASE-0.md \
-           .claude/commands/bootstrap.md .gitattributes .gitignore \
-           scripts/secure-repo.sh templates/hooks/setup-hooks.sh \
-           templates/hooks/pre-commit-secrets.sh.template; do
+  for f in README.md CLAUDE.md AGENTS.md .repo-template.yaml \
+           docs/PHASE-0.md docs/TEMPLATE-UPGRADE.md \
+           .claude/commands/bootstrap.md .claude/commands/upgrade-template.md \
+           .gitattributes .gitignore scripts/secure-repo.sh \
+           templates/hooks/setup-hooks.sh templates/hooks/pre-commit-secrets.sh.template; do
     if [[ ! -f "$f" ]]; then
       fail "Missing after template creation: $f"
       essential_ok=false
     fi
   done
   if $essential_ok; then
-    pass "First-agent and security files transfer with the template"
+    pass "First-agent, provenance, reconciliation, and security files transfer"
   fi
 
   if grep -q 'Derived-repository mode' CLAUDE.md && \
@@ -124,6 +125,20 @@ if [[ "${TEST_REPO_SKIP:-}" != "true" ]]; then
     pass "Phase 0 carries classification and session-intake contracts"
   else
     fail "Phase 0 contract is incomplete"
+  fi
+
+  if grep -q '^baseline_id: agent-native-phase0-v1$' .repo-template.yaml && \
+     grep -q 'strategy: semantic-reconciliation' .repo-template.yaml; then
+    pass "Template provenance marker carries the current reconciliation baseline"
+  else
+    fail "Template provenance marker is missing or incorrect"
+  fi
+
+  if grep -q 'three-way model' docs/TEMPLATE-UPGRADE.md && \
+     grep -q 'docs/TEMPLATE-UPGRADE.md' .claude/commands/upgrade-template.md; then
+    pass "Template upgrade guidance and Claude entrypoint transfer"
+  else
+    fail "Template upgrade reconciliation contract is incomplete"
   fi
 
   if grep -q 'docs/PHASE-0.md' .claude/commands/bootstrap.md && \
@@ -236,25 +251,29 @@ if [[ "${TEST_REPO_SKIP:-}" != "true" ]]; then
 fi
 
 # ============================================================
-# TEST 5.4: Drift Detection Core Logic
+# TEST 5.4: Template Baseline Compatibility
 # ============================================================
-header "5.4: Drift Detection"
+header "5.4: Template Baseline Compatibility"
 
 if [[ "${TEST_REPO_SKIP:-}" != "true" ]]; then
   cd "$WORK_DIR/$REPO_NAME" || exit 1
 
-  if [[ -f SECURITY.md ]]; then
-    echo "# Modified" >> SECURITY.md
-    TEMPLATE_SHA=$(gh api "repos/$TEMPLATE_REPO/contents/SECURITY.md" --jq '.sha' 2>/dev/null || echo "")
-    LOCAL_SHA=$(git hash-object SECURITY.md 2>/dev/null || echo "")
+  local_baseline=$(awk -F': *' '$1 == "baseline_id" {print $2; exit}' .repo-template.yaml)
+  template_baseline=$(gh api -H 'Accept: application/vnd.github.raw+json' \
+    "repos/$TEMPLATE_REPO/contents/.repo-template.yaml" 2>/dev/null | \
+    awk -F': *' '$1 == "baseline_id" {print $2; exit}')
 
-    if [[ -n "$TEMPLATE_SHA" && -n "$LOCAL_SHA" && "$TEMPLATE_SHA" != "$LOCAL_SHA" ]]; then
-      pass "Drift core logic identifies a modified protected file"
-    else
-      fail "Drift core logic did not identify modified SECURITY.md"
-    fi
+  if [[ -n "$local_baseline" && "$local_baseline" = "$template_baseline" ]]; then
+    pass "Fresh derived repository records the current template baseline"
   else
-    warn "SECURITY.md not found in test repository"
+    fail "Fresh derived repository baseline does not match the source template"
+  fi
+
+  if grep -q 'Template baseline is current' .github/workflows/check-template-drift.yml && \
+     ! grep -q 'git hash-object' .github/workflows/check-template-drift.yml; then
+    pass "Compatibility workflow checks baseline provenance, not exact project file hashes"
+  else
+    fail "Compatibility workflow still assumes downstream files should match the template"
   fi
 
   cd "$REPO_ROOT" || exit 1

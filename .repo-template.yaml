@@ -1,0 +1,6 @@
+schema_version: 1
+source_repository: vbonk/repo-template
+baseline_id: agent-native-phase0-v1
+upgrade:
+  strategy: semantic-reconciliation
+  canonical_spec: https://github.com/vbonk/repo-template/blob/main/docs/TEMPLATE-UPGRADE.md
