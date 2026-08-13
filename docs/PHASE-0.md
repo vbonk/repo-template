@@ -36,6 +36,7 @@ Phase 0 is repository preparation. It must not invent the future application.
 6. **Configuration must be truthful.** A file that appears configured but is not is worse than no file.
 7. **Minimal interruption.** Ask only when a material decision cannot be inferred safely.
 8. **No ceremonial intermediate state.** If the project is already available, normalize and integrate it in one coherent workflow.
+9. **Preserve upgrade provenance.** `.repo-template.yaml` is intentionally durable ancestry metadata, not template clutter.
 
 ## Phase 1 — Detect and Verify
 
@@ -82,11 +83,13 @@ Retain stack-neutral infrastructure that has current value. Typical candidates:
 - `.gitignore`;
 - `.gitattributes`;
 - `.editorconfig`;
+- `.repo-template.yaml` template-provenance marker;
 - useful security policy/boundaries;
 - secret-protection mechanisms;
 - valid CODEOWNERS protections;
 - concise PR/issue governance that matches the project;
-- root agent entry files until they are replaced with project-specific versions.
+- root agent entry files until they are replaced with project-specific versions;
+- baseline-compatibility signaling when the project wants automated notice that a newer template compatibility generation exists.
 
 KEEP is not automatic. Confirm that retained material is accurate for the derived repository.
 
@@ -111,7 +114,7 @@ Material that exists for the template project or demonstrates optional capabilit
 
 - template marketing and source-template badges;
 - `CHANGELOG.md`, governance/community files, funding, or contributor automation when they do not fit the project;
-- template drift detection;
+- legacy exact-file drift/synchronization checks that treat intentional project divergence as a defect;
 - source-template release/package-publishing workflows;
 - stale/lock/welcome maintenance automation that is not wanted;
 - example agents and example skills;
@@ -153,6 +156,8 @@ At minimum resolve:
 
 The resulting repository must not pretend that example content is real project design.
 
+Do not treat `.repo-template.yaml`, its source-repository reference, or the canonical Template Upgrade reference as stale template identity. Those are intentional provenance and future-maintenance metadata.
+
 ## Phase 5A — Project Material Is Already Available
 
 When the current session already contains the project, proceed directly from normalization into project materialization.
@@ -161,7 +166,7 @@ When the current session already contains the project, proceed directly from nor
 2. Organize them into a coherent repository structure appropriate to the project rather than the template.
 3. Preserve distinctions among requirements, architecture, decisions, research, schemas, implementation, operations, and supporting material.
 4. Replace the transitional README with the real project README.
-5. Replace `CLAUDE.md` and `AGENTS.md` with concise project-specific operating instructions.
+5. Replace `CLAUDE.md` and `AGENTS.md` with concise project-specific operating instructions. If `.repo-template.yaml` remains, include a small **Template Ancestry** rule that says normal project work does not rerun Phase 0 and future template-upgrade/compatibility requests use the canonical `docs/TEMPLATE-UPGRADE.md` referenced by the marker.
 6. Configure CI, dependency tooling, environment documentation, and other capabilities only where the project provides evidence for them.
 7. Capture material architectural decisions as ADRs when they are real decisions, not placeholders.
 8. Reconcile links, indexes, and source-of-truth relationships.
@@ -179,6 +184,8 @@ The root README should state:
 - Claude Code uses `CLAUDE.md` and Codex uses `AGENTS.md`;
 - no agent should scaffold a stack merely because the repo is empty;
 - project-specific instructions will replace the transitional files at intake.
+
+Retain `.repo-template.yaml`. Transitional `CLAUDE.md` and `AGENTS.md` should continue to expose the distinction between Phase 0 and Template Upgrade until real project-specific instructions replace them.
 
 Create `docs/PROJECT_INTAKE.md` only when it is useful as a landing-zone schema. It should identify unresolved categories, not fabricate answers. Suggested categories:
 
@@ -213,6 +220,12 @@ CI must describe checks that actually exist.
 
 Do not configure ecosystems that do not exist. Enable them after the package ecosystem is known.
 
+### Template compatibility signaling
+
+The source template's historical drift workflow is now baseline-aware rather than exact-file-sync aware. If the project wants automated notice of a newer `baseline_id`, retain or adapt that capability. It should compare compatibility generations, not require the mature project to match template files.
+
+If the project does not want automated compatibility checks, the provenance marker still preserves the upgrade route for an agent when a user requests reconciliation later.
+
 ### Release/package automation
 
 Do not inherit release or package-publishing behavior merely because the template source uses it.
@@ -230,7 +243,7 @@ Do not treat the template's MIT license as an automatic licensing decision for t
 
 Search the resulting repository for stale template residue, including:
 
-- `repo-template` and source-template URLs;
+- source-template marketing references that are no longer operationally relevant;
 - `/project:init-template` or obsolete initialization language;
 - source-template badges;
 - deleted paths and removed commands;
@@ -239,7 +252,7 @@ Search the resulting repository for stale template residue, including:
 - unused scripts/configuration;
 - broken relative links.
 
-Historical attribution or intentional references to the source template are allowed when clearly labeled as such.
+Intentional provenance references are allowed and should remain clearly scoped: `.repo-template.yaml`, the canonical Template Upgrade specification, required license/attribution notices, and any explicit historical documentation.
 
 ## Phase 9 — Validation
 
@@ -250,12 +263,14 @@ Before declaring Phase 0 complete, verify:
 - user/project work was preserved;
 - remaining files have a known purpose;
 - no empty placeholder app source remains unless intentionally retained;
-- no stack was selected without evidence.
+- no stack was selected without evidence;
+- `.repo-template.yaml` still truthfully records template ancestry when the project remains template-derived.
 
 ### Documentation
 
 - README accurately describes the current repository;
 - agent instructions accurately describe the current repository;
+- project-specific agent instructions retain the Template Ancestry upgrade route when provenance remains;
 - links resolve;
 - no fake commands, architecture, deployment targets, or environment variables remain.
 
@@ -264,7 +279,8 @@ Before declaring Phase 0 complete, verify:
 - CI only runs real checks;
 - dependency automation targets real ecosystems;
 - release/package automation is intentional;
-- CODEOWNERS entries are valid.
+- CODEOWNERS entries are valid;
+- any retained template-compatibility check is baseline-aware and does not treat intentional project file divergence as failure.
 
 ### Security
 
@@ -280,6 +296,7 @@ Review the complete change set and ask:
 - Can the next agent understand this repository quickly?
 - Can the real project proceed without fighting inherited scaffolding?
 - Is every remaining template-derived capability intentional?
+- Can a future agent tell how to handle a later `repo-template` compatibility upgrade without rerunning Phase 0?
 
 Remediate any “no” answer before completion.
 
@@ -301,6 +318,7 @@ Final report should state:
 - major categories kept, adapted, removed, and deferred;
 - whether project material was ingested;
 - validation performed;
+- whether template provenance and future upgrade routing were retained;
 - genuine remaining decisions only;
 - next action.
 
@@ -314,7 +332,10 @@ Phase 0 is complete only when:
 - template identity and misleading defaults are gone from the derived project;
 - no stack or architecture was invented;
 - agent instructions reflect the real current state;
+- `.repo-template.yaml` remains truthful template ancestry metadata;
+- project-specific agent instructions retain future Template Upgrade routing when provenance remains;
 - automation is truthful;
+- any retained compatibility signal is baseline-aware rather than exact-sync based;
 - licensing was not silently inferred from the template;
 - security basics remain intact;
 - stale references and broken links were resolved;
@@ -324,4 +345,4 @@ Phase 0 is complete only when:
 ---
 
 **Referenced by:** `README.md`, `CLAUDE.md`, `AGENTS.md`, `.claude/commands/bootstrap.md`  
-**See also:** [AI Security](AI-SECURITY.md) | [Documentation Guide](DOCUMENTATION-GUIDE.md) | [ADRs](decisions/)
+**See also:** [Template Upgrade](TEMPLATE-UPGRADE.md) | [AI Security](AI-SECURITY.md) | [Documentation Guide](DOCUMENTATION-GUIDE.md) | [ADRs](decisions/)
