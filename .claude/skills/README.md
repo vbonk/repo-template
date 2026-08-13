@@ -1,110 +1,108 @@
 # Claude Code Skills
 
-> **At a glance** — Skills are project-specific capabilities that Claude auto-discovers based on description matching. Unlike commands (which you invoke with `/project:X`), skills fire automatically when your request matches what they do. Put skills here to make Claude smarter about YOUR project.
+> Project-local, auto-discovered Claude Code capabilities. Skills are loaded when their `description` matches the current task; commands remain the explicit `/project:X` entrypoints.
 
----
+## Required Layout
 
-## What Are Skills?
+Each skill is a directory containing `SKILL.md`:
 
-When you ask Claude Code a question or request a task, it scans the `description` field of every skill file in this directory. If your request matches a skill's description, Claude loads that skill and uses it — without you having to invoke anything.
-
-```mermaid
-flowchart LR
-    A["You ask a question"] --> B["Claude scans\nskill descriptions"]
-    B --> C{"Match\nfound?"}
-    C -->|Yes| D["Skill loaded\ninto context"]
-    C -->|No| E["Normal response"]
-    D --> F["Contextual help\nwith skill knowledge"]
+```text
+.claude/skills/
+└── skill-name/
+    └── SKILL.md
 ```
 
-**Example:** If you have a skill with description `"Check database migrations for safety issues"`, and you say "review this migration file," Claude will automatically use that skill — you don't type a command.
+Flat files such as `.claude/skills/skill-name.md` are not discovered reliably and must not be used.
 
-## Skills vs Commands vs Agents
+## Discovery Contract
 
-| Need | Use | Why |
-|------|-----|-----|
-| **Proactive, automatic help** | Skill | Auto-discovered when context matches |
-| **Explicit tool, user invokes** | Command (`/project:X`) | Predictable, only fires when asked |
-| **Complex multi-step task** | Agent | Isolated context, can run in parallel |
-
-> [!TIP]
-> **Start with commands.** Skills are powerful but consume context tokens on every session (Claude scans their descriptions). Add a skill when you find yourself repeatedly invoking the same command — that's the signal it should be auto-discovered.
-
-## Your First Skill in 2 Minutes
-
-> [!IMPORTANT]
-> **Layout matters: each skill is a DIRECTORY containing a `SKILL.md` file** —
-> `.claude/skills/my-skill/SKILL.md`. Flat files like `.claude/skills/my-skill.md`
-> are silently ignored by Claude Code (verified at runtime). The directory can
-> also hold supporting files the skill references.
-
-Create `my-project-helper/SKILL.md` in this directory:
-
-```markdown
----
-name: my-project-helper
-description: >-
-  Help with [your project] by checking [specific thing].
-  Use when [trigger condition].
----
-
-# My Project Helper
-
-## When to Activate
-- User asks about [topic]
-- User is working with [file type]
-
-## What to Do
-1. Check [thing]
-2. Suggest [improvement]
-3. Reference [docs]
-```
-
-**The `description` field is everything.** It determines when Claude uses the skill. Be specific:
-- Bad: `"Helps with the project"` (too vague, matches everything)
-- Good: `"Check Python database migrations for backward compatibility issues, missing rollback steps, and data loss risks"` (specific, Claude knows exactly when to fire)
-
-## Skill File Format
+A skill begins with YAML frontmatter:
 
 ```yaml
 ---
-name: skill-name              # Unique identifier
-description: >-               # CRITICAL: this is what Claude matches against
-  What the skill does and when to use it.
-  Include keywords that would appear in user requests.
-allowed-tools: Bash, Read, Grep  # Optional: limit which tools the skill can suggest
+name: skill-name
+description: "What the skill does and the specific situations in which Claude should use it."
 ---
 ```
 
-> [!IMPORTANT]
-> **Context budget:** Every skill's description is scanned on every Claude Code session. Keep descriptions under 200 words. If you have 10+ skills, consider consolidating.
+The `description` is the discovery surface. Keep it specific, include likely user-language triggers, and quote it so YAML punctuation cannot break parsing.
 
-## Example Skills for Common Projects
+### Skills vs. commands vs. agents
 
-| Skill | Description | Good For |
-|-------|-------------|----------|
-| API endpoint checker | Validates REST endpoints follow project conventions | Backend projects |
-| Component reviewer | Checks React/Vue components for accessibility | Frontend projects |
-| Migration safety | Reviews database migrations for data loss risks | Any project with a DB |
-| Dependency auditor | Checks for outdated or vulnerable dependencies | All projects |
-| Test coverage gaps | Identifies untested code paths | All projects |
+| Need | Use |
+|---|---|
+| Automatic assistance when a task matches | Skill |
+| Explicit user-invoked workflow | `.claude/commands/` |
+| Complex isolated or parallel work | `.claude/agents/` |
+
+Skills consume some context through their descriptions. Prefer a small number of high-value, clearly triggered capabilities rather than broad generic helpers.
 
 ## Bundled Skills
 
-This template ships six working skills (each in its own directory):
+This template ships seven working skills:
 
-| Skill | What it does |
-|-------|--------------|
-| `cot` | Structured chain-of-thought analysis + risk assessment before complex or destructive actions |
-| `hibernate` | Put a GitHub repo into a dormant state (and wake it back up) |
-| `repo-docs` | Audit and upgrade README + docs/ to production quality |
-| `skill-builder` | Guided creation of new skills with optimized frontmatter |
-| `skill-validator` | Validate and debug existing skills (discovery, structure, descriptions) |
-| `task-cleanup` | Archive or clear completed tasks from the task list |
+| Skill | Purpose |
+|---|---|
+| `cot` | Structured risk assessment before complex or destructive actions |
+| `hibernate` | Put a repository into a dormant state and restore it later |
+| `repo-docs` | Audit and improve README/documentation quality |
+| `skill-builder` | Create new skills with valid discovery-oriented frontmatter |
+| `skill-validator` | Validate skill structure, discovery, and YAML frontmatter |
+| `task-cleanup` | Archive or clear completed task records |
+| `template-upgrade` | Reconcile a repo-template-derived project with a newer template baseline while preserving project-specific work |
+
+`template-upgrade` is intentionally paired with the model-neutral [`docs/TEMPLATE-UPGRADE.md`](../../docs/TEMPLATE-UPGRADE.md). Claude may auto-discover the skill, but Codex and other agents use the canonical SOP directly.
+
+## Creating a Skill
+
+Use the bundled `skill-builder` when possible. The minimal structure is:
+
+```text
+my-skill/
+└── SKILL.md
+```
+
+Example:
+
+```markdown
+---
+name: migration-safety
+description: "Review database migrations for data-loss, rollback, and backward-compatibility risks. Use when creating or reviewing schema migrations."
+---
+
+# Migration Safety
+
+1. Inspect the migration and surrounding schema.
+2. Identify irreversible or compatibility-sensitive changes.
+3. Verify rollback and deployment ordering.
+4. Report risks and recommended remediation.
+```
+
+## Validation
+
+For a new or edited skill:
+
+1. Confirm it lives at `.claude/skills/<name>/SKILL.md`.
+2. Parse the frontmatter as YAML.
+3. Confirm `name` is unique and `description` is specific.
+4. Test likely trigger phrases.
+5. Run the repository template validation before merge.
+
+A quick YAML check:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+import yaml
+p = Path('.claude/skills/my-skill/SKILL.md')
+frontmatter = p.read_text().split('---', 2)[1]
+yaml.safe_load(frontmatter)
+print('OK')
+PY
+```
 
 ## See Also
 
-- [Agents README](../agents/README.md) — for complex, multi-step tasks
-- [Commands](../commands/) — for explicit, user-invoked tools
-- [Example skill](_example-skill/SKILL.md) — a complete, working skill you can customize
-- [Claude Code Docs: Skills](https://code.claude.com/docs/en/skills)
+- [Commands](../commands/) — explicit project workflows
+- [Agents](../agents/README.md) — specialized sub-agents
+- [Template Upgrade SOP](../../docs/TEMPLATE-UPGRADE.md) — cross-agent downstream reconciliation
