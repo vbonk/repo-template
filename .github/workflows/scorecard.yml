@@ -1,11 +1,8 @@
-# OpenSSF Scorecard — automated supply-chain security scoring
-# Scores this repo against the OpenSSF Scorecard checks (branch protection,
-# SHA-pinning, token permissions, SAST, dependency update tooling, and more)
-# and publishes results so the README badge stays current.
+# OpenSSF Scorecard — source-template supply-chain security scoring
 #
-# Why: Scorecard is the industry-standard measure of repo security posture.
-# Running it weekly catches regressions (a rule someone disabled, a new
-# unpinned action) that point-in-time hardening misses.
+# GitHub template creation copies workflow files. This source-project publishing
+# job must therefore stay inert in derived repositories unless Phase 0 explicitly
+# adapts it for that project's own public security posture.
 
 name: OpenSSF Scorecard
 
@@ -20,11 +17,11 @@ permissions: read-all
 
 jobs:
   analysis:
+    if: github.repository == 'vbonk/repo-template'
     name: Scorecard analysis
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      # Needed to upload results to code-scanning and publish the badge
       security-events: write
       id-token: write
 
