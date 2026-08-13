@@ -33,13 +33,13 @@ For derived repositories:
 9. Before removing template administration tooling, verify settings that GitHub templates do not carry into a new repository: local pre-commit hooks, repository rules/protection, correct CODEOWNERS ownership, and labels when the project will use the included issue taxonomy. Use `templates/hooks/setup-hooks.sh`, `scripts/secure-repo.sh`, and `scripts/labels.sh` where applicable; do not assume those settings transferred automatically.
 10. If the real project is already available, normalize and integrate it in the same workflow; do not force an unnecessary intermediate substrate commit.
 11. Ask only when a material decision is genuinely unknowable or unsafe to infer.
-12. Replace these generic instructions with project-specific instructions when Phase 0 completes.
+12. Replace these generic instructions with project-specific instructions when Phase 0 completes, but if `.repo-template.yaml` remains, retain a concise **Template Ancestry** rule that routes future template-upgrade or compatibility requests to the canonical `docs/TEMPLATE-UPGRADE.md` referenced by the marker. Normal project work must not rerun Phase 0 merely because the source template evolves.
 
 Explicit fallback: `/project:bootstrap`.
 
 ### Existing derived project
 
-If the repository already contains project-specific instructions and substantial project work, do **not** rerun Phase 0 simply because `repo-template` has changed. When the user requests a template update, use `.repo-template.yaml` and [docs/TEMPLATE-UPGRADE.md](docs/TEMPLATE-UPGRADE.md) (or the canonical source document referenced by the marker) for semantic reconciliation.
+If the repository already contains project-specific instructions and substantial project work, do **not** rerun Phase 0 simply because `repo-template` has changed. When the user requests a template update, use `.repo-template.yaml` and [docs/TEMPLATE-UPGRADE.md](docs/TEMPLATE-UPGRADE.md) (or the canonical source document referenced by the marker) for semantic reconciliation. Legacy repositories without the marker are supported by the upgrade SOP through ancestry and historical-baseline inference.
 
 ## Source Template Project
 
@@ -88,7 +88,8 @@ See [docs/AI-SECURITY.md](docs/AI-SECURITY.md).
 ## Claude Toolkit
 
 - `/project:bootstrap` — normalize a fresh derived repository and ingest available project context
-- `/project:upgrade-template` — reconcile an existing derived project with a newer template baseline
+- `/project:upgrade-template` — explicitly reconcile an existing derived project with a newer template baseline
+- `template-upgrade` skill — auto-discovers template upgrade/reconciliation intent and follows the canonical SOP
 - `/project:init-template` — deprecated compatibility alias for bootstrap
 - `/project:security-audit` — read-only security scorecard
 - `/project:review` — review assistance
