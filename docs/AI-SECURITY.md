@@ -83,7 +83,7 @@ These files control AI agent behavior and are protected by CODEOWNERS:
 
 ### For Maintainers
 
-1. **Verify CODEOWNERS is yours** -- The AI config protection rules ship active; `/project:init-template` replaces the maintainer's handle with yours. Confirm with `grep -E '^[^#]' .github/CODEOWNERS` that the active rules name YOUR handle.
+1. **Verify CODEOWNERS is yours** -- The source template intentionally names `@vbonk`; in a derived repository, Phase 0 must validate and adapt CODEOWNERS before relying on its review behavior. Confirm with `grep -E '^[^#]' .github/CODEOWNERS` that active rules name the correct owner for that repository.
 
 2. **Enable branch protection** -- See [BRANCH-PROTECTION.md](BRANCH-PROTECTION.md) for the recommended settings and a `gh api` script.
 
