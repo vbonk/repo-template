@@ -25,8 +25,6 @@ jobs:
       - name: Validate YAML files
         run: |
           echo "--- Validating YAML files ---"
-          # Probe the validator first: missing pyyaml must fail loudly as
-          # "validator unavailable", never masquerade as N invalid files.
           if ! python3 -c "import yaml" 2>/dev/null; then
             echo "::error::pyyaml not available — YAML validation cannot run (this is a hard failure, not a pass)"
             exit 1
@@ -48,9 +46,6 @@ jobs:
       - name: Validate JSON files
         run: |
           echo "--- Validating JSON files ---"
-          # Uses scripts/validate-jsonc.py which strips // and /* */ comments before
-          # parsing, so devcontainer.json and .vscode/*.json template files with
-          # instructional comments are treated as valid JSONC.
           FILES=$(find . -name '*.json' | grep -v node_modules | sort | tr '\n' ' ')
           # shellcheck disable=SC2086
           python3 scripts/validate-jsonc.py $FILES || {
@@ -81,9 +76,6 @@ jobs:
       - name: Verify all actions are SHA-pinned
         run: |
           echo "--- Checking SHA-pinned actions ---"
-          # Anchored check: EVERY active step-key `uses:` ref must end in a
-          # 40-hex SHA. The old grep-for-@vN approach missed `@main` entirely
-          # and dropped any line containing '#' — so `@v4 # v4` escaped too.
           UNPINNED=0
           while IFS= read -r line; do
             case "$(echo "$line" | sed 's/^[[:space:]]*//')" in \#*) continue ;; esac
@@ -146,14 +138,23 @@ jobs:
           fi
           echo "No secrets patterns found."
 
-      - name: Verify agent-native Phase 0 contract
+      - name: Verify agent-native Phase 0 and reconciliation contracts
         run: |
-          echo "--- Checking first-agent bootstrap invariants ---"
+          echo "--- Checking first-agent and upgrade invariants ---"
           test -f docs/PHASE-0.md || { echo "::error::docs/PHASE-0.md missing"; exit 1; }
           grep -q 'KEEP / ADAPT / REMOVE / DEFER' docs/PHASE-0.md || { echo "::error::Phase 0 classification contract missing"; exit 1; }
           grep -q 'Derived-repository mode' CLAUDE.md || { echo "::error::CLAUDE.md missing derived-repository detection"; exit 1; }
           grep -q 'Derived-repository mode' AGENTS.md || { echo "::error::AGENTS.md missing derived-repository detection"; exit 1; }
           grep -q 'The Golden Path' README.md || { echo "::error::README missing agent-first golden path"; exit 1; }
+
+          test -f .repo-template.yaml || { echo "::error::.repo-template.yaml missing"; exit 1; }
+          grep -q '^baseline_id: agent-native-phase0-v1$' .repo-template.yaml || { echo "::error::unexpected template baseline_id"; exit 1; }
+          grep -q 'strategy: semantic-reconciliation' .repo-template.yaml || { echo "::error::semantic reconciliation policy missing"; exit 1; }
+          test -f docs/TEMPLATE-UPGRADE.md || { echo "::error::template upgrade guidance missing"; exit 1; }
+          test -f .claude/commands/upgrade-template.md || { echo "::error::Claude template-upgrade entrypoint missing"; exit 1; }
+          grep -q 'Existing derived project' CLAUDE.md || { echo "::error::CLAUDE.md missing mature-project upgrade distinction"; exit 1; }
+          grep -q 'Existing derived project' AGENTS.md || { echo "::error::AGENTS.md missing mature-project upgrade distinction"; exit 1; }
+
           if grep -qE 'Client.*API Server|npm run dev|DATABASE_URL|NODE_ENV|Production.*main branch' CLAUDE.md AGENTS.md .env.example; then
             echo "::error::Speculative application defaults returned to root agent/config surfaces"
             exit 1
@@ -178,4 +179,12 @@ jobs:
             echo "::error::E2E suite still validates superseded onboarding journeys"
             exit 1
           fi
-          echo "Agent-native Phase 0 contract is intact."
+          grep -q 'Template baseline is current' .github/workflows/check-template-drift.yml || {
+            echo "::error::compatibility workflow is not baseline-aware"
+            exit 1
+          }
+          if grep -q 'git hash-object' .github/workflows/check-template-drift.yml; then
+            echo "::error::compatibility workflow returned to exact downstream file-hash matching"
+            exit 1
+          fi
+          echo "Agent-native Phase 0 and template reconciliation contracts are intact."
