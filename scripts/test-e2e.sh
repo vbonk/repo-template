@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # test-e2e.sh — End-to-end template validation (Layer 5)
 # Usage: bash scripts/test-e2e.sh [--keep] [--skip-cleanup]
-# Creates temporary repos on GitHub, runs full user journeys, then deletes them.
-# Requires: gh CLI authenticated with repo create/delete permissions.
 #
-# WARNING: Creates real public repos under your GitHub account. They are deleted
-# on success. Use --keep to preserve them for debugging.
+# Creates one real repository from repo-template, verifies the first-agent
+# contract and security baseline, then deletes the repository on success.
+# Requires: gh CLI authenticated with repo create/delete permissions.
 set -uo pipefail
 
 GREEN='\033[0;32m'
@@ -35,20 +34,19 @@ fi
 
 TEMPLATE_REPO="$OWNER/repo-template"
 TIMESTAMP=$(date +%s)
-TEST_REPO_1="${OWNER}/e2e-test-template-${TIMESTAMP}"
-TEST_REPO_2="${OWNER}/e2e-test-retrofit-${TIMESTAMP}"
+TEST_REPO="${OWNER}/e2e-test-template-${TIMESTAMP}"
+REPO_NAME="e2e-test-template-${TIMESTAMP}"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 WORK_DIR=$(mktemp -d)
 
-# Cleanup tracking
 REPOS_TO_DELETE=()
 DIRS_TO_DELETE=("$WORK_DIR")
 
-# shellcheck disable=SC2317,SC2329  # invoked indirectly via the EXIT trap below
+# shellcheck disable=SC2317,SC2329  # invoked indirectly via EXIT trap
 cleanup() {
   if $KEEP; then
     echo ""
-    echo -e "${YELLOW}--keep flag set. Preserving test repos:${NC}"
+    echo -e "${YELLOW}--keep flag set. Preserving test resources:${NC}"
     for r in "${REPOS_TO_DELETE[@]}"; do
       echo "  https://github.com/$r"
     done
@@ -82,272 +80,184 @@ echo "  $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "============================================"
 
 # ============================================================
-# TEST 5.1: Create from Template → Full Journey
+# TEST 5.1: Create from Template → First-Agent Contract
 # ============================================================
-header "5.1: Create from Template Journey"
+header "5.1: Create from Template — First-Agent Contract"
 
-REPO_NAME_1="e2e-test-template-${TIMESTAMP}"
-
-echo "  Creating repo from template..."
-if gh repo create "$TEST_REPO_1" --template "$TEMPLATE_REPO" --public >/dev/null 2>&1 && \
+echo "  Creating repository from template..."
+if gh repo create "$TEST_REPO" --template "$TEMPLATE_REPO" --public >/dev/null 2>&1 && \
    sleep 3 && \
-   git clone "https://github.com/$TEST_REPO_1.git" "$WORK_DIR/$REPO_NAME_1" >/dev/null 2>&1; then
-  pass "Repo created from template: $TEST_REPO_1"
-  REPOS_TO_DELETE+=("$TEST_REPO_1")
+   git clone "https://github.com/$TEST_REPO.git" "$WORK_DIR/$REPO_NAME" >/dev/null 2>&1; then
+  pass "Repository created from template: $TEST_REPO"
+  REPOS_TO_DELETE+=("$TEST_REPO")
 else
-  fail "Failed to create repo from template"
-  # Can't continue this test
-  echo -e "  ${RED}Skipping remaining 5.1 tests${NC}"
-  FAIL=$((FAIL + 9))
-  # Jump to next test
-  TEST_5_1_SKIP=true
+  fail "Failed to create repository from template"
+  TEST_REPO_SKIP=true
 fi
 
-if [[ "${TEST_5_1_SKIP:-}" != "true" ]]; then
-  cd "$WORK_DIR/$REPO_NAME_1" || { fail "Failed to cd into cloned repo"; exit 1; }
+if [[ "${TEST_REPO_SKIP:-}" != "true" ]]; then
+  cd "$WORK_DIR/$REPO_NAME" || { fail "Failed to enter cloned repository"; exit 1; }
 
-  # Verify key files transferred
-  local_files_ok=true
-  for f in CLAUDE.md AGENTS.md \
-           .gitattributes .gitignore \
+  essential_ok=true
+  for f in README.md CLAUDE.md AGENTS.md docs/PHASE-0.md \
+           .claude/commands/bootstrap.md .gitattributes .gitignore \
            scripts/secure-repo.sh templates/hooks/setup-hooks.sh \
            templates/hooks/pre-commit-secrets.sh.template; do
     if [[ ! -f "$f" ]]; then
-      fail "Missing after template create: $f"
-      local_files_ok=false
+      fail "Missing after template creation: $f"
+      essential_ok=false
     fi
   done
-  if $local_files_ok; then
-    pass "All essential files transferred from template"
+  if $essential_ok; then
+    pass "First-agent and security files transfer with the template"
   fi
 
-  # Verify .git/hooks is empty (expected — hooks don't transfer)
-  if [[ ! -f .git/hooks/pre-commit ]]; then
-    pass "Hooks correctly NOT transferred (local-only)"
+  if grep -q 'Derived-repository mode' CLAUDE.md && \
+     grep -q 'Derived-repository mode' AGENTS.md; then
+    pass "Claude and Codex entry files detect derived-repository mode"
   else
-    warn "Unexpected: pre-commit hook exists in fresh clone"
+    fail "Derived-repository mode missing from agent entry files"
   fi
 
-  # Run secure-repo.sh
+  if grep -q 'KEEP / ADAPT / REMOVE / DEFER' docs/PHASE-0.md && \
+     grep -q 'Current-session context is project input' docs/PHASE-0.md; then
+    pass "Phase 0 carries classification and session-intake contracts"
+  else
+    fail "Phase 0 contract is incomplete"
+  fi
+
+  if grep -q 'docs/PHASE-0.md' .claude/commands/bootstrap.md && \
+     grep -q 'docs/PHASE-0.md' .claude/commands/init-template.md && \
+     ! grep -qE 'Quick setup|Gather Project Information|Ask for project name' .claude/commands/init-template.md; then
+    pass "Bootstrap is canonical and legacy initializer is compatibility-only"
+  else
+    fail "Legacy interactive initializer behavior is still active"
+  fi
+
+  if grep -qE 'Client.*API Server|npm run dev|DATABASE_URL|NODE_ENV|Production.*main branch' \
+      CLAUDE.md AGENTS.md .env.example; then
+    fail "Speculative application defaults exist in first-agent surfaces"
+  else
+    pass "First-agent surfaces remain stack- and architecture-neutral"
+  fi
+
+  if [[ ! -f .git/hooks/pre-commit ]]; then
+    pass "Local hooks correctly do not transfer through GitHub templates"
+  else
+    warn "Unexpected pre-commit hook exists in fresh clone"
+  fi
+
+  cd "$REPO_ROOT" || exit 1
+fi
+
+# ============================================================
+# TEST 5.2: Security Baseline on a Fresh Derived Repository
+# ============================================================
+header "5.2: Security Baseline"
+
+if [[ "${TEST_REPO_SKIP:-}" != "true" ]]; then
+  cd "$WORK_DIR/$REPO_NAME" || exit 1
+
   echo "  Running secure-repo.sh..."
   secure_output=$(bash scripts/secure-repo.sh 2>&1) || true
   if echo "$secure_output" | grep -q 'SCORECARD'; then
-    pass "secure-repo.sh produces scorecard on fresh repo"
-    # Extract grade
-    grade=$(echo "$secure_output" | grep 'SCORECARD' | sed 's/.*SCORECARD: //' | tr -d ' ')
-    echo -e "    Grade: $grade"
+    pass "secure-repo.sh produces a scorecard on a fresh derived repo"
   else
-    fail "secure-repo.sh did not produce scorecard"
+    fail "secure-repo.sh did not produce a scorecard"
   fi
 
-  # Run setup-hooks.sh
   echo "  Running setup-hooks.sh..."
-  if bash templates/hooks/setup-hooks.sh >/dev/null 2>&1; then
-    if [[ -x .git/hooks/pre-commit ]]; then
-      pass "setup-hooks.sh installs working hooks on fresh repo"
-    else
-      fail "setup-hooks.sh ran but hook not executable"
-    fi
+  if bash templates/hooks/setup-hooks.sh >/dev/null 2>&1 && [[ -x .git/hooks/pre-commit ]]; then
+    pass "setup-hooks.sh installs an executable pre-commit hook"
   else
-    fail "setup-hooks.sh failed on fresh repo"
+    fail "setup-hooks.sh did not install a working pre-commit hook"
   fi
 
-  # Test hook blocks a secret
   echo "const key = 'sk-ant-e2etest123456789';" > test-e2e-secret.js
   git add -f test-e2e-secret.js >/dev/null 2>&1
   if bash .git/hooks/pre-commit >/dev/null 2>&1; then
-    fail "Hook should block sk-ant pattern in fresh repo"
+    fail "Pre-commit hook should block the secret fixture"
   else
-    pass "Hook blocks secrets in fresh repo"
+    pass "Pre-commit hook blocks the secret fixture"
   fi
   git reset HEAD test-e2e-secret.js >/dev/null 2>&1
   rm -f test-e2e-secret.js
 
-  # Test hook allows clean file
   echo "const hello = 'world';" > test-e2e-clean.js
   git add -f test-e2e-clean.js >/dev/null 2>&1
   if bash .git/hooks/pre-commit >/dev/null 2>&1; then
-    pass "Hook allows clean commits in fresh repo"
+    pass "Pre-commit hook allows a clean fixture"
   else
-    fail "Hook incorrectly blocked clean commit in fresh repo"
+    fail "Pre-commit hook incorrectly blocked a clean fixture"
   fi
   git reset HEAD test-e2e-clean.js >/dev/null 2>&1
   rm -f test-e2e-clean.js
 
-  # Run labels.sh
-  echo "  Running labels.sh..."
   labels_output=$(bash scripts/labels.sh 2>&1) || true
   if echo "$labels_output" | grep -qi 'label'; then
-    pass "labels.sh runs on fresh repo"
+    pass "labels.sh remains usable before project intake"
   else
-    warn "labels.sh produced no output"
-  fi
-
-  # Run audit-compliance against self
-  echo "  Running audit-compliance.sh..."
-  audit_output=$(bash "$REPO_ROOT/scripts/audit-compliance.sh" "$TEST_REPO_1" 2>/dev/null) || true
-  if echo "$audit_output" | python3 -c "import sys,json; d=json.load(sys.stdin); r=d['repos'][0]; print(f\"Score: {r['compliance_score']}% {r['grade']}\")" 2>/dev/null; then
-    pass "Compliance audit runs on fresh repo"
-  else
-    warn "Compliance audit returned unexpected output"
+    warn "labels.sh produced no recognizable output"
   fi
 
   cd "$REPO_ROOT" || exit 1
 fi
 
 # ============================================================
-# TEST 5.2: Retrofit Journey (Workflow E)
+# TEST 5.3: Template Truthfulness Before Project Intake
 # ============================================================
-header "5.2: Retrofit Existing Repo"
+header "5.3: Pre-Intake Truthfulness"
 
-REPO_NAME_2="e2e-test-retrofit-${TIMESTAMP}"
+if [[ "${TEST_REPO_SKIP:-}" != "true" ]]; then
+  cd "$WORK_DIR/$REPO_NAME" || exit 1
 
-echo "  Creating empty repo..."
-if gh repo create "$TEST_REPO_2" --public >/dev/null 2>&1; then
-  pass "Empty repo created: $TEST_REPO_2"
-  REPOS_TO_DELETE+=("$TEST_REPO_2")
-else
-  fail "Failed to create empty repo"
-  FAIL=$((FAIL + 4))
-  TEST_5_2_SKIP=true
-fi
-
-if [[ "${TEST_5_2_SKIP:-}" != "true" ]]; then
-  cd "$WORK_DIR" || exit 1
-  git clone "https://github.com/$TEST_REPO_2.git" "$REPO_NAME_2" >/dev/null 2>&1 || {
-    # New empty repos need an initial commit
-    mkdir -p "$REPO_NAME_2"
-    cd "$REPO_NAME_2" || exit 1
-    git init >/dev/null 2>&1
-    git remote add origin "https://github.com/$TEST_REPO_2.git" 2>/dev/null
-    echo "# My Project" > README.md
-    echo "const app = () => console.log('hello');" > index.js
-    git add README.md index.js
-    git commit -m "initial commit" >/dev/null 2>&1
-    git branch -M main
-    git push -u origin main >/dev/null 2>&1
-  }
-  cd "$WORK_DIR/$REPO_NAME_2" 2>/dev/null || cd "$REPO_NAME_2" 2>/dev/null || { fail "Can't enter retrofit repo"; TEST_5_2_SKIP=true; }
-fi
-
-if [[ "${TEST_5_2_SKIP:-}" != "true" ]]; then
-  # Ensure we have an initial commit
-  if ! git log --oneline -1 >/dev/null 2>&1; then
-    echo "# My Project" > README.md
-    echo "const app = () => console.log('hello');" > index.js
-    git add README.md index.js
-    git commit -m "initial commit" >/dev/null 2>&1
-    git branch -M main
-    git push -u origin main >/dev/null 2>&1
+  if grep -q 'The Golden Path' README.md && \
+     grep -q 'Agent inside a repository created from this template' README.md; then
+    pass "README identifies the derived-repository golden path"
+  else
+    fail "README does not expose the first-agent golden path"
   fi
 
-  # Curl the init-template command (exactly as README instructs)
-  mkdir -p .claude/commands
-  if curl -sL "https://raw.githubusercontent.com/$TEMPLATE_REPO/main/.claude/commands/init-template.md" \
-    -o .claude/commands/init-template.md 2>/dev/null; then
-    if [[ -f .claude/commands/init-template.md && -s .claude/commands/init-template.md ]]; then
-      pass "Workflow E curl step works: init-template.md downloaded"
-    else
-      fail "Workflow E curl step: file empty or missing"
-    fi
+  if grep -q 'repo-template source' docs/ARCHITECTURE.md && \
+     ! grep -q 'Client.*API Server' docs/ARCHITECTURE.md; then
+    pass "Architecture document describes the template, not a fictitious app"
   else
-    fail "Workflow E curl step: curl failed"
+    fail "Architecture document contains misleading application architecture"
   fi
 
-  # Verify existing files NOT overwritten
-  if [[ -f index.js ]]; then
-    pass "Existing code preserved after retrofit setup"
+  if grep -q 'intentionally empty' .env.example && \
+     ! grep -qE 'DATABASE_URL|API_KEY|NODE_ENV|PORT=' .env.example; then
+    pass ".env.example is intentionally stack-neutral"
   else
-    fail "Existing code was lost"
-  fi
-
-  # Copy secure-repo.sh AND its dependency from template and run.
-  # (_lib.sh is sourced by secure-repo.sh — copying the script alone
-  # guaranteed failure, which the old WARN then masked.)
-  mkdir -p scripts
-  cp "$REPO_ROOT/scripts/secure-repo.sh" scripts/secure-repo.sh
-  cp "$REPO_ROOT/scripts/_lib.sh" scripts/_lib.sh
-  chmod +x scripts/secure-repo.sh
-
-  secure_output=$(bash scripts/secure-repo.sh 2>&1) || true
-  if echo "$secure_output" | grep -q 'SCORECARD'; then
-    pass "secure-repo.sh works on retrofitted repo"
-  else
-    fail "secure-repo.sh failed on retrofitted repo: $(echo "$secure_output" | head -2)"
+    fail ".env.example implies project-specific variables before intake"
   fi
 
   cd "$REPO_ROOT" || exit 1
 fi
 
 # ============================================================
-# TEST 5.3: Three-Command Setup (Hero Claim)
-# ============================================================
-header "5.3: Three-Command Setup (README Hero)"
-
-# We already tested this in 5.1 essentially — verify the exact commands work
-# Using the repo from 5.1 if it exists
-if [[ "${TEST_5_1_SKIP:-}" != "true" ]] && [[ -d "$WORK_DIR/$REPO_NAME_1" ]]; then
-  cd "$WORK_DIR/$REPO_NAME_1" || exit 1
-
-  # The three commands from the README hero:
-  # 1. gh repo create (already done in 5.1)
-  # 2. bash scripts/secure-repo.sh (already tested in 5.1)
-  # 3. bash templates/hooks/setup-hooks.sh (already tested in 5.1)
-  pass "Three-command setup: all 3 commands succeeded (verified in 5.1)"
-
-  cd "$REPO_ROOT" || exit 1
-else
-  warn "Three-command setup: skipped (5.1 repo not available)"
-fi
-
-# ============================================================
-# TEST 5.4: Drift Detection
+# TEST 5.4: Drift Detection Core Logic
 # ============================================================
 header "5.4: Drift Detection"
 
-if [[ "${TEST_5_1_SKIP:-}" != "true" ]] && [[ -d "$WORK_DIR/$REPO_NAME_1" ]]; then
-  cd "$WORK_DIR/$REPO_NAME_1" || exit 1
+if [[ "${TEST_REPO_SKIP:-}" != "true" ]]; then
+  cd "$WORK_DIR/$REPO_NAME" || exit 1
 
-  # Simulate drift by modifying SECURITY.md
   if [[ -f SECURITY.md ]]; then
     echo "# Modified" >> SECURITY.md
-    git add SECURITY.md
-    git commit -m "simulate drift" >/dev/null 2>&1
-
-    # Run the drift check logic locally (can't call reusable workflow locally,
-    # but we can test the core comparison logic)
     TEMPLATE_SHA=$(gh api "repos/$TEMPLATE_REPO/contents/SECURITY.md" --jq '.sha' 2>/dev/null || echo "")
     LOCAL_SHA=$(git hash-object SECURITY.md 2>/dev/null || echo "")
 
     if [[ -n "$TEMPLATE_SHA" && -n "$LOCAL_SHA" && "$TEMPLATE_SHA" != "$LOCAL_SHA" ]]; then
-      pass "Drift detection: correctly identifies modified SECURITY.md"
+      pass "Drift core logic identifies a modified protected file"
     else
-      fail "Drift detection: did not detect modification"
+      fail "Drift core logic did not identify modified SECURITY.md"
     fi
   else
-    warn "Drift detection: SECURITY.md not found in test repo"
-  fi
-
-  # Test missing file detection
-  if [[ -f .gitattributes ]]; then
-    git rm .gitattributes >/dev/null 2>&1
-    git commit -m "remove gitattributes" >/dev/null 2>&1
-
-    if [[ ! -f .gitattributes ]]; then
-      TEMPLATE_EXISTS=$(gh api "repos/$TEMPLATE_REPO/contents/.gitattributes" --jq '.sha' 2>/dev/null || echo "")
-      if [[ -n "$TEMPLATE_EXISTS" ]]; then
-        pass "Drift detection: correctly identifies missing .gitattributes"
-      else
-        warn "Drift detection: template also missing .gitattributes"
-      fi
-    fi
-  else
-    warn "Drift detection: .gitattributes not found"
+    warn "SECURITY.md not found in test repository"
   fi
 
   cd "$REPO_ROOT" || exit 1
-else
-  warn "Drift detection: skipped (5.1 repo not available)"
 fi
 
 # ============================================================
@@ -355,7 +265,6 @@ fi
 # ============================================================
 header "5.5: Cross-Repo Compliance Audit"
 
-# Test against repo-template-example (no repo creation needed)
 echo "  Auditing $OWNER/repo-template-example..."
 audit_output=$(bash scripts/audit-compliance.sh "$OWNER/repo-template-example" 2>/dev/null) || true
 
@@ -366,12 +275,9 @@ r = d['repos'][0]
 score = r['compliance_score']
 grade = r['grade']
 print(f'  Score: {score}% ({grade})')
-if score >= 70:
-    sys.exit(0)
-else:
-    sys.exit(1)
+sys.exit(0 if score >= 70 else 1)
 " 2>/dev/null; then
-  pass "repo-template-example compliance: scored well"
+  pass "repo-template-example compliance score is at least 70%"
 else
   example_exists=$(gh repo view "$OWNER/repo-template-example" --json name 2>/dev/null || echo "")
   if [[ -z "$example_exists" ]]; then
@@ -381,7 +287,6 @@ else
   fi
 fi
 
-# Also test template against itself
 echo "  Auditing $TEMPLATE_REPO (self)..."
 self_output=$(bash scripts/audit-compliance.sh "$TEMPLATE_REPO" 2>/dev/null) || true
 
@@ -392,14 +297,11 @@ r = d['repos'][0]
 score = r['compliance_score']
 grade = r['grade']
 print(f'  Score: {score}% ({grade})')
-if score >= 95:
-    sys.exit(0)
-else:
-    sys.exit(1)
+sys.exit(0 if score >= 95 else 1)
 " 2>/dev/null; then
-  pass "repo-template self-audit: 95%+ (A+)"
+  pass "repo-template self-audit is at least 95%"
 else
-  warn "repo-template self-audit: below 95%"
+  warn "repo-template self-audit is below 95%"
 fi
 
 # ============================================================
