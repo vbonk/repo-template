@@ -30,9 +30,10 @@ For derived repositories:
 6. Do not choose a stack, architecture, deployment target, dependency ecosystem, or license without project evidence.
 7. Preserve useful repository hygiene and security controls.
 8. Preserve `.repo-template.yaml` as the template-provenance marker; its source-template reference is intentional.
-9. If the real project is already available, normalize and integrate it in the same workflow rather than forcing an intermediate substrate commit.
-10. Ask only when a material decision is genuinely unknowable or unsafe to infer.
-11. Replace these generic instructions with project-specific instructions when Phase 0 completes.
+9. Before removing template administration tooling, verify settings that GitHub templates do not carry into a new repository: local pre-commit hooks, repository rules/protection, correct CODEOWNERS ownership, and labels when the project will use the included issue taxonomy. Use `templates/hooks/setup-hooks.sh`, `scripts/secure-repo.sh`, and `scripts/labels.sh` where applicable; do not assume those settings transferred automatically.
+10. If the real project is already available, normalize and integrate it in the same workflow rather than forcing an intermediate substrate commit.
+11. Ask only when a material decision is genuinely unknowable or unsafe to infer.
+12. Replace these generic instructions with project-specific instructions when Phase 0 completes.
 
 ### Existing derived project
 
