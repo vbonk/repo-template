@@ -1,6 +1,6 @@
 # Template Validation (Meta-CI)
 # Validates the template's own files: YAML, JSON, shell scripts, SHA pins, secrets.
-# Remove this workflow after initializing from the template.
+# A derived repository may remove or adapt this source-template workflow during Phase 0.
 
 name: Validate Template
 
@@ -160,6 +160,22 @@ jobs:
           fi
           if grep -qE 'Quick setup|Gather Project Information|Ask for project name' .claude/commands/init-template.md; then
             echo "::error::Legacy interactive initializer behavior returned"
+            exit 1
+          fi
+          grep -q 'Phase 0 must validate and adapt CODEOWNERS' docs/AI-SECURITY.md || {
+            echo "::error::AI security docs do not reflect derived-repository CODEOWNERS validation"
+            exit 1
+          }
+          if grep -q '/project:init-template.*replaces the maintainer' docs/AI-SECURITY.md; then
+            echo "::error::AI security docs still claim the legacy initializer rewrites CODEOWNERS"
+            exit 1
+          fi
+          grep -q 'First-Agent Contract' scripts/test-e2e.sh || {
+            echo "::error::E2E suite does not exercise the first-agent contract"
+            exit 1
+          }
+          if grep -qE 'Retrofit Existing Repo|Three-Command Setup \(README Hero\)|Workflow E curl' scripts/test-e2e.sh; then
+            echo "::error::E2E suite still validates superseded onboarding journeys"
             exit 1
           fi
           echo "Agent-native Phase 0 contract is intact."
