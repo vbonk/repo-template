@@ -1,6 +1,6 @@
 # Architecture
 
-> Architecture of the `vbonk/repo-template` source project. In a template-derived repository, Phase 0 treats this as source-template reference material and replaces or removes it based on the real incoming project.
+> Architecture of the `vbonk/repo-template` source project. In a template-derived repository, Phase 0 treats this as source-template reference material and reconciles it against the real incoming project.
 
 **Last Updated:** 2026-08-13
 
@@ -75,11 +75,11 @@ Material architecture decisions are recorded in [docs/decisions/](decisions/).
 
 | ADR | Decision |
 |---|---|
-| [001](decisions/001-sha-pin-actions.md) | SHA-pin GitHub Actions |
+| [001](decisions/001-sha-pinned-actions.md) | SHA-pin GitHub Actions |
 | [002](decisions/002-rulesets-over-classic-protection.md) | Prefer rulesets over classic branch protection |
 | [003](decisions/003-skills-directory-format.md) | Use runtime-supported skill directory format |
 | [004](decisions/004-two-agent-focus.md) | Focus on Claude Code + Codex |
-| [005](decisions/005-drift-severity-fail-closed.md) | Severity-aware, fail-closed drift verification |
+| [005](decisions/005-drift-severity-and-fail-closed.md) | Severity-aware, fail-closed drift verification |
 | [006](decisions/006-agent-native-phase-zero.md) | Agent-native Phase 0 for derived repositories |
 
 ---
