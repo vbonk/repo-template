@@ -143,6 +143,12 @@ jobs:
           echo "--- Checking first-agent and upgrade invariants ---"
           test -f docs/PHASE-0.md || { echo "::error::docs/PHASE-0.md missing"; exit 1; }
           grep -q 'KEEP / ADAPT / REMOVE / DEFER' docs/PHASE-0.md || { echo "::error::Phase 0 classification contract missing"; exit 1; }
+          grep -q 'Template Ancestry' docs/PHASE-0.md || { echo "::error::Phase 0 does not preserve future template-upgrade routing"; exit 1; }
+          grep -q 'baseline-aware' docs/PHASE-0.md || { echo "::error::Phase 0 does not recognize baseline compatibility signaling"; exit 1; }
+          if grep -q -- '- template drift detection;' docs/PHASE-0.md; then
+            echo "::error::Phase 0 still treats all template compatibility signaling as removable drift tooling"
+            exit 1
+          fi
           grep -q 'Derived-repository mode' CLAUDE.md || { echo "::error::CLAUDE.md missing derived-repository detection"; exit 1; }
           grep -q 'Derived-repository mode' AGENTS.md || { echo "::error::AGENTS.md missing derived-repository detection"; exit 1; }
           grep -q 'The Golden Path' README.md || { echo "::error::README missing agent-first golden path"; exit 1; }
