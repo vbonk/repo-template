@@ -151,9 +151,18 @@ jobs:
           grep -q '^baseline_id: agent-native-phase0-v1$' .repo-template.yaml || { echo "::error::unexpected template baseline_id"; exit 1; }
           grep -q 'strategy: semantic-reconciliation' .repo-template.yaml || { echo "::error::semantic reconciliation policy missing"; exit 1; }
           test -f docs/TEMPLATE-UPGRADE.md || { echo "::error::template upgrade guidance missing"; exit 1; }
+          grep -q '## Repository Router' docs/TEMPLATE-UPGRADE.md || { echo "::error::template upgrade SOP missing repository router"; exit 1; }
+          grep -q 'A — Historical template baseline' docs/TEMPLATE-UPGRADE.md || { echo "::error::template upgrade SOP missing three-way baseline model"; exit 1; }
+          grep -q 'Legacy repositories without the marker' docs/TEMPLATE-UPGRADE.md || { echo "::error::template upgrade SOP missing legacy-unmarked support"; exit 1; }
+          grep -q '## Future Template Evolution' docs/TEMPLATE-UPGRADE.md || { echo "::error::template upgrade SOP missing future baseline rules"; exit 1; }
           test -f .claude/commands/upgrade-template.md || { echo "::error::Claude template-upgrade entrypoint missing"; exit 1; }
+          test -f .claude/skills/template-upgrade/SKILL.md || { echo "::error::Claude template-upgrade skill missing"; exit 1; }
+          grep -q '^name: template-upgrade$' .claude/skills/template-upgrade/SKILL.md || { echo "::error::template-upgrade skill frontmatter invalid"; exit 1; }
+          grep -q 'semantic three-way reconciliation' .claude/skills/template-upgrade/SKILL.md || { echo "::error::template-upgrade skill discovery description incomplete"; exit 1; }
           grep -q 'Existing derived project' CLAUDE.md || { echo "::error::CLAUDE.md missing mature-project upgrade distinction"; exit 1; }
           grep -q 'Existing derived project' AGENTS.md || { echo "::error::AGENTS.md missing mature-project upgrade distinction"; exit 1; }
+          grep -q 'Template Ancestry' CLAUDE.md || { echo "::error::CLAUDE.md does not preserve future upgrade routing after Phase 0"; exit 1; }
+          grep -q 'Template Ancestry' AGENTS.md || { echo "::error::AGENTS.md does not preserve future upgrade routing after Phase 0"; exit 1; }
 
           if grep -qE 'Client.*API Server|npm run dev|DATABASE_URL|NODE_ENV|Production.*main branch' CLAUDE.md AGENTS.md .env.example; then
             echo "::error::Speculative application defaults returned to root agent/config surfaces"
