@@ -1,5 +1,8 @@
 name: Update Contributors
 
+# Source-template maintenance only. GitHub template creation copies workflow files,
+# so this job must remain inert in derived repositories until Phase 0 deliberately
+# retains/adapts an equivalent project-specific capability.
 on:
   push:
     branches: [main]
@@ -20,6 +23,7 @@ env:
 
 jobs:
   update:
+    if: github.repository == 'vbonk/repo-template'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -35,7 +39,7 @@ jobs:
             /<!-- CONTRIBUTORS-START -->/ {
               print
               print ""
-              system("git log --format='"'"'%aN'"'"' | sort -uf | while IFS= read -r name; do [ -n \"$name\" ] && echo \"- **${name}**\"; done")
+              system("git log --format='\''%aN'\'' | sort -uf | while IFS= read -r name; do [ -n \"$name\" ] && echo \"- **${name}**\"; done")
               print ""
               skip=1
               next

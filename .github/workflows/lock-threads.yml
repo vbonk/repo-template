@@ -1,12 +1,11 @@
 # Lock Stale Threads
-# Locks issues and PRs that have been closed for 30+ days.
-# Prevents necro-posting on resolved threads.
+# Source-template maintenance by default; derived projects opt in during Phase 0.
 
 name: Lock Threads
 
 on:
   schedule:
-    - cron: '0 7 * * 1' # Weekly Monday 07:00 UTC
+    - cron: '0 7 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -15,6 +14,7 @@ permissions:
 
 jobs:
   lock:
+    if: github.repository == 'vbonk/repo-template'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

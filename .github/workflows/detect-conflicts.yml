@@ -1,15 +1,9 @@
 # Detect Merge Conflicts
 # Auto-labels open PRs with `needs-rebase` when they have merge conflicts.
 #
-# Design notes (hard-won):
-# - Triggers are push-to-main + daily schedule + manual. NOT pull_request_target:
-#   this job only calls the GitHub API (never checks out PR code), and per-PR
-#   triggers made one PR's red X depend on UNRELATED PRs' state.
-# - The label is created idempotently first — a missing label used to crash
-#   the loop and fail the whole run.
-# - Per-PR failures warn and continue; one broken PR must never fail the run.
-# - mergeable=UNKNOWN means GitHub is still computing — retried once, then
-#   skipped with a warning (the next scheduled run catches it).
+# Source-template maintenance only by default. GitHub template creation copies
+# workflow files; derived repositories should not receive labels or scheduled
+# maintenance side effects before Phase 0 decides whether this capability belongs.
 
 name: Detect Merge Conflicts
 
@@ -26,6 +20,7 @@ permissions:
 
 jobs:
   check-conflicts:
+    if: github.repository == 'vbonk/repo-template'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -35,7 +30,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          # Label must exist before any pr edit references it
           gh label create needs-rebase --repo "$REPO" \
             --color D93F0B --description "PR has merge conflicts and needs a rebase" \
             --force || echo "::warning::could not ensure needs-rebase label exists"
@@ -46,7 +40,6 @@ jobs:
 
           prs=$(check_prs)
 
-          # Retry once for PRs still computing mergeability
           if printf '%s' "$prs" | jq -e '[.[] | select(.mergeable == "UNKNOWN")] | length > 0' > /dev/null; then
             echo "Some PRs have mergeable=UNKNOWN — waiting 20s for GitHub to compute"
             sleep 20

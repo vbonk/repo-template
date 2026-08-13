@@ -1,6 +1,5 @@
 # Auto-Label PRs
-# Automatically labels PRs based on changed file paths.
-# Configure labels in .github/labeler.yml
+# Source-template policy by default; derived projects opt in during Phase 0.
 
 name: Auto Label
 
@@ -14,9 +13,9 @@ permissions:
 
 jobs:
   label:
+    if: github.repository == 'vbonk/repo-template'
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
     steps:
       - name: Label PR based on changed files
         uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0

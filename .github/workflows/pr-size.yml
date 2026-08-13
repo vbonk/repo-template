@@ -1,6 +1,5 @@
 # PR Size Labeler
-# Automatically labels PRs by size (lines changed).
-# Encourages smaller, reviewable PRs.
+# Source-template policy by default; derived projects opt in during Phase 0.
 
 name: PR Size
 
@@ -14,6 +13,7 @@ permissions:
 
 jobs:
   size-label:
+    if: github.repository == 'vbonk/repo-template'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
