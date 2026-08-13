@@ -1,6 +1,6 @@
 # Template Validation (Meta-CI)
-# Validates the template's own files: YAML, JSON, shell scripts, SHA pins, secrets.
-# A derived repository may remove or adapt this source-template workflow during Phase 0.
+# Validates the template source itself. GitHub template creation copies workflow
+# files, so this job is explicitly inert in derived repositories.
 
 name: Validate Template
 
@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   validate:
+    if: github.repository == 'vbonk/repo-template'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -137,6 +138,21 @@ jobs:
             exit 1
           fi
           echo "No secrets patterns found."
+
+      - name: Verify source-template workflows self-quarantine
+        run: |
+          echo "--- Checking source-only workflow guards ---"
+          for f in \
+            .github/workflows/validate-template.yml \
+            .github/workflows/update-contributors.yml \
+            .github/workflows/scorecard.yml \
+            .github/workflows/detect-conflicts.yml; do
+            if ! grep -Fq "if: github.repository == 'vbonk/repo-template'" "$f"; then
+              echo "::error::$f can execute source-template maintenance in derived repositories"
+              exit 1
+            fi
+            echo "OK: $f is source-template guarded"
+          done
 
       - name: Verify agent-native Phase 0 and reconciliation contracts
         run: |
