@@ -29,21 +29,27 @@ For derived repositories:
 5. Remove assumptions before adding implementation.
 6. Do not choose a stack, architecture, deployment target, dependency ecosystem, or license without project evidence.
 7. Preserve useful repository hygiene and security controls.
-8. If the real project is already available, normalize and integrate it in the same workflow; do not force an unnecessary intermediate substrate commit.
-9. Ask only when a material decision is genuinely unknowable or unsafe to infer.
-10. Replace these generic instructions with project-specific instructions when Phase 0 completes.
+8. Preserve `.repo-template.yaml` as the small template-provenance marker; it is intentionally allowed to retain a reference to `vbonk/repo-template`.
+9. If the real project is already available, normalize and integrate it in the same workflow; do not force an unnecessary intermediate substrate commit.
+10. Ask only when a material decision is genuinely unknowable or unsafe to infer.
+11. Replace these generic instructions with project-specific instructions when Phase 0 completes.
 
 Explicit fallback: `/project:bootstrap`.
+
+### Existing derived project
+
+If the repository already contains project-specific instructions and substantial project work, do **not** rerun Phase 0 simply because `repo-template` has changed. When the user requests a template update, use `.repo-template.yaml` and [docs/TEMPLATE-UPGRADE.md](docs/TEMPLATE-UPGRADE.md) (or the canonical source document referenced by the marker) for semantic reconciliation.
 
 ## Source Template Project
 
 **Name:** repo-template  
-**Purpose:** Secure, agent-native GitHub template optimized for Claude Code and Codex, with a canonical first-agent normalization path for derived repositories.
+**Purpose:** Secure, agent-native GitHub template optimized for Claude Code and Codex, with first-agent normalization and repeatable downstream reconciliation.
 
 ### Architecture
 
 - **Agent entry:** `CLAUDE.md`, `AGENTS.md`, `.claude/`
 - **Bootstrap/intake:** `docs/PHASE-0.md` and `/project:bootstrap`
+- **Template provenance/upgrades:** `.repo-template.yaml`, `docs/TEMPLATE-UPGRADE.md`, `/project:upgrade-template`
 - **Security/governance:** `.github/`, repository policies, hardening scripts, hooks
 - **Verification:** template tests, compliance audit, GitHub Actions
 
@@ -80,7 +86,8 @@ See [docs/AI-SECURITY.md](docs/AI-SECURITY.md).
 
 ## Claude Toolkit
 
-- `/project:bootstrap` — normalize a derived repository and ingest available project context
+- `/project:bootstrap` — normalize a fresh derived repository and ingest available project context
+- `/project:upgrade-template` — reconcile an existing derived project with a newer template baseline
 - `/project:init-template` — deprecated compatibility alias for bootstrap
 - `/project:security-audit` — read-only security scorecard
 - `/project:review` — review assistance
@@ -98,8 +105,9 @@ A template change is not complete until:
 - no speculative project assumptions were introduced into downstream entry surfaces;
 - security controls were preserved or intentionally replaced;
 - references and links remain valid;
-- first-agent usability in derived repositories did not regress.
+- first-agent usability in derived repositories did not regress;
+- downstream compatibility/provenance behavior remains coherent.
 
 ---
 
-> See also: [AGENTS.md](AGENTS.md) | [Phase 0](docs/PHASE-0.md) | [AI Security](docs/AI-SECURITY.md)
+> See also: [AGENTS.md](AGENTS.md) | [Phase 0](docs/PHASE-0.md) | [Template Upgrade](docs/TEMPLATE-UPGRADE.md) | [AI Security](docs/AI-SECURITY.md)
