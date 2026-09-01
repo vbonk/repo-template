@@ -91,7 +91,7 @@ These files control AI agent behavior and are protected by CODEOWNERS:
 
 4. **Install scanning hooks** -- Copy the templates from `.claude/hooks/` and register them in your agent configuration.
 
-5. **Limit agent permissions** -- Agents should have the minimum permissions needed. Never give an agent admin or direct push access.
+5. **Scope agent permissions to the task** -- Prefer the minimum permissions needed. Repository-administration operations such as first-time hardening may require elevated rights; use those rights only when explicitly authorized for that operation, and do not grant a standing bypass around protected-branch or review controls.
 
 ### For Contributors
 
