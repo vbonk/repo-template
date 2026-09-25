@@ -92,6 +92,9 @@ jobs:
           fi
           echo "All actions are SHA-pinned (anchored check)."
 
+      - name: Run AI security hook payload tests
+        run: bash scripts/test-template.sh --local-only --layer 3
+
       - name: ShellCheck hook templates
         run: |
           echo "--- ShellCheck on .sh.template files ---"

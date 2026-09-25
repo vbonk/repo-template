@@ -13,8 +13,15 @@
 #
 # HOW IT WORKS (Claude Code hooks protocol):
 #   Hooks receive a JSON event on STDIN. This is a PostToolUse hook — it
-#   fires AFTER a tool ran, when the event contains `tool_output` (the
-#   fetched content). A PreToolUse hook could NOT do this job: before
+#   fires AFTER a tool ran, when the event contains `tool_response` (the
+#   fetched content; for Bash, an object with `stdout` and `stderr`).
+#   Commands that exit non-zero fire PostToolUseFailure instead and are not
+#   scanned. It only sees `gh` output from the Bash tool: PR or issue
+#   content fetched through a GitHub MCP server or WebFetch is not scanned.
+#   Covering those needs a matcher for them (for example
+#   `mcp__<your-github-server>__.*|WebFetch`) and a change to this hook,
+#   which today exits early when there is no `gh` command.
+#   A PreToolUse hook could NOT do this job: before
 #   execution there is no output to scan — only the command string.
 #   On a match, the hook exits 2 and writes to stderr; Claude Code feeds
 #   that stderr back to the agent as a warning it must consider.
@@ -50,6 +57,7 @@ set -euo pipefail
 # --- Parse the hook event from stdin ---
 # Extract the executed command and its output. Non-Bash events, or Bash
 # commands that aren't fetching PR/issue content, pass through silently.
+[ -t 0 ] && exit 0  # run by hand with no piped event: nothing to scan
 EVENT_JSON=$(cat -)
 
 read_field() {
@@ -63,6 +71,12 @@ field = sys.argv[1]
 value = event.get(field, '')
 if field == 'tool_input':
     value = (value or {}).get('command', '')
+elif field == 'tool_response':
+    # For Bash, tool_response is an object with stdout and stderr (plus
+    # interrupted and isImage). Scan both.
+    if isinstance(value, dict):
+        parts = [value.get(k) for k in ('stdout', 'stderr') if isinstance(value.get(k), str)]
+        value = '\n'.join(parts) if parts else json.dumps(value)
 print(value if isinstance(value, str) else json.dumps(value))
 " "$1" 2>/dev/null || true
 }
@@ -72,11 +86,13 @@ TOOL_NAME=$(read_field tool_name)
 
 COMMAND=$(read_field tool_input)
 case "$COMMAND" in
-  *"gh pr view"*|*"gh pr diff"*|*"gh issue view"*|*"gh api"*pulls*|*"gh api"*issues*) ;;
+  *"gh "*"pr view"*|*"gh "*"pr diff"*|*"gh "*"pr list"*) ;;
+  *"gh "*"issue view"*|*"gh "*"issue list"*) ;;
+  *"gh api"*pulls*|*"gh api"*issues*|*"gh api graphql"*) ;;
   *) exit 0 ;;
 esac
 
-CONTENT=$(read_field tool_output)
+CONTENT=$(read_field tool_response)
 [ -n "$CONTENT" ] || exit 0
 
 # --- Injection patterns (case-insensitive grep -E) ---
@@ -104,7 +120,9 @@ INJECTION_PATTERNS=(
 FOUND=0
 DETAIL=""
 for pattern in "${INJECTION_PATTERNS[@]}"; do
-  if printf '%s' "$CONTENT" | grep -qiE -e "$pattern"; then
+  # A here-string, not printf | grep -q: under pipefail, grep -q exiting early
+  # on a match kills printf with SIGPIPE on output over 64 KB and the match is lost.
+  if grep -qiE -e "$pattern" <<<"$CONTENT"; then
     DETAIL="${DETAIL}  - pattern: ${pattern}\n"
     FOUND=$((FOUND + 1))
   fi
