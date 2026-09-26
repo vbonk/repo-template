@@ -1,75 +1,121 @@
 #!/usr/bin/env bash
 # warn-ai-config-changes.sh — Claude Code hook template
 #
-# PURPOSE: Warn when AI configuration files are being modified.
+# PURPOSE: Warn when AI configuration files are modified.
 #
-# AI config files (CLAUDE.md, AGENTS.md, and the .claude/ toolkit)
-# control how AI agents behave in this repo.
-# Unauthorized changes to these files are a prompt injection vector — an attacker
-# could modify them to instruct the agent to exfiltrate secrets or bypass checks.
+# AI config files (CLAUDE.md, AGENTS.md, .mcp.json and the .claude/ toolkit)
+# control how AI agents behave in this repo. Unauthorized changes to these
+# files are a prompt injection vector: an attacker could modify them to
+# instruct the agent to exfiltrate secrets or bypass checks.
 #
-# This hook alerts the human operator whenever these files are part of a change.
+# HOW IT WORKS (Claude Code hooks protocol):
+#   This is a PostToolUse hook. After an Edit, Write or NotebookEdit call
+#   (MultiEdit, a legacy tool name, is kept in the matcher), Claude Code sends
+#   a JSON event on STDIN; the edited path is in `tool_input.file_path`
+#   (`tool_input.notebook_path` for notebooks). When the path is an AI config
+#   file, the hook writes a warning to stderr and exits 2, which is how a
+#   PostToolUse hook shows a message to the agent. The edit has already
+#   happened, so this warns; it does not block. Output printed on exit 0 goes
+#   only to Claude Code's debug log, so the agent would never see it.
+#
+#   Blind spot: writes made through Bash (echo, sed, git checkout) never reach
+#   this hook. CODEOWNERS review, once required (docs/BRANCH-PROTECTION.md),
+#   and CI are the gate for those and for every change that reaches main.
+#
+#   Manual use: pass a path as $1 (for example from a git hook). The warning
+#   goes to stderr and the script exits 0, so it never blocks a commit.
 #
 # USAGE:
-#   1. Copy this file to .claude/hooks/warn-ai-config-changes.sh
-#   2. Remove the .template extension
-#   3. chmod +x .claude/hooks/warn-ai-config-changes.sh
-#   4. Register in .claude/settings.json under PostToolUse hooks
+#   1. cp .claude/hooks/warn-ai-config-changes.sh.template \
+#        .claude/hooks/warn-ai-config-changes.sh
+#   2. chmod +x .claude/hooks/warn-ai-config-changes.sh
+#   3. Register in .claude/settings.json:
 #
-# HOOK TYPE: PostToolUse (runs after file modifications)
-# TRIGGER: After any file write or edit operation
+#        {
+#          "hooks": {
+#            "PostToolUse": [
+#              {
+#                "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+#                "hooks": [
+#                  {
+#                    "type": "command",
+#                    "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/warn-ai-config-changes.sh"
+#                  }
+#                ]
+#              }
+#            ]
+#          }
+#        }
+#
+# Requires: python3 (for JSON parsing; ships on macOS and ubuntu runners).
 
 set -euo pipefail
 
 # --- Configuration ---
-# Files that control AI agent behavior. Add more as needed.
+# Files that control AI agent behavior: the agent surfaces in .github/CODEOWNERS
+# plus the local-only files Claude Code also loads (settings.local.json,
+# CLAUDE.local.md), which no CODEOWNERS rule can cover because they are
+# normally uncommitted. Lower-case; entries ending in / match a directory,
+# the rest match a file name.
 AI_CONFIG_FILES=(
-  "CLAUDE.md"
-  "AGENTS.md"
+  "claude.md"
+  "agents.md"
+  "claude.local.md"
+  ".mcp.json"
   ".claude/settings.json"
+  ".claude/settings.local.json"
   ".claude/commands/"
   ".claude/hooks/"
+  ".claude/skills/"
+  ".claude/agents/"
+  ".claude/rules/"
 )
 
 # --- Input ---
-# This hook receives the changed file path as an argument or via stdin.
-# Adapt based on how your hook runner provides context.
+MODE="hook"
 CHANGED_FILE="${1:-}"
-if [ -z "$CHANGED_FILE" ]; then
-  # Fallback: check git diff for staged changes
-  CHANGED_FILE=$(git diff --cached --name-only 2>/dev/null || echo "")
+if [ -n "$CHANGED_FILE" ]; then
+  MODE="manual"
+elif [ ! -t 0 ]; then
+  CHANGED_FILE=$(python3 -c "
+import json, sys
+try:
+    event = json.load(sys.stdin)
+except ValueError:
+    sys.exit(0)
+tool_input = event.get('tool_input') or {}
+path = tool_input.get('file_path') or tool_input.get('notebook_path') or ''
+print(path if isinstance(path, str) else '')
+" 2>/dev/null || true)
 fi
 
-if [ -z "$CHANGED_FILE" ]; then
-  exit 0
-fi
+[ -n "$CHANGED_FILE" ] || exit 0
+
+# Normalize Windows separators and case (macOS and Windows file systems are
+# case-insensitive), and anchor at a path boundary so SUBAGENTS.md or
+# CLAUDE.md.bak don't match.
+CHANGED_FILE="${CHANGED_FILE//\\//}"
+LOWER_PATH="/$(printf '%s' "$CHANGED_FILE" | tr '[:upper:]' '[:lower:]')"
 
 # --- Check ---
-WARNED=0
+MATCHED=0
 for config_file in "${AI_CONFIG_FILES[@]}"; do
-  if echo "$CHANGED_FILE" | grep -q "$config_file"; then
-    if [ "$WARNED" -eq 0 ]; then
-      echo ""
-      echo "========================================"
-      echo " AI CONFIG FILE CHANGE DETECTED"
-      echo "========================================"
-      echo ""
-    fi
-    MATCH=$(echo "$CHANGED_FILE" | grep "$config_file")
-    echo "  Changed: $MATCH"
-    WARNED=$((WARNED + 1))
-  fi
+  case "$config_file" in
+    */) case "$LOWER_PATH" in *"/$config_file"*) MATCHED=1 ;; esac ;;
+    *)  case "$LOWER_PATH" in *"/$config_file") MATCHED=1 ;; esac ;;
+  esac
 done
 
-if [ "$WARNED" -gt 0 ]; then
-  echo ""
-  echo "These files control AI agent behavior and are prompt injection targets."
-  echo "Ensure these changes are intentional and reviewed by a human maintainer."
-  echo "CODEOWNERS should require owner review for these files."
-  echo ""
-  echo "See docs/AI-SECURITY.md for details on AI config security."
-  echo "========================================"
-  echo ""
-fi
+[ "$MATCHED" -eq 1 ] || exit 0
 
+{
+  echo "AI CONFIG FILE CHANGED: $CHANGED_FILE"
+  echo "This file controls how AI agents behave in this repo and is a prompt injection target."
+  echo "Tell the human operator about this change and confirm it is intentional."
+  echo "CODEOWNERS review is the gate once required review is enabled (docs/BRANCH-PROTECTION.md)."
+} >&2
+
+if [ "$MODE" = "hook" ]; then
+  exit 2
+fi
 exit 0

@@ -7,7 +7,7 @@ This is not a theoretical problem. AI-assisted commits leak secrets at twice the
 > [!IMPORTANT]
 > **Why this matters to you:** If you're building with Claude Code or Codex, the code it writes for you is statistically likely to contain security issues. You don't need to become a security expert — but you do need guardrails that catch the mistakes before they reach your repo. That's what this page sets up.
 
-> **Threat Model at a Glance** -- This repository defends against prompt injection attacks through 6 layers of defense-in-depth: CODEOWNERS review gates, branch protection, CI validation, hook-based scanning, agent-level instructions, and secret detection. AI config files carry active CODEOWNERS rules (review is *requested* automatically; to make it *blocking*, enable "Require review from Code Owners" — see docs/BRANCH-PROTECTION.md). On a hardened repo, all changes to `main` must arrive by PR with passing status checks — direct pushes are rejected, including from agents.
+> **Threat Model at a Glance** -- This repository defends against prompt injection with four layers of defense-in-depth (CODEOWNERS review gates, branch protection, CI validation and secret detection) plus two early-warning aids that are not defenses on their own: tripwire hooks that flag known injection strings, and agent instructions. AI config files carry active CODEOWNERS rules (review is *requested* automatically; to make it *blocking*, enable "Require review from Code Owners" — see docs/BRANCH-PROTECTION.md). On a hardened repo, all changes to `main` must arrive by PR with passing status checks — direct pushes are rejected, including from agents.
 
 ---
 
@@ -40,17 +40,17 @@ If the AI agent reads this PR body without safeguards, it might comply.
 
 6. **Commit message injection** -- Instructions embedded in commit messages that agents read when reviewing history.
 
-## Defense Layers
+## Defense Layers and Tripwires
 
-This repository implements defense-in-depth with multiple layers:
+Layers 1, 2, 3 and 6 enforce once branch protection requires PRs, passing checks and Code Owner review (see docs/BRANCH-PROTECTION.md); they then hold even when an agent ignores its instructions. Layer 6's local pre-commit hook can be skipped; its CI scan cannot. Layers 4 and 5 only warn. Pattern scanning catches known strings, not new phrasings, and instructions are advisory, so an agent under pressure can skip them. Treat them as tripwires and awareness, never as the barrier.
 
 ```mermaid
 graph TD
     L1["**Layer 1: CODEOWNERS**<br/>AI config files require human owner review.<br/>Prevents unauthorized changes to agent instructions."]
     L2["**Layer 2: Branch Protection**<br/>All changes go through PRs with required reviews.<br/>No direct pushes to main. Agents cannot self-approve."]
     L3["**Layer 3: CI Validation**<br/>Automated checks run on every PR.<br/>Template validation, linting, security scanning."]
-    L4["**Layer 4: Hook-based Scanning**<br/>Pre-commit/pre-tool hooks scan for injection patterns.<br/>See .claude/hooks/ for templates."]
-    L5["**Layer 5: Agent Instructions**<br/>Each AI config file includes injection awareness.<br/>Agents are told to refuse suspicious requests."]
+    L4["**Layer 4: Tripwire hooks (warn only)**<br/>Flag known injection strings in fetched PR/issue content<br/>and edits to AI config files. A warning, not a barrier.<br/>See .claude/hooks/ for templates."]
+    L5["**Layer 5: Agent instructions (awareness only)**<br/>Each AI config file includes injection awareness.<br/>Advisory: enforcement lives in CODEOWNERS, branch protection and CI."]
     L6["**Layer 6: Secret Detection**<br/>Pre-commit hooks scan for secrets, API keys, and credentials.<br/>CI workflow scans PR diffs as a server-side backstop."]
 
     L1 --> L2 --> L3 --> L4 --> L5 --> L6
@@ -58,8 +58,8 @@ graph TD
     style L1 fill:#1a5276,stroke:#2980b9,color:#fff
     style L2 fill:#1a5276,stroke:#2980b9,color:#fff
     style L3 fill:#1a5276,stroke:#2980b9,color:#fff
-    style L4 fill:#1a5276,stroke:#2980b9,color:#fff
-    style L5 fill:#1a5276,stroke:#2980b9,color:#fff
+    style L4 fill:#5d6d7e,stroke:#85929e,color:#fff
+    style L5 fill:#5d6d7e,stroke:#85929e,color:#fff
     style L6 fill:#7d3c98,stroke:#a569bd,color:#fff
 ```
 
@@ -78,6 +78,8 @@ These files control AI agent behavior and are protected by CODEOWNERS:
 | `.claude/commands/` | Claude Code commands | Slash command definitions |
 | `.claude/skills/` | Claude Code skills | Executable skill instructions |
 | `.claude/agents/` | Claude Code agents | Sub-agent definitions |
+| `.claude/settings.json` | Claude Code settings | Registers hooks and permissions; removing a hook here disables it |
+| `.mcp.json` | MCP servers | Tools the agent can call |
 
 ## Best Practices
 
@@ -115,7 +117,7 @@ These files control AI agent behavior and are protected by CODEOWNERS:
 ## Hook Templates
 
 > [!TIP]
-> This repository ships ready-to-use hook templates. Copy them, remove the `.template` extension, and you have working security hooks in minutes.
+> This repository ships ready-to-use hook templates. Copy them, remove the `.template` extension and register them. `scripts/test-template.sh` runs each hook template against the event Claude Code sends; after installing, run one real `gh pr view` on a test PR to confirm your own registration fires.
 
 This repository includes hook templates at two levels:
 
@@ -129,8 +131,8 @@ Install with: `bash templates/hooks/setup-hooks.sh`
 
 ### AI Security Hooks (`.claude/hooks/`)
 
-- **`validate-pr-body.sh.template`** -- A **PostToolUse** hook: after the agent fetches PR/issue content (`gh pr view`, `gh pr diff`, `gh issue view`), it scans the fetched output for injection patterns and, on a match, exits 2 so Claude Code feeds a warning back to the agent before it acts on that content. (PostToolUse is required — hooks receive a JSON event on stdin, and only *after* execution does the event carry `tool_output` to scan.)
-- **`warn-ai-config-changes.sh.template`** -- Warns when AI config files are modified, prompting human review.
+- **`validate-pr-body.sh.template`** -- A **PostToolUse** hook: after the agent fetches PR/issue content (`gh pr view`, `gh pr diff`, `gh issue view`), it scans the fetched output for injection patterns and, on a match, exits 2 so Claude Code feeds a warning back to the agent before it acts on that content. (PostToolUse is required — hooks receive a JSON event on stdin, and only *after* execution does the event carry `tool_response` to scan; for Bash that is an object with `stdout` and `stderr`.) It scans `gh pr view|diff|list`, `gh issue view|list` (including with `-R`/`--repo`) and `gh api` calls on pulls, issues or graphql. Commands that exit non-zero fire PostToolUseFailure and are not scanned. It only sees `gh` output from the Bash tool: PR or issue content fetched through a GitHub MCP server or WebFetch is not scanned. Covering those tools needs a matcher for them (for example `mcp__<your-github-server>__.*|WebFetch`) and a change to this hook, which today exits early when there is no `gh` command.
+- **`warn-ai-config-changes.sh.template`** -- A **PostToolUse** hook on Edit, Write and NotebookEdit (MultiEdit kept in the matcher as a legacy name): when the edited file is an AI config file (`CLAUDE.md`, `AGENTS.md`, the `.claude/` toolkit), it exits 2 so Claude Code shows the agent a warning to pass on to the human. It also covers `.mcp.json`, `.claude/rules/` and the local-only `.claude/settings.local.json` and `CLAUDE.local.md`, which no CODEOWNERS rule can reach. It warns rather than blocks, because the edit has already happened, and it never sees writes made through Bash; CODEOWNERS review is the gate once required review is enabled (docs/BRANCH-PROTECTION.md).
 
 To use them:
 1. Copy the template and remove `.template` extension

@@ -18,6 +18,8 @@ AGENTS.md                            @vbonk
 .claude/agents/                      @vbonk
 .claude/hooks/                       @vbonk
 .claude/commands/                    @vbonk
+.claude/settings.json                @vbonk
+.mcp.json                            @vbonk
 
 # Security hardening surfaces
 scripts/secure-repo.sh               @vbonk
