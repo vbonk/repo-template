@@ -924,6 +924,16 @@ run_layer_4() {
   else
     pass "pre-commit hook: blocked message does not recommend --no-verify"
   fi
+
+  # 4.16 PRIVATE.KEY is prose-prone: with -i it matched "private keys" in
+  # CONTRIBUTING.md and docs/AI-SECURITY.md (the sentences that describe this
+  # hook), so no edit to those files could be committed. PEM blocks stay
+  # precise (scanned everywhere, docs included) via their "PRIVATE KEY-----"
+  # delimiter; the bare PRIVATE.KEY form belongs to the generic group, which
+  # still catches private_key assignments in code and config but skips docs.
+  test_hook_allows ".md prose naming private keys" "The hook blocks API keys, private keys and credentials." "test-sec-53.md"
+  test_hook_blocks "PKCS#8 PEM header" "-----BEGIN ""PRIVATE KEY-----" "test-sec-54.pem"
+  test_hook_blocks "private_key assignment in config" "\"private_key\": \"MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC\"" "test-sec-55.json"
 }
 
 # ============================================================
