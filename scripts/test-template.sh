@@ -92,6 +92,43 @@ assert_not_contains() {
   fi
 }
 
+# --- Hook sandbox (Layer 3 installer checks, Layer 4 worktree check) ---
+# A throwaway repository with the hook templates committed in, so installer
+# and gate behaviour can be exercised without touching this checkout's
+# .git/hooks, and from a linked worktree of this checkout. HOME is redirected
+# into the sandbox: git then ignores the user's global config (hooksPath,
+# gpgsign, init.templateDir) and setup-hooks.sh's ~/.config backup lands in
+# the sandbox too. bash 3.2 and BSD tools only: no mapfile, no GNU-only flags.
+
+# sandbox_run ROOT DIR CMD... — run CMD inside DIR (ROOT or a worktree of it)
+sandbox_run() {
+  local root="$1" dir="$2"; shift 2
+  (
+    cd "$dir" || exit 1
+    HOME="$root" XDG_CONFIG_HOME="$root/.xdg" GIT_CONFIG_NOSYSTEM=1 \
+    GIT_AUTHOR_NAME="repo-template tests" GIT_AUTHOR_EMAIL="tests@example.invalid" \
+    GIT_COMMITTER_NAME="repo-template tests" GIT_COMMITTER_EMAIL="tests@example.invalid" \
+    "$@"
+  )
+}
+
+# make_hook_sandbox — print the path of a fresh sandbox; the caller removes it
+make_hook_sandbox() {
+  local sb
+  sb=$(mktemp -d "${TMPDIR:-/tmp}/repo-template-hooks.XXXXXX") || return 1
+  mkdir -p "$sb/templates/hooks" || return 1
+  cp templates/hooks/pre-commit-secrets.sh.template \
+     templates/hooks/forbidden-tokens.txt.template \
+     templates/hooks/setup-hooks.sh "$sb/templates/hooks/" || return 1
+  sandbox_run "$sb" "$sb" git -c init.defaultBranch=main init -q >/dev/null 2>&1 || return 1
+  sandbox_run "$sb" "$sb" git add -A >/dev/null 2>&1 || return 1
+  sandbox_run "$sb" "$sb" git commit -q -m "sandbox" >/dev/null 2>&1 || return 1
+  echo "$sb"
+}
+
+# count_prefixed DIR PREFIX — number of files in DIR whose name starts with PREFIX
+count_prefixed() { find "$1" -maxdepth 1 -name "$2*" | wc -l | tr -d ' '; }
+
 # ============================================================
 # LAYER 1: CLAIM CONSISTENCY
 # ============================================================
@@ -488,6 +525,139 @@ run_layer_3() {
     skip "AI security hook payload tests: python3 not installed (the hooks need it too)"
   fi
 
+  # 3.8–3.13 Installer behaviour, exercised in sandbox repositories: these
+  # run from linked worktrees too and never touch this checkout's .git/hooks.
+  local sb hooks tpl out rc stale_n backup_n chain_ok
+  tpl="templates/hooks/pre-commit-secrets.sh.template"
+
+  if sb=$(make_hook_sandbox); then
+    hooks="$sb/.git/hooks"
+
+    # 3.8 A fresh install is a byte-for-byte copy of the template
+    sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh >/dev/null 2>&1
+    if [[ -x "$hooks/pre-commit" ]] && cmp -s "$tpl" "$hooks/pre-commit"; then
+      pass "setup-hooks.sh: fresh install matches the template"
+    else
+      fail "setup-hooks.sh: fresh install missing, not executable, or differs from the template"
+    fi
+
+    # 3.9 A re-run refreshes an OUTDATED installed copy and keeps it aside.
+    # Marker line intact, body different: what an older template looks like.
+    # On 2026-09-25 a marker-only check skipped exactly this, and the stale
+    # installed hook failed 5 Layer 4 checks.
+    sed 's/All checks passed/All checks passed (outdated copy)/' "$tpl" > "$hooks/pre-commit"
+    chmod +x "$hooks/pre-commit"
+    echo "sandbox-custom-token" >> "$hooks/forbidden-tokens.txt"
+    sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh >/dev/null 2>&1
+    stale_n=$(count_prefixed "$hooks" pre-commit.stale.)
+    if [[ -x "$hooks/pre-commit" ]] && cmp -s "$tpl" "$hooks/pre-commit"; then
+      pass "setup-hooks.sh: re-run refreshes an outdated installed hook"
+    else
+      fail "setup-hooks.sh: re-run left an outdated installed hook in place"
+    fi
+    if [[ "$stale_n" -eq 1 ]] && grep -q 'outdated copy' "$hooks"/pre-commit.stale.*; then
+      pass "setup-hooks.sh: outdated hook kept as pre-commit.stale.<timestamp>"
+    else
+      fail "setup-hooks.sh: outdated hook not kept aside ($stale_n stale copies)"
+    fi
+    if grep -q '^sandbox-custom-token$' "$hooks/forbidden-tokens.txt"; then
+      pass "setup-hooks.sh: refresh leaves a customized forbidden-tokens.txt alone"
+    else
+      fail "setup-hooks.sh: refresh clobbered forbidden-tokens.txt"
+    fi
+
+    # 3.10 A re-run on a CURRENT copy is a no-op: no second stale file
+    out=$(sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh 2>&1)
+    stale_n=$(count_prefixed "$hooks" pre-commit.stale.)
+    if [[ "$stale_n" -eq 1 ]] && echo "$out" | grep -q 'SKIP'; then
+      pass "setup-hooks.sh: re-run on a current hook is a no-op"
+    else
+      fail "setup-hooks.sh: re-run on a current hook was not a no-op ($stale_n stale copies)"
+    fi
+    rm -rf "$sb"
+  else
+    fail "hook sandbox: could not create a sandbox repository (3.8-3.10 not run)"
+  fi
+
+  # 3.11 A foreign hook is chained ONCE. Before the fix a re-run did not
+  # recognise its own wrapper: it backed the wrapper up as the "original" and
+  # wrapped it again, and the newest backup then re-ran the wrapper (recursion).
+  if sb=$(make_hook_sandbox); then
+    hooks="$sb/.git/hooks"
+    printf '#!/bin/sh\necho "original hook ran"\n' > "$hooks/pre-commit"
+    chmod +x "$hooks/pre-commit"
+    sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh >/dev/null 2>&1
+    cp "$hooks/pre-commit" "$sb/wrapper.first"
+    sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh >/dev/null 2>&1
+    backup_n=$(count_prefixed "$hooks" pre-commit.backup.)
+    # One backup, and it is the foreign hook, not a wrapper. A same-second
+    # re-run overwrites the backup in place, so the count alone cannot tell
+    # the two apart; the content can.
+    chain_ok=false
+    if [[ "$backup_n" -eq 1 ]] && grep -q 'original hook ran' "$hooks"/pre-commit.backup.* \
+       && cmp -s "$hooks/pre-commit" "$sb/wrapper.first"; then
+      chain_ok=true
+      pass "setup-hooks.sh: re-run after chaining does not chain a second time"
+    else
+      fail "setup-hooks.sh: re-run after chaining chained again ($backup_n backups)"
+    fi
+
+    # Only run the chained hook when the chain is sound: a wrapper that
+    # wraps itself never terminates.
+    if $chain_ok; then
+      echo "const greeting = 'hello world';" > "$sb/clean.js"
+      sandbox_run "$sb" "$sb" git add clean.js >/dev/null 2>&1
+      out=$(sandbox_run "$sb" "$sb" bash .git/hooks/pre-commit 2>&1); rc=$?
+      if [[ $rc -eq 0 && "$(echo "$out" | grep -c 'original hook ran')" -eq 1 ]]; then
+        pass "setup-hooks.sh: chained hook scans, then runs the original hook once"
+      else
+        fail "setup-hooks.sh: chained hook exit $rc, original hook ran $(echo "$out" | grep -c 'original hook ran') time(s)"
+      fi
+      sandbox_run "$sb" "$sb" git reset -q clean.js >/dev/null 2>&1
+      echo "const key = 'sk-ant-""api03sandbox123456';" > "$sb/leak.js"
+      sandbox_run "$sb" "$sb" git add leak.js >/dev/null 2>&1
+      if sandbox_run "$sb" "$sb" bash .git/hooks/pre-commit >/dev/null 2>&1; then
+        fail "setup-hooks.sh: chained hook let a secret through"
+      else
+        pass "setup-hooks.sh: chained hook still blocks a secret"
+      fi
+      sandbox_run "$sb" "$sb" git reset -q leak.js >/dev/null 2>&1
+    fi
+
+    # 3.12 An outdated chained scanner is refreshed in place; chain untouched
+    sed 's/All checks passed/All checks passed (outdated copy)/' "$tpl" > "$hooks/pre-commit-secrets"
+    sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh >/dev/null 2>&1
+    backup_n=$(count_prefixed "$hooks" pre-commit.backup.)
+    stale_n=$(count_prefixed "$hooks" pre-commit-secrets.stale.)
+    if [[ -x "$hooks/pre-commit-secrets" ]] && cmp -s "$tpl" "$hooks/pre-commit-secrets" \
+       && [[ "$backup_n" -eq 1 && "$stale_n" -eq 1 ]] \
+       && grep -q 'original hook ran' "$hooks"/pre-commit.backup.*; then
+      pass "setup-hooks.sh: outdated chained scanner refreshed, old copy kept, no re-chain"
+    else
+      fail "setup-hooks.sh: outdated chained scanner not refreshed cleanly ($backup_n backups, $stale_n stale copies)"
+    fi
+    rm -rf "$sb"
+  else
+    fail "hook sandbox: could not create a sandbox repository (3.11-3.12 not run)"
+  fi
+
+  # 3.13 Run from a linked worktree, hooks land in the common git dir, which
+  # every worktree shares. <worktree>/.git is a file; a HOOKS_DIR built from
+  # the worktree root made cp fail there.
+  if sb=$(make_hook_sandbox); then
+    sandbox_run "$sb" "$sb" git worktree add wt -b sandbox-wt >/dev/null 2>&1
+    out=$(sandbox_run "$sb" "$sb/wt" bash templates/hooks/setup-hooks.sh 2>&1); rc=$?
+    if [[ $rc -eq 0 && -x "$sb/.git/hooks/pre-commit" && -f "$sb/.git/hooks/forbidden-tokens.txt" ]] \
+       && cmp -s "$tpl" "$sb/.git/hooks/pre-commit"; then
+      pass "setup-hooks.sh: run from a linked worktree installs into the common hooks dir"
+    else
+      fail "setup-hooks.sh: run from a linked worktree did not install into the common hooks dir (exit $rc)"
+    fi
+    rm -rf "$sb"
+  else
+    fail "hook sandbox: could not create a sandbox repository (3.13 not run)"
+  fi
+
   # Hook tests need .git to be a real directory. In a git WORKTREE, .git is a
   # file pointing elsewhere and setup-hooks.sh writes to the wrong place —
   # these tests would false-fail. Skip VISIBLY (a skip is never a pass).
@@ -503,6 +673,10 @@ run_layer_3() {
     cp .git/hooks/pre-commit .git/hooks/pre-commit.test-backup
     had_hook=true
   fi
+  # Fresh-install path. An outdated copy would otherwise be refreshed here
+  # and leave a pre-commit.stale.* file behind in this checkout; 3.9 covers
+  # the refresh path in a sandbox.
+  rm -f .git/hooks/pre-commit
 
   bash templates/hooks/setup-hooks.sh >/dev/null 2>&1
   if [[ -x .git/hooks/pre-commit ]]; then
@@ -599,24 +773,18 @@ run_layer_3() {
 run_layer_4() {
   header "Layer 4: Security Verification"
 
-  # Same worktree constraint as Layer 3: hook install/execution needs .git
-  # to be a real directory. Skip VISIBLY rather than false-fail.
-  if [[ ! -d .git ]]; then
-    skip "Layer 4 hook tests: worktree checkout detected (.git is a file) — run from a standard clone to verify hook behavior"
-    return 0
-  fi
-
-  # Ensure hooks are installed for testing
-  if [[ ! -x .git/hooks/pre-commit ]]; then
-    bash templates/hooks/setup-hooks.sh >/dev/null 2>&1
-  fi
+  # These checks run the TEMPLATE itself, not whatever copy is installed in
+  # .git/hooks: on 2026-09-25 an outdated installed copy failed 5 of them
+  # while the template was correct. Running the template needs no install,
+  # so the checks also run from a linked worktree (each has its own index).
+  local hook="templates/hooks/pre-commit-secrets.sh.template"
 
   # Helper: test if hook blocks a pattern
   test_hook_blocks() {
     local label="$1" content="$2" filename="$3"
     echo "$content" > "$filename"
     git add -f "$filename" >/dev/null 2>&1
-    if bash .git/hooks/pre-commit >/dev/null 2>&1; then
+    if bash "$hook" >/dev/null 2>&1; then
       fail "Hook should BLOCK: $label"
     else
       pass "Hook BLOCKS: $label"
@@ -630,7 +798,7 @@ run_layer_4() {
     local label="$1" content="$2" filename="$3"
     echo "$content" > "$filename"
     git add -f "$filename" >/dev/null 2>&1
-    if bash .git/hooks/pre-commit >/dev/null 2>&1; then
+    if bash "$hook" >/dev/null 2>&1; then
       pass "Hook ALLOWS: $label"
     else
       fail "Hook should ALLOW: $label"
@@ -714,6 +882,58 @@ run_layer_4() {
 
   # 4.13 .env file hook check (renamed to avoid gitignore)
   test_hook_blocks ".env file staged" "DB_PASSWORD=secret123" "test-sec-env.env.local"
+
+  # 4.14 Forbidden tokens apply from a linked worktree. The token file lives
+  # in the common git dir; a hook that built its path from the worktree root
+  # ($toplevel/.git is a FILE there) silently skipped it. This is the served
+  # path: git itself runs the installed hook on `git commit` in the worktree.
+  local sb out rc
+  if sb=$(make_hook_sandbox); then
+    sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh >/dev/null 2>&1
+    echo "sandbox-forbidden-token-9f3a" >> "$sb/.git/hooks/forbidden-tokens.txt"
+    sandbox_run "$sb" "$sb" git worktree add wt -b sandbox-wt >/dev/null 2>&1
+    echo "const probe = 'sandbox-forbidden-token-9f3a';" > "$sb/wt/leak.js"
+    sandbox_run "$sb" "$sb/wt" git add leak.js >/dev/null 2>&1
+    out=$(sandbox_run "$sb" "$sb/wt" git commit -q -m "leak" 2>&1); rc=$?
+    if [[ $rc -ne 0 ]] && echo "$out" | grep -q 'Forbidden tokens found'; then
+      pass "Hook BLOCKS: forbidden token in a commit from a linked worktree"
+    else
+      fail "Hook should BLOCK: forbidden token in a commit from a linked worktree (git exit $rc)"
+    fi
+    # Negative control: a clean commit from the same worktree goes through,
+    # so the block above came from the token, not from a hook that crashed.
+    sandbox_run "$sb" "$sb/wt" git reset -q leak.js >/dev/null 2>&1
+    rm -f "$sb/wt/leak.js"
+    echo "const greeting = 'hello world';" > "$sb/wt/clean.js"
+    sandbox_run "$sb" "$sb/wt" git add clean.js >/dev/null 2>&1
+    if sandbox_run "$sb" "$sb/wt" git commit -q -m "clean" >/dev/null 2>&1; then
+      pass "Hook ALLOWS: clean commit from the same linked worktree"
+    else
+      fail "Hook should ALLOW: clean commit from a linked worktree"
+    fi
+    rm -rf "$sb"
+  else
+    fail "hook sandbox: could not create a sandbox repository (4.14 not run)"
+  fi
+
+  # 4.15 The blocked message must not teach the bypass. Advising --no-verify
+  # contradicts the template's own rule not to weaken a control to make a
+  # check pass; the remedy is to reword the content or narrow the pattern.
+  if grep -qF -- '--no-verify' templates/hooks/pre-commit-secrets.sh.template; then
+    fail "pre-commit hook: blocked message recommends --no-verify"
+  else
+    pass "pre-commit hook: blocked message does not recommend --no-verify"
+  fi
+
+  # 4.16 PRIVATE.KEY is prose-prone: with -i it matched "private keys" in
+  # CONTRIBUTING.md and docs/AI-SECURITY.md (the sentences that describe this
+  # hook), so no edit to those files could be committed. PEM blocks stay
+  # precise (scanned everywhere, docs included) via their "PRIVATE KEY-----"
+  # delimiter; the bare PRIVATE.KEY form belongs to the generic group, which
+  # still catches private_key assignments in code and config but skips docs.
+  test_hook_allows ".md prose naming private keys" "The hook blocks API keys, private keys and credentials." "test-sec-53.md"
+  test_hook_blocks "PKCS#8 PEM header" "-----BEGIN ""PRIVATE KEY-----" "test-sec-54.pem"
+  test_hook_blocks "private_key assignment in config" "\"private_key\": \"MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC\"" "test-sec-55.json"
 }
 
 # ============================================================

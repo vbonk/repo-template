@@ -24,6 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - CODEOWNERS documentation now distinguishes source-template ownership from derived-repository ownership validation
 - Root README and agent instructions are substantially smaller and no longer carry speculative application architecture, commands, deployment URLs, or environment settings
 
+### Fixed
+
+- **Pre-commit secret gate in linked worktrees**: the hook looked for `forbidden-tokens.txt` under `<worktree>/.git/hooks`, which is a file in a linked worktree, so every file-based token was silently skipped there. The token file now resolves through `git rev-parse --git-common-dir` (#184)
+- **`setup-hooks.sh` is safe to re-run**: it installs into the common hooks dir (it failed inside a linked worktree); compares the installed hook with the template instead of looking for a marker line (an outdated copy was skipped forever, which is how a stale hook failed five Layer 4 self-tests on 2026-09-25); refreshes an outdated copy and keeps it as `pre-commit.stale.<timestamp>`; and recognises its own chaining wrapper, so a re-run no longer chains a second time (the double chain made the "original hook" the previous wrapper: unbounded recursion) (#184)
+- **The hook's blocked message no longer recommends `git commit --no-verify`**, which contradicted the template's own rule not to weaken a control to make a check pass; it now says to reword the content, or narrow the pattern in the template and reinstall (#184)
+- **The `PRIVATE.KEY` pattern no longer blocks docs that mention private keys**: the case-insensitive precise pattern matched the prose "private keys" in CONTRIBUTING.md and docs/AI-SECURITY.md (the sentences that describe the hook), so those files could not be edited while the hook was installed. PEM blocks stay in the precise group through their closing delimiter (`PRIVATE KEY` followed by five dashes; scanned everywhere, docs included); the bare form moved to the generic group, which still catches `private_key` assignments in code and config but skips docs (#184)
+- Self-tests: Layer 3 exercises the installer in sandbox repositories (fresh, re-run, outdated copy, foreign hook chained, re-run after chaining, outdated chained copy, run from a linked worktree); Layer 4 proves a file token blocks a commit made from a linked worktree, asserts the message does not teach the bypass, and runs the hook template directly instead of whatever copy is installed, so the hook checks of both layers now run from linked worktrees too
+
 ## [2.0.0] - 2026-08-06
 
 The trust-layer release: everything the docs claim is now enforced, everything
