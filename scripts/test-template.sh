@@ -525,7 +525,7 @@ run_layer_3() {
     skip "AI security hook payload tests: python3 not installed (the hooks need it too)"
   fi
 
-  # 3.8–3.14 Installer and local-audit behaviour, exercised in sandbox
+  # 3.8–3.17 Installer and local-audit behaviour, exercised in sandbox
   # repositories: these run from linked worktrees too and never touch this
   # checkout's .git/hooks.
   local sb hooks tpl out rc stale_n backup_n chain_ok
@@ -676,6 +676,67 @@ run_layer_3() {
     rm -rf "$sb"
   else
     fail "hook sandbox: could not create a sandbox repository (3.13 not run)"
+  fi
+
+  # 3.15–3.17 core.hooksPath (husky, lint-staged) routes hooks elsewhere, and
+  # git then never runs anything in the hooks dir the installer fills.
+  # Measured: with core.hooksPath=.husky and no such directory, a commit
+  # sailed past the installed gate. The installer must say so and the
+  # scorecard must not PASS a hook git will never run.
+  if sb=$(make_hook_sandbox); then
+    hooks="$sb/.git/hooks"
+    mkdir -p "$sb/scripts" "$sb/bin"
+    cp scripts/secure-repo.sh scripts/_lib.sh "$sb/scripts/"
+    printf '#!/bin/sh\nexit 1\n' > "$sb/bin/gh"
+    chmod +x "$sb/bin/gh"
+
+    # 3.15 The installer still installs, and warns naming the configured path
+    sandbox_run "$sb" "$sb" git config core.hooksPath .husky
+    out=$(sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh 2>&1)
+    if echo "$out" | grep -q 'WARN' && echo "$out" | grep -q 'core.hooksPath' \
+       && echo "$out" | grep -q '\.husky' && [[ -x "$hooks/pre-commit" ]]; then
+      pass "setup-hooks.sh: warns that core.hooksPath=.husky bypasses the installed gate"
+    else
+      fail "setup-hooks.sh: no warning that core.hooksPath=.husky bypasses the installed gate"
+    fi
+
+    # 3.16 The scorecard WARNs while bypassed and PASSes once the hook in
+    # core.hooksPath calls the installed scanner; the remedy really blocks.
+    out=$(sandbox_run "$sb" "$sb" env PATH="$sb/bin:$PATH" bash "$sb/scripts/secure-repo.sh" --audit --repo example/example 2>&1)
+    if echo "$out" | grep -q 'core.hooksPath' && ! echo "$out" | grep -q 'PASS.*Pre-commit hook installed'; then
+      pass "secure-repo.sh: reports the core.hooksPath bypass instead of PASS"
+    else
+      fail "secure-repo.sh: PASSed a pre-commit hook that core.hooksPath keeps git from running"
+    fi
+    mkdir -p "$sb/.husky"
+    printf '#!/bin/sh\nbash "%s/pre-commit"\n' "$hooks" > "$sb/.husky/pre-commit"
+    chmod +x "$sb/.husky/pre-commit"
+    out=$(sandbox_run "$sb" "$sb" env PATH="$sb/bin:$PATH" bash "$sb/scripts/secure-repo.sh" --audit --repo example/example 2>&1)
+    if echo "$out" | grep -q 'PASS.*Pre-commit hook installed'; then
+      pass "secure-repo.sh: PASSes once the core.hooksPath hook calls the installed scanner"
+    else
+      fail "secure-repo.sh: still WARNs after the core.hooksPath hook calls the installed scanner"
+    fi
+    echo "const key = 'sk-ant-""api03husky123456';" > "$sb/leak.js"
+    sandbox_run "$sb" "$sb" git add leak.js >/dev/null 2>&1
+    if sandbox_run "$sb" "$sb" git commit -q -m leak >/dev/null 2>&1; then
+      fail "core.hooksPath hook that calls the scanner let a secret through on git commit"
+    else
+      pass "core.hooksPath hook that calls the scanner blocks a secret on git commit"
+    fi
+    sandbox_run "$sb" "$sb" git reset -q leak.js >/dev/null 2>&1
+
+    # 3.17 No warning when core.hooksPath points at the hooks dir itself
+    sandbox_run "$sb" "$sb" git config core.hooksPath "$hooks"
+    out=$(sandbox_run "$sb" "$sb" bash templates/hooks/setup-hooks.sh 2>&1)
+    if echo "$out" | grep -q 'core.hooksPath'; then
+      fail "setup-hooks.sh: warned although core.hooksPath points at the hooks dir itself"
+    else
+      pass "setup-hooks.sh: quiet when core.hooksPath points at the hooks dir itself"
+    fi
+    rm -rf "$sb"
+  else
+    fail "hook sandbox: could not create a sandbox repository (3.15-3.17 not run)"
   fi
 
   # Hook tests need .git to be a real directory. In a git WORKTREE, .git is a

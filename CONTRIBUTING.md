@@ -126,7 +126,7 @@ bash templates/hooks/setup-hooks.sh
 This installs a hook that blocks commits containing API keys, private keys, credentials, and tokens you configure in `.git/hooks/forbidden-tokens.txt` (the common git dir's `hooks/` when you commit from a linked worktree). If a detection is a false positive, reword the content, or narrow the pattern in the template and reinstall; the hook says so when it blocks. Re-run the installer after pulling template updates: an outdated copy is refreshed and the old one kept as `pre-commit.stale.<timestamp>`.
 
 > [!TIP]
-> If you already have a pre-commit hook (husky, lint-staged, etc.), the installer chains them — your existing hook is preserved. Hooks are also backed up to `~/.config/repo-template/hooks/` so they survive recloning.
+> If you already have a pre-commit hook in the git hooks dir (lint-staged, a custom script), the installer chains them — your existing hook is preserved. Husky-style setups set `core.hooksPath` and run hooks from elsewhere; the installer then warns and prints the line to add to that hook so the scanner runs, and `secure-repo.sh` reports the gate as bypassed until it does. Hooks are also backed up to `~/.config/repo-template/hooks/` so they survive recloning.
 
 > [!NOTE]
 > **For contributors modifying hooks:** Use POSIX-compatible regex patterns (`[[:space:]]` not `\s`, `[[:alpha:]]` not `\w`) for cross-platform compatibility. BSD grep on macOS doesn't support Perl-style character classes.
