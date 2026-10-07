@@ -123,7 +123,7 @@ Install the secret scanning pre-commit hook to catch accidental credential commi
 bash templates/hooks/setup-hooks.sh
 ```
 
-This installs a hook that blocks commits containing API keys, private keys, credentials, and tokens you configure in `.git/hooks/forbidden-tokens.txt`. If a detection is a false positive, the hook tells you how to proceed.
+This installs a hook that blocks commits containing API keys, private keys, credentials, and tokens you configure in `.git/hooks/forbidden-tokens.txt` (the common git dir's `hooks/` when you commit from a linked worktree). If a detection is a false positive, reword the content, or narrow the pattern in the template and reinstall; the hook says so when it blocks. Re-run the installer after pulling template updates: an outdated copy is refreshed and the old one kept as `pre-commit.stale.<timestamp>`.
 
 > [!TIP]
 > If you already have a pre-commit hook (husky, lint-staged, etc.), the installer chains them — your existing hook is preserved. Hooks are also backed up to `~/.config/repo-template/hooks/` so they survive recloning.
