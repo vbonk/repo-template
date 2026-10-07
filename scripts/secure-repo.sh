@@ -298,8 +298,15 @@ fi
 echo ""
 echo "Local Protections:"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
+# Hooks live in the common git dir, which every linked worktree shares; inside
+# a worktree $REPO_ROOT/.git is a file, so resolve the hooks dir through git
+# (the same resolution templates/hooks/setup-hooks.sh uses to install them).
+HOOKS_DIR="$REPO_ROOT/.git/hooks"
+if GIT_COMMON_DIR="$(git rev-parse --git-common-dir 2>/dev/null)"; then
+  HOOKS_DIR="$(cd "$GIT_COMMON_DIR" && pwd)/hooks"
+fi
 
-if [[ -x "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
+if [[ -x "$HOOKS_DIR/pre-commit" ]]; then
   echo -e "  ${GREEN}[PASS]${NC} Pre-commit hook installed"
   PASS=$((PASS + 1))
 else
@@ -307,8 +314,11 @@ else
   WARN=$((WARN + 1))
 fi
 
-if [[ -f "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" ]]; then
-  TOKEN_COUNT=$(grep -cv '^[[:space:]]*#\|^[[:space:]]*$' "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" 2>/dev/null || echo 0)
+if [[ -f "$HOOKS_DIR/forbidden-tokens.txt" ]]; then
+  # grep -c prints the count (0 included) and exits 1 when nothing matched,
+  # so do not append a fallback on failure; default only if nothing printed.
+  TOKEN_COUNT=$(grep -cv '^[[:space:]]*#\|^[[:space:]]*$' "$HOOKS_DIR/forbidden-tokens.txt" 2>/dev/null || true)
+  TOKEN_COUNT="${TOKEN_COUNT:-0}"
   echo -e "  ${GREEN}[PASS]${NC} Forbidden tokens file ($TOKEN_COUNT tokens)"
   PASS=$((PASS + 1))
 else
@@ -355,7 +365,7 @@ echo "============================================"
 if [[ $WARN -gt 0 || $FAIL -gt 0 ]]; then
   echo ""
   echo "Next steps:"
-  [[ ! -x "$REPO_ROOT/.git/hooks/pre-commit" ]] && echo "  - Install hooks: bash templates/hooks/setup-hooks.sh"
+  [[ ! -x "$HOOKS_DIR/pre-commit" ]] && echo "  - Install hooks: bash templates/hooks/setup-hooks.sh"
   [[ "$SIGNING" != "true" ]] && echo "  - Set up commit signing: see docs/BRANCH-PROTECTION.md"
   echo "  - Enable CodeQL (recommended: default setup): gh api -X PATCH repos/OWNER/REPO/code-scanning/default-setup -f state=configured"
 fi

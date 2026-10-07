@@ -525,8 +525,9 @@ run_layer_3() {
     skip "AI security hook payload tests: python3 not installed (the hooks need it too)"
   fi
 
-  # 3.8–3.13 Installer behaviour, exercised in sandbox repositories: these
-  # run from linked worktrees too and never touch this checkout's .git/hooks.
+  # 3.8–3.14 Installer and local-audit behaviour, exercised in sandbox
+  # repositories: these run from linked worktrees too and never touch this
+  # checkout's .git/hooks.
   local sb hooks tpl out rc stale_n backup_n chain_ok
   tpl="templates/hooks/pre-commit-secrets.sh.template"
 
@@ -652,6 +653,25 @@ run_layer_3() {
       pass "setup-hooks.sh: run from a linked worktree installs into the common hooks dir"
     else
       fail "setup-hooks.sh: run from a linked worktree did not install into the common hooks dir (exit $rc)"
+    fi
+
+    # 3.14 secure-repo.sh's Local Protections audit sees those hooks from the
+    # same linked worktree. Before the fix it looked under <worktree>/.git,
+    # a file, and told the user to install hooks that were already there. A
+    # gh shim that always fails keeps the GitHub checks offline (they WARN);
+    # only the local section is under test.
+    mkdir -p "$sb/scripts" "$sb/bin"
+    cp scripts/secure-repo.sh scripts/_lib.sh "$sb/scripts/"
+    printf '#!/bin/sh\nexit 1\n' > "$sb/bin/gh"
+    chmod +x "$sb/bin/gh"
+    out=$(sandbox_run "$sb" "$sb/wt" env PATH="$sb/bin:$PATH" bash "$sb/scripts/secure-repo.sh" --audit --repo example/example 2>&1)
+    # The token count must be one number: grep -c prints 0 and exits 1 when
+    # nothing matches, and an "|| echo 0" fallback printed a second 0.
+    if echo "$out" | grep -q 'Pre-commit hook installed' \
+       && echo "$out" | grep -q 'Forbidden tokens file ([0-9][0-9]* tokens)'; then
+      pass "secure-repo.sh: Local Protections sees the installed hooks from a linked worktree"
+    else
+      fail "secure-repo.sh: Local Protections misses the installed hooks from a linked worktree"
     fi
     rm -rf "$sb"
   else
