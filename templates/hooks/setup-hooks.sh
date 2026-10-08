@@ -37,6 +37,7 @@ INSTALLED=0
 UPDATED=0
 SKIPPED=0
 CHAINED=0
+WARNINGS=0
 
 # keep_aside FILE KIND — copy FILE to FILE.KIND.<timestamp>; print that name.
 # Nothing the user may have edited is ever overwritten in place.
@@ -152,6 +153,32 @@ else
   INSTALLED=$((INSTALLED + 1))
 fi
 
+# --- Hook routing: core.hooksPath (husky, lint-staged) ---
+# When core.hooksPath is set, git runs hooks from there and never from the
+# hooks dir above; a relative value counts from the worktree root, where
+# hooks run. Measured: with core.hooksPath=.husky and no such directory, a
+# commit sailed past the installed gate. Say so, and say how to wire it.
+HOOKS_PATH_CFG="$(git config --path --get core.hooksPath 2>/dev/null || true)"
+if [[ -n "$HOOKS_PATH_CFG" ]]; then
+  case "$HOOKS_PATH_CFG" in
+    /*) EFFECTIVE_HOOKS_DIR="$HOOKS_PATH_CFG" ;;
+    *)  EFFECTIVE_HOOKS_DIR="$REPO_ROOT/$HOOKS_PATH_CFG" ;;
+  esac
+  HOOKS_DIR_PHYS="$(cd "$HOOKS_DIR" && pwd -P)"
+  EFFECTIVE_PHYS="$(cd "$EFFECTIVE_HOOKS_DIR" 2>/dev/null && pwd -P || echo "$EFFECTIVE_HOOKS_DIR")"
+  if [[ "$EFFECTIVE_PHYS" != "$HOOKS_DIR_PHYS" ]]; then
+    echo ""
+    echo -e "${YELLOW}[WARN]${NC} core.hooksPath is set to \"$HOOKS_PATH_CFG\" ($EFFECTIVE_PHYS): git runs hooks"
+    echo "       from there and never from $HOOKS_DIR, so the secret gate"
+    echo "       installed above is inert until that hook calls it. Either:"
+    echo "         - add this line to $EFFECTIVE_PHYS/pre-commit:"
+    echo "             bash \"$HOOKS_DIR/pre-commit\""
+    echo "         - or copy the scanner there (replaces that hook if it exists):"
+    echo "             cp \"$TEMPLATE\" \"$EFFECTIVE_PHYS/pre-commit\" && chmod +x \"$EFFECTIVE_PHYS/pre-commit\""
+    WARNINGS=$((WARNINGS + 1))
+  fi
+fi
+
 # --- Backup hooks to persistent location ---
 # Named after the main checkout, not after a linked worktree.
 REPO_NAME=$(basename "$(dirname "$GIT_COMMON_DIR")")
@@ -169,7 +196,7 @@ fi
 
 # --- Summary ---
 echo ""
-echo "=== Results: $INSTALLED installed | $UPDATED updated | $CHAINED chained | $SKIPPED skipped ==="
+echo "=== Results: $INSTALLED installed | $UPDATED updated | $CHAINED chained | $SKIPPED skipped | $WARNINGS warnings ==="
 
 if [[ $INSTALLED -gt 0 || $UPDATED -gt 0 || $CHAINED -gt 0 ]]; then
   echo ""

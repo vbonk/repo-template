@@ -298,8 +298,47 @@ fi
 echo ""
 echo "Local Protections:"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
+# Hooks live in the common git dir, which every linked worktree shares; inside
+# a worktree $REPO_ROOT/.git is a file, so resolve the hooks dir through git
+# (the same resolution templates/hooks/setup-hooks.sh uses to install them).
+HOOKS_DIR="$REPO_ROOT/.git/hooks"
+if GIT_COMMON_DIR="$(git rev-parse --git-common-dir 2>/dev/null)"; then
+  HOOKS_DIR="$(cd "$GIT_COMMON_DIR" && pwd)/hooks"
+fi
 
-if [[ -x "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
+# core.hooksPath (husky, lint-staged) makes git run hooks from elsewhere and
+# never from $HOOKS_DIR; a relative value counts from the worktree root. The
+# gate then counts only if the hook git actually runs is the scanner or calls
+# the installed one.
+HOOKS_PATH_CFG="$(git config --path --get core.hooksPath 2>/dev/null || true)"
+GATE_STATE="hooks-dir"   # hooks-dir | via-hookspath | bypassed
+EFFECTIVE_HOOKS_DIR="$HOOKS_DIR"
+if [[ -n "$HOOKS_PATH_CFG" ]]; then
+  case "$HOOKS_PATH_CFG" in
+    /*) EFFECTIVE_HOOKS_DIR="$HOOKS_PATH_CFG" ;;
+    *)  EFFECTIVE_HOOKS_DIR="$REPO_ROOT/$HOOKS_PATH_CFG" ;;
+  esac
+  HOOKS_DIR_PHYS="$(cd "$HOOKS_DIR" 2>/dev/null && pwd -P || echo "$HOOKS_DIR")"
+  EFFECTIVE_PHYS="$(cd "$EFFECTIVE_HOOKS_DIR" 2>/dev/null && pwd -P || echo "$EFFECTIVE_HOOKS_DIR")"
+  if [[ "$EFFECTIVE_PHYS" != "$HOOKS_DIR_PHYS" ]]; then
+    if [[ -x "$EFFECTIVE_HOOKS_DIR/pre-commit" ]] && grep -q \
+         -e 'hooks/pre-commit' -e 'pre-commit-secrets' \
+         -e 'Pre-commit hook: blocks commits containing secrets' \
+         "$EFFECTIVE_HOOKS_DIR/pre-commit" 2>/dev/null; then
+      GATE_STATE="via-hookspath"
+    else
+      GATE_STATE="bypassed"
+    fi
+  fi
+fi
+
+if [[ "$GATE_STATE" == "bypassed" ]]; then
+  echo -e "  ${YELLOW}[WARN]${NC} core.hooksPath=$HOOKS_PATH_CFG routes hooks away from $HOOKS_DIR — the secret gate there never runs"
+  WARN=$((WARN + 1))
+elif [[ "$GATE_STATE" == "via-hookspath" ]]; then
+  echo -e "  ${GREEN}[PASS]${NC} Pre-commit hook installed (core.hooksPath=$HOOKS_PATH_CFG runs the secret scanner)"
+  PASS=$((PASS + 1))
+elif [[ -x "$HOOKS_DIR/pre-commit" ]]; then
   echo -e "  ${GREEN}[PASS]${NC} Pre-commit hook installed"
   PASS=$((PASS + 1))
 else
@@ -307,8 +346,11 @@ else
   WARN=$((WARN + 1))
 fi
 
-if [[ -f "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" ]]; then
-  TOKEN_COUNT=$(grep -cv '^[[:space:]]*#\|^[[:space:]]*$' "$REPO_ROOT/.git/hooks/forbidden-tokens.txt" 2>/dev/null || echo 0)
+if [[ -f "$HOOKS_DIR/forbidden-tokens.txt" ]]; then
+  # grep -c prints the count (0 included) and exits 1 when nothing matched,
+  # so do not append a fallback on failure; default only if nothing printed.
+  TOKEN_COUNT=$(grep -cv '^[[:space:]]*#\|^[[:space:]]*$' "$HOOKS_DIR/forbidden-tokens.txt" 2>/dev/null || true)
+  TOKEN_COUNT="${TOKEN_COUNT:-0}"
   echo -e "  ${GREEN}[PASS]${NC} Forbidden tokens file ($TOKEN_COUNT tokens)"
   PASS=$((PASS + 1))
 else
@@ -355,7 +397,8 @@ echo "============================================"
 if [[ $WARN -gt 0 || $FAIL -gt 0 ]]; then
   echo ""
   echo "Next steps:"
-  [[ ! -x "$REPO_ROOT/.git/hooks/pre-commit" ]] && echo "  - Install hooks: bash templates/hooks/setup-hooks.sh"
+  [[ ! -x "$HOOKS_DIR/pre-commit" ]] && echo "  - Install hooks: bash templates/hooks/setup-hooks.sh"
+  [[ "$GATE_STATE" == "bypassed" ]] && echo "  - core.hooksPath=$HOOKS_PATH_CFG: add to $EFFECTIVE_HOOKS_DIR/pre-commit the line: bash \"$HOOKS_DIR/pre-commit\""
   [[ "$SIGNING" != "true" ]] && echo "  - Set up commit signing: see docs/BRANCH-PROTECTION.md"
   echo "  - Enable CodeQL (recommended: default setup): gh api -X PATCH repos/OWNER/REPO/code-scanning/default-setup -f state=configured"
 fi

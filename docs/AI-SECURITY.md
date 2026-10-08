@@ -125,7 +125,7 @@ This repository includes hook templates at two levels:
 
 - **`pre-commit-secrets.sh.template`** -- Pre-commit hook that blocks commits containing API keys, private keys, credentials, and custom forbidden tokens.
 - **`forbidden-tokens.txt.template`** -- Customizable blocklist for environment-specific strings (hostnames, paths, key prefixes).
-- **`setup-hooks.sh`** -- Safe installer that chains with existing hooks and backs up to `~/.config/repo-template/hooks/`. Safe to re-run after a template update: an outdated installed copy is refreshed and kept as `pre-commit.stale.<timestamp>`. Hooks go to the common git dir, so the gate also covers commits made from linked worktrees.
+- **`setup-hooks.sh`** -- Safe installer that chains with existing hooks and backs up to `~/.config/repo-template/hooks/`. Safe to re-run after a template update: an outdated installed copy is refreshed and kept as `pre-commit.stale.<timestamp>`. Hooks go to the common git dir, so the gate also covers commits made from linked worktrees. If `core.hooksPath` routes hooks elsewhere (husky), the installer warns and tells you how to call the scanner from that hook, and `secure-repo.sh` reports the gate as bypassed until it does.
 
 Install with: `bash templates/hooks/setup-hooks.sh`
 
