@@ -40,7 +40,7 @@ jobs:
       # unsigned release, and publish-package.yml (release: published
       # trigger) never fires for it.
       - name: Create draft release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           generate_release_notes: true
           body_path: /tmp/changelog.txt
@@ -104,7 +104,7 @@ jobs:
       # the SBOM could never be attached ("Cannot upload assets to an
       # immutable release"). Assets must be complete BEFORE the publish gate.
       - name: Upload signatures to release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           files: /tmp/release-assets/*.sigstore.json
           draft: true
@@ -128,7 +128,7 @@ jobs:
           upload-release-assets: false
 
       - name: Upload SBOM to release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           files: /tmp/release-assets/sbom.cyclonedx.json
           draft: true
